@@ -15,7 +15,7 @@ source "$BASE_DIR/commons/config.sh"
 source "$BASE_DIR/commons/utils.sh"
 source "$BASE_DIR/services/caddy.sh"
 source "$BASE_DIR/commons/menu.sh"
-
+check_bash_version
 check_require_packages "curl"
 check_require_packages "fzf"
 

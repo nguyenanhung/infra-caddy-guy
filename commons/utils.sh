@@ -238,6 +238,22 @@ check_port() {
   fi
   return 1
 }
+# Function check bash version
+check_bash_version() {
+  if ! command -v bash &>/dev/null; then
+    echo "❌ Bash is not installed!"
+    exit 1
+  fi
+
+  local bash_version
+  bash_version=$(bash --version | head -n1 | awk '{print $4}' | cut -d. -f1)
+  if [[ "$bash_version" -lt 4 ]]; then
+    echo "❌ Bash version must be ≥ 4 (Current: $bash_version)"
+    exit 1
+  fi
+
+  return 0
+}
 # Install require packages
 check_require_packages() {
   local packages="$1"
