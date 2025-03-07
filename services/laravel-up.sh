@@ -108,11 +108,12 @@ laravel_up() {
   mkdir -p "$laravel_dir"
   cat >"$laravel_dir/Dockerfile" <<EOF
 FROM php:${php_version}-fpm-alpine
-RUN apk add --no-cache bash netcat-openbsd curl git unzip supervisor libpng-dev libjpeg-turbo-dev libwebp-dev zlib-dev \\
-    libzip-dev postgresql-dev mariadb-connector-c-dev \\
+RUN apk add --no-cache bash netcat-openbsd curl git unzip supervisor \\
+    libpng-dev libjpeg-turbo-dev libwebp-dev zlib-dev libzip-dev \\
+    postgresql-dev mariadb-connector-c-dev autoconf g++ make \\
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \\
     && docker-php-ext-configure gd --with-jpeg --with-webp \\
-    && docker-php-ext-install pdo pdo_mysql pdo_pgsql mysqli gd zip bcmath pcntl exif \\
+    && docker-php-ext-install pdo pdo_mysql pdo_pgsql mysqli gd zip bcmath pcntl exif mbstring soap intl opcache gd \\
     && pecl install redis && docker-php-ext-enable redis
 WORKDIR /var/www/${domain}/html
 CMD ["php-fpm"]
@@ -122,11 +123,12 @@ EOF
   if [ "$worker_separate" = "Yes" ]; then
     cat >"$laravel_dir/Dockerfile.cli" <<EOF
 FROM php:${php_version}-cli-alpine
-RUN apk add --no-cache bash netcat-openbsd curl git unzip supervisor libpng-dev libjpeg-turbo-dev libwebp-dev zlib-dev \\
-    libzip-dev postgresql-dev mariadb-connector-c-dev \\
+RUN apk add --no-cache bash netcat-openbsd curl git unzip supervisor \\
+    libpng-dev libjpeg-turbo-dev libwebp-dev zlib-dev libzip-dev \\
+    postgresql-dev mariadb-connector-c-dev autoconf g++ make \\
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \\
     && docker-php-ext-configure gd --with-jpeg --with-webp \\
-    && docker-php-ext-install pdo pdo_mysql pdo_pgsql mysqli gd zip bcmath pcntl exif \\
+    && docker-php-ext-install pdo pdo_mysql pdo_pgsql mysqli gd zip bcmath pcntl exif mbstring soap intl opcache gd \\
     && pecl install redis && docker-php-ext-enable redis
 WORKDIR /var/www/${domain}/html
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
