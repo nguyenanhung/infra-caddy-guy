@@ -416,14 +416,14 @@ __display_header_information() {
     os_compatibility=$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2- | tr -d '"')
   fi
   break_line
-  echo "  _    _                           _   _    _____ "
-  echo " | |  | |                         | \ | |  / ____|"
-  echo " | |__| |  _   _   _ __     __ _  |  \| | | |  __ "
-  echo " |  __  | | | | | | '_ \   / _\` | | . \` | | | |_ |"
-  echo " | |  | | | |_| | | | | | | (_| | | |\  | | |__| |"
-  echo " |_|  |_|  \__,_| |_| |_|  \__, | |_| \_|  \_____|"
-  echo "                            __/ |                 "
-  echo "                           |___/                  "
+  echo "
+  ___        __               ____          _     _           ____
+ |_ _|_ __  / _|_ __ __ _    / ___|__ _  __| | __| |_   _    / ___|_   _ _   _
+  | || '_ \| |_| '__/ _| |  | |   / _| |/ _| |/ _| | | | |  | |  _| | | | | | |
+  | || | | |  _| | | (_| |  | |__| (_| | (_| | (_| | |_| |  | |_| | |_| | |_| |
+ |___|_| |_|_| |_|  \__,_|   \____\__,_|\__,_|\__,_|\__, |   \____|\__,_|\__, |
+                                                    |___/                 |___/
+"
   echo
   echo -e "${YELLOW}Powered by ${DEVELOP_BY}${NC}"
   echo -e "BEAR Caddy Docker Stack - ${GREEN}Premium${NC} scripts version ${YELLOW}${SCRIPT_VERSION}${NC}${NC}"
