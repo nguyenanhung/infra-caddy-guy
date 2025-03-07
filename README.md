@@ -1,13 +1,17 @@
-# Infra Guy with Caddy
+# Infra Caddy Guy's Scripts
 
 A lightweight Server management script set, backend is Docker, Caddy Web Server. Makes the life of the infra guy a
 little simpler and easier.
 
+![Screenshot](https://live.staticflickr.com/65535/54371947330_98e6d75c81_b.jpg)
+
 ## Installation
+
 ```shell
 git clone https://github.com/nguyenanhung/caddy-bash-guy.git
 cd caddy-bash-guy && ./bear-caddy
 ```
+
 ## Stack
 
 - [x] Docker, fzf

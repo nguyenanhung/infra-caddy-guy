@@ -18,6 +18,8 @@ source "$BASE_DIR/commons/config.sh"
 # shellcheck source=./../commons/utils.sh
 source "$BASE_DIR/commons/utils.sh"
 
+check_bash_version
+
 create_bin_symlink() {
   if [ -z "$1" ] || [ -z "$2" ]; then
     echo -e "‼️${RED}Error: Please provide shortcut name and path to original application.${NC}"
