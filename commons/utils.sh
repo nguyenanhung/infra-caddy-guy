@@ -238,6 +238,45 @@ check_port() {
   fi
   return 1
 }
+# Install require packages
+check_require_packages() {
+  local packages="$1"
+  if [ -n "$packages" ] && ! has_command "$packages"; then
+    local OS
+    OS=$(os_detect)
+    local package_manager=""
+    case "$OS" in
+    MacOS)
+      package_manager="brew"
+      ;;
+    Ubuntu)
+      if has_command apt; then
+        package_manager="sudo apt"
+      else
+        package_manager="sudo apt-get"
+      fi
+      ;;
+    RHEL)
+      if has_command dnf; then
+        package_manager="sudo dnf"
+      else
+        package_manager="sudo yum"
+      fi
+      ;;
+    *)
+      message ERROR "Unsupported OS: $OS. Docker installation may vary."
+      exit 1
+      ;;
+    esac
+
+    if [ -n "$package_manager" ]; then
+      message INFO "Installing required packages..."
+      if $package_manager install -y "$packages"; then
+        message SUCCESS "$packages installed successfully"
+      fi
+    fi
+  fi
+}
 # Check Docker installation
 check_docker() {
   if ! command -v docker &>/dev/null; then

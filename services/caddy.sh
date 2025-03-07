@@ -323,3 +323,171 @@ restart_site() {
     fi
   fi
 }
+
+add_basic_auth() {
+  local sites_path="$CONFIG_DIR/sites"
+
+  # Ask for domain
+  local domain
+  domain=$(prompt_with_default "Enter domain name to enable basic auth" "")
+  [ -z "$domain" ] && {
+    message ERROR "Domain name cannot be empty"
+    return 1
+  }
+
+  # Check if domain exists
+  local domain_file="$sites_path/$domain.caddy"
+  if [ ! -f "$domain_file" ]; then
+    message ERROR "Domain $domain does not exist in $sites_path"
+    return 1
+  fi
+
+  # Ask for username and password
+  local username
+  username=$(prompt_with_default "Enter basic auth username" "auth-admin")
+  local password
+  password=$(prompt_with_default "Enter basic auth password (leave blank for random)" "")
+  [ -z "$password" ] && password=$(generate_password) && message INFO "Generated password: $password"
+
+  # Ask for scope (whole site or specific path)
+  local scope_choice
+  scope_choice=$(prompt_with_fzf "Apply basic auth to whole site or specific path?" "Whole site Specific path" "Whole site")
+  local auth_path=""
+  if [ "$scope_choice" = "Specific path" ]; then
+    auth_path=$(prompt_with_default "Enter path to protect (e.g., /admin)" "")
+    [ -z "$auth_path" ] && {
+      message ERROR "Path cannot be empty"
+      return 1
+    }
+  fi
+
+  # Check if username already exists in config
+  local existing_auth
+  if [ -n "$auth_path" ]; then
+    existing_auth=$(grep -A 2 "basic_auth" "$domain_file" | grep "$username" || true)
+  else
+    existing_auth=$(grep -B 2 "basic_auth" "$domain_file" | grep "$username" || true)
+  fi
+
+  if [ -n "$existing_auth" ]; then
+    local update_choice
+    update_choice=$(prompt_with_fzf "Username $username already exists. Update password?" "Yes No" "No")
+    if [ "$update_choice" = "No" ]; then
+      message INFO "Basic auth not updated for $username"
+      return 0
+    fi
+    # Remove existing basic auth block
+    if [ -n "$auth_path" ]; then
+      sed -i "/@path.*$auth_path/,/}/d" "$domain_file"
+    else
+      sed -i "/basic_auth/,/}/d" "$domain_file"
+    fi
+  fi
+
+  # Generate hashed password
+  local hashed_password
+  hashed_password=$(docker exec "${PREFIX_NAME}_caddy" caddy hash-password --plaintext "$password" | tail -n 1)
+
+  # Backup config before modification
+  local backup_file="$BACKUP_DIR/$domain.caddy.$(date +%Y%m%d_%H%M%S)"
+  cp "$domain_file" "$backup_file"
+  message INFO "Backed up $domain.caddy to $backup_file"
+
+  # Add basic auth to config
+  if [ -n "$auth_path" ]; then
+    echo "@path_$auth_path {" >>"$domain_file"
+    echo "    path $auth_path" >>"$domain_file"
+    echo "}" >>"$domain_file"
+    echo "handle @path_$auth_path {" >>"$domain_file"
+    echo "    basic_auth {" >>"$domain_file"
+    echo "        $username $hashed_password" >>"$domain_file"
+    echo "    }" >>"$domain_file"
+    echo "}" >>"$domain_file"
+  else
+    sed -i "/}/i \    basic_auth {\n        $username $hashed_password\n    }" "$domain_file"
+  fi
+
+  # Test Caddy syntax
+  local validate_result
+  validate_result=$(
+    docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
+    echo $?
+  )
+  if [ "$validate_result" -eq 0 ]; then
+    docker exec "${PREFIX_NAME}_caddy" caddy reload --config "/etc/caddy/Caddyfile"
+    message INFO "Basic auth enabled for $domain and Caddy reloaded"
+  else
+    mv "$backup_file" "$domain_file"
+    message ERROR "Invalid Caddy configuration, restored backup"
+    return 1
+  fi
+}
+
+delete_basic_auth() {
+  local sites_path="$CONFIG_DIR/sites"
+
+  # Ask for domain
+  local domain
+  domain=$(prompt_with_default "Enter domain name to delete basic auth" "")
+  [ -z "$domain" ] && {
+    message ERROR "Domain name cannot be empty"
+    return 1
+  }
+
+  # Check if domain exists
+  local domain_file="$sites_path/$domain.caddy"
+  if [ ! -f "$domain_file" ]; then
+    message ERROR "Domain $domain does not exist in $sites_path"
+    return 1
+  fi
+
+  # Ask for username
+  local username
+  username=$(prompt_with_default "Enter username to delete" "")
+  [ -z "$username" ] && {
+    message ERROR "Username cannot be empty"
+    return 1
+  }
+
+  # Check if username exists in config
+  local existing_auth
+  existing_auth=$(grep "$username" "$domain_file" || true)
+  if [ -z "$existing_auth" ]; then
+    message INFO "Username $username not found in $domain config"
+    return 0
+  fi
+
+  # Backup config before modification
+  local backup_file
+  backup_file="$BACKUP_DIR/$domain.caddy.$(date +%Y%m%d_%H%M%S)"
+  cp "$domain_file" "$backup_file"
+  message INFO "Backed up $domain.caddy to $backup_file"
+
+  # Confirm deletion
+  confirm_action "Do you want to delete basic auth for $username in $domain?" || {
+    message INFO "Deletion canceled"
+    return 0
+  }
+
+  # Remove basic auth block
+  if grep -A 2 "basic_auth" "$domain_file" | grep -q "$username"; then
+    sed -i "/basic_auth/,/}/d" "$domain_file"
+  elif grep -A 2 "@path" "$domain_file" | grep -q "$username"; then
+    sed -i "/@path_.*{/{:a;N;/}/!ba;/$username/d}" "$domain_file"
+  fi
+
+  # Test Caddy syntax
+  local validate_result
+  validate_result=$(
+    docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
+    echo $?
+  )
+  if [ "$validate_result" -eq 0 ]; then
+    docker exec "${PREFIX_NAME}_caddy" caddy reload --config "/etc/caddy/Caddyfile"
+    message INFO "Basic auth for $username in $domain deleted and Caddy reloaded"
+  else
+    mv "$backup_file" "$domain_file"
+    message ERROR "Invalid Caddy configuration after deletion, restored backup"
+    return 1
+  fi
+}

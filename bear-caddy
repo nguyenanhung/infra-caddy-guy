@@ -16,6 +16,9 @@ source "$BASE_DIR/commons/utils.sh"
 source "$BASE_DIR/services/caddy.sh"
 source "$BASE_DIR/commons/menu.sh"
 
+check_require_packages "curl"
+check_require_packages "fzf"
+
 # Parse command
 case "$1" in
 "")
@@ -73,20 +76,22 @@ case "$1" in
   esac
   ;;
 "delete")
-  source "$BASE_DIR/services/caddy.sh"
   delete_site
   ;;
 "stop")
-  source "$BASE_DIR/services/caddy.sh"
   stop_site
   ;;
 "start")
-  source "$BASE_DIR/services/caddy.sh"
   start_site
   ;;
 "restart")
-  source "$BASE_DIR/services/caddy.sh"
   restart_site
+  ;;
+"basic-auth")
+  add_basic_auth
+  ;;
+"delete-basic-auth")
+  delete_basic_auth
   ;;
 "add-reverse-proxy")
   source "$BASE_DIR/services/reverse-proxy.sh"
