@@ -19,13 +19,15 @@ sync_file() {
 }
 sync_file "$MY_CADDY_BASH/ai-builder.txt" "$MY_BASH/ai-builder-caddy-bash.txt"
 sync_file "$MY_CADDY_BASH/.gitignore" "$MY_SERVER_SCRIPTS_BEAR_CADDY/.gitignore"
+sync_file "$MY_CADDY_BASH/README.md" "$MY_SERVER_SCRIPTS_BEAR_CADDY/README.md"
+sync_file "$MY_CADDY_BASH/bear-caddy" "$MY_SERVER_SCRIPTS_BEAR_CADDY/bear-caddy"
 
+sync_file "$MY_CADDY_BASH/bin/" "$MY_SERVER_SCRIPTS_BEAR_CADDY/bin/"
 sync_file "$MY_CADDY_BASH/commons/" "$MY_SERVER_SCRIPTS_BEAR_CADDY/commons/"
 sync_file "$MY_CADDY_BASH/config/" "$MY_SERVER_SCRIPTS_BEAR_CADDY/config/"
 sync_file "$MY_CADDY_BASH/container/" "$MY_SERVER_SCRIPTS_BEAR_CADDY/container/"
 sync_file "$MY_CADDY_BASH/services/" "$MY_SERVER_SCRIPTS_BEAR_CADDY/services/"
 sync_file "$MY_CADDY_BASH/volumes/" "$MY_SERVER_SCRIPTS_BEAR_CADDY/volumes/"
-sync_file "$MY_CADDY_BASH/bear-caddy" "$MY_SERVER_SCRIPTS_BEAR_CADDY/bear-caddy"
 
 cd "$MY_BASH" || {
   echo "Failed to change to '$MY_BASH'"

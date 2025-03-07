@@ -36,5 +36,18 @@ bear_welcome() {
   message INFO "  $0 restart-<service>             - Restart Service Container (e.g. mariadb, redis, ...). Example: $0 restart-redis"
   message INFO "  $0 remove-<service>              - Removing Service Container (e.g. mariadb, redis, ...). Example: $0 remove-redis"
   message INFO "  $0 log-<service>                 - Check Service Container (e.g. mariadb, redis, ...). Example: $0 log-redis"
+  message INFO "  $0 basic-auth                    - Enable basic authentication"
+  message INFO "  $0 delete-basic-auth             - Disable basic authentication"
+  message INFO "  $0 add-reverse-proxy             - Add Reverse Proxy"
+  message INFO "  $0 delete-reverse-proxy          - Delete Reverse Proxy"
+  message INFO "  $0 add-load-balancer             - Add Load Balancer"
+  message INFO "  $0 delete-load-balancer          - Delete Load Balancer"
+  message INFO "  $0 delete-load-balancer-backend  - Delete Load Balancer Backend"
+  message INFO "  $0 laravel-up                    - Build and configure Laravel Application"
+  message INFO "  $0 laravel-down                  - Down mode for Laravel Application"
+  message INFO "  $0 laravel-restore               - Restore from Down mode Laravel Application"
+  message INFO "  $0 laravel-remove                - Removing Laravel Application"
+  echo
+  message INFO "...and more great features will be added soon.."
   print_message
 }

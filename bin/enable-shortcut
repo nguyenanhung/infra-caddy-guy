@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# Base directory of the project (root of bear-caddy/)
+# Use BASE_DIR from main.sh if set; otherwise calculate from config.sh
+if [ -z "$BASE_DIR" ]; then
+  if command -v realpath >/dev/null 2>&1; then
+    BASE_DIR="$(dirname "$(dirname "$(realpath "$0")")")"
+  else
+    # Fallback for systems without realpath
+    BASE_DIR="$(cd "$(dirname "$(dirname "$0")")" && pwd)"
+  fi
+fi
+
+# shellcheck source=./../commons/color.sh
+source "$BASE_DIR/commons/color.sh"
+# shellcheck source=./../commons/config.sh
+source "$BASE_DIR/commons/config.sh"
+# shellcheck source=./../commons/utils.sh
+source "$BASE_DIR/commons/utils.sh"
+
+create_bin_symlink() {
+  if [ -z "$1" ] || [ -z "$2" ]; then
+    echo -e "‼️${RED}Error: Please provide shortcut name and path to original application.${NC}"
+    return 1
+  fi
+
+  if [ -e "/usr/bin/$1" ]; then
+    local current_target
+    current_target=$(readlink "/usr/bin/$1")
+
+    if [ "$current_target" != "$2" ]; then
+      echo -e "‼️${RED}Warning${NC}: Link $1 already exists in /usr/bin, but points to $current_target instead of $2."
+    else
+      echo -e "👉 Link ${GREEN}$1${NC} already exists and points to ${GREEN}$2${NC} correctly. Skip."
+    fi
+  else
+    if command -v "$1" >/dev/null 2>&1; then
+      echo -e "${GREEN}Command $1 already exists${NC}. Please check the command at $(command -v $1)"
+      return 1
+    fi
+
+    if [[ ! -e "$2" ]]; then
+      echo -e "❌ ${RED}Error creating symlink${NC}: /usr/bin/$1 -> $2, because $2 is not exists!"
+      return 1
+    fi
+
+    if ln -s "$2" "/usr/bin/$1"; then
+      echo -e "✅ ${GREEN}Created symlink success${NC}: /usr/bin/$1 -> $2"
+    else
+      echo -e "❌ ${RED}Error creating symlink${NC}: /usr/bin/$1 -> $2"
+      return 1
+    fi
+  fi
+}
+create_bin_symlink "infra-caddy" "${BASE_DIR}/bear-caddy"
+create_bin_symlink "bear-caddy" "${BASE_DIR}/bear-caddy"
