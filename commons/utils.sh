@@ -383,6 +383,27 @@ get_containers_status() {
     echo
   fi
 }
+# Helper function to wait for container health
+wait_for_health() {
+  local container_name="$1"
+  local service_type="$2"
+  local retry_count=0
+  local max_retries=5
+
+  while [ "$(docker inspect --format='{{.State.Health.Status}}' "$container_name" 2>/dev/null)" != "healthy" ]; do
+    message INFO "${service_type} → ${container_name} is not healthy yet. Retrying..."
+    sleep 5
+    ((retry_count++))
+
+    if [ "$retry_count" -ge "$max_retries" ]; then
+      message ERROR "${service_type} → ${container_name} failed to become healthy after ${max_retries} attempts. Please check logs and try again"
+      message INFO "Check docker logs: docker -f ${container_name} failed to become healthy"
+      return 1
+    fi
+  done
+
+  message INFO "${service_type} → ${container_name} is healthy"
+}
 get_mapping_value() {
   local -n map=$1
   local key=$2

@@ -7,17 +7,6 @@ source "$BASE_DIR/commons/utils.sh"
 # shellcheck source=./../commons/validation.sh
 source "$BASE_DIR/commons/validation.sh"
 
-# Helper function to wait for container health
-wait_for_health() {
-  local container_name="$1"
-  local service_type="$2"
-  while [ "$(docker inspect --format='{{.State.Health.Status}}' "$container_name" 2>/dev/null)" != "healthy" ]; do
-    message INFO "$service_type is not healthy yet. Retrying..."
-    sleep 5
-  done
-  message INFO "$service_type is healthy"
-}
-
 laravel_up() {
   local sites_path="$CONFIG_DIR/sites"
   local laravel_base_dir="$CONTAINER_DIR/sites/laravel"

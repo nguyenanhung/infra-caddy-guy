@@ -331,9 +331,13 @@ EOF
   if docker compose up -d; then
     message SUCCESS "Build Service $service_name and enabled successfully"
     message INFO "Please wait a moment while ${service_name} starts up..."
-    sleep 5
-    echo
-    docker ps -a --filter "name=${container_name}"
+    if wait_for_health "${container_name}" "${service_name}"; then
+      echo
+      docker ps -a --filter "name=${container_name}"
+    else
+      message INFO "Failed to start service ${service_name}"
+      exit 1
+    fi
   else
     message ERROR "Failed to enable service $service_name" >&2
     exit 1

@@ -65,9 +65,12 @@ setup_caddy() {
       --health-start-period=10s \
       "$image"
     message SUCCESS "Caddy container ${PREFIX_NAME}_caddy created successfully"
-    sleep 5
-    echo
-    docker ps -a --filter "name=${PREFIX_NAME}_caddy"
+    if wait_for_health "${PREFIX_NAME}_caddy" "Caddy Web Server"; then
+      echo
+      docker ps -a --filter "name=${PREFIX_NAME}_caddy"
+    else
+      message ERROR "Caddy container ${PREFIX_NAME}_caddy failed to start"
+    fi
   else
     message INFO "Caddy container ${PREFIX_NAME}_caddy already exists"
   fi
