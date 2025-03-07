@@ -61,10 +61,8 @@ EOF
 
   # Test Caddy syntax
   local validate_result
-  validate_result=$(
-    docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
-    echo $?
-  )
+  docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
+  validate_result=$?
   if [ "$validate_result" -eq 0 ]; then
     docker exec "${PREFIX_NAME}_caddy" caddy reload --config "/etc/caddy/Caddyfile"
     message INFO "Reverse proxy for $domain added and Caddy reloaded"
@@ -118,10 +116,8 @@ delete_reverse_proxy() {
 
   # Validate and reload Caddy
   local validate_result
-  validate_result=$(
-    docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
-    echo $?
-  )
+  docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
+  validate_result=$?
   if [ "$validate_result" -eq 0 ]; then
     docker exec "${PREFIX_NAME}_caddy" caddy reload --config "/etc/caddy/Caddyfile"
     message INFO "Caddy reloaded successfully"

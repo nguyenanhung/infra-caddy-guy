@@ -316,10 +316,8 @@ EOF
 
   # Test and reload Caddy
   local validate_result
-  validate_result=$(
-    docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
-    echo $?
-  )
+  docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
+  validate_result=$?
   if [ "$validate_result" -eq 0 ]; then
     docker exec "${PREFIX_NAME}_caddy" caddy reload --config "/etc/caddy/Caddyfile"
     message INFO "Laravel site $domain set up and Caddy reloaded"
@@ -371,10 +369,8 @@ laravel_down() {
 
   # Validate and reload Caddy
   local validate_result
-  validate_result=$(
-    docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
-    echo $?
-  )
+  docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
+  validate_result=$?
   if [ "$validate_result" -eq 0 ]; then
     docker exec "${PREFIX_NAME}_caddy" caddy reload --config "/etc/caddy/Caddyfile"
     message INFO "Caddy reloaded successfully"
@@ -419,10 +415,8 @@ laravel_restore() {
 
   # Validate and reload Caddy
   local validate_result
-  validate_result=$(
-    docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
-    echo $?
-  )
+  docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
+  validate_result=$?
   if [ "$validate_result" -eq 0 ]; then
     docker exec "${PREFIX_NAME}_caddy" caddy reload --config "/etc/caddy/Caddyfile"
     message INFO "Caddy reloaded successfully"
@@ -481,10 +475,8 @@ laravel_remove() {
 
   # Validate and reload Caddy
   local validate_result
-  validate_result=$(
-    docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
-    echo $?
-  )
+  docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
+  validate_result=$?
   if [ "$validate_result" -eq 0 ]; then
     docker exec "${PREFIX_NAME}_caddy" caddy reload --config "/etc/caddy/Caddyfile"
     message INFO "Caddy reloaded successfully"

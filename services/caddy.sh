@@ -22,10 +22,8 @@ setup_caddy() {
 
   # Create network if not exists
   local network_check
-  network_check=$(
-    docker network ls | grep -q "$NETWORK_NAME"
-    echo $?
-  )
+  docker network ls | grep -q "$NETWORK_NAME"
+  network_check=$?
   if [ "$network_check" -ne 0 ]; then
     docker network create "$NETWORK_NAME"
     message INFO "Network $NETWORK_NAME created"
@@ -33,10 +31,8 @@ setup_caddy() {
 
   # Check if Caddy container exists
   local container_check
-  container_check=$(
-    docker ps -a | grep -q "${PREFIX_NAME}_caddy"
-    echo $?
-  )
+  docker ps -a | grep -q "${PREFIX_NAME}_caddy"
+  container_check=$?
   if [ "$container_check" -ne 0 ]; then
     local image
     image=$(prompt_with_default "Enter Caddy image" "$(get_mapping_value SERVICE_IMAGES caddy)")
@@ -188,10 +184,8 @@ delete_site() {
 
   # Validate and reload Caddy
   local validate_result
-  validate_result=$(
-    docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
-    echo $?
-  )
+  docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
+  validate_result=$?
   if [ "$validate_result" -eq 0 ]; then
     docker exec "${PREFIX_NAME}_caddy" caddy reload --config "/etc/caddy/Caddyfile"
     message INFO "Caddy reloaded successfully"
@@ -420,10 +414,8 @@ add_basic_auth() {
 
   # Test Caddy syntax
   local validate_result
-  validate_result=$(
-    docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
-    echo $?
-  )
+  docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
+  validate_result=$?
   if [ "$validate_result" -eq 0 ]; then
     docker exec "${PREFIX_NAME}_caddy" caddy reload --config "/etc/caddy/Caddyfile"
     message INFO "Basic auth enabled for $domain and Caddy reloaded"
@@ -497,10 +489,8 @@ delete_basic_auth() {
 
   # Test Caddy syntax
   local validate_result
-  validate_result=$(
-    docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
-    echo $?
-  )
+  docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
+  validate_result=$?
   if [ "$validate_result" -eq 0 ]; then
     docker exec "${PREFIX_NAME}_caddy" caddy reload --config "/etc/caddy/Caddyfile"
     message INFO "Basic auth for $username in $domain deleted and Caddy reloaded"
