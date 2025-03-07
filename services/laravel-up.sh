@@ -81,7 +81,23 @@ laravel_up() {
     message ERROR "Source directory cannot be empty"
     return 1
   }
-  mkdir -p "$source_dir"
+  if [ ! -d "$source_dir" ]; then
+    if confirm_action "Laravel source directory does not exist yet. Do you want to start new Laravel project in the directory?"; then
+      if ! has_command composer; then
+        message ERROR "Composer is not installed. Please install Composer first."
+        return 1
+      fi
+
+      mkdir -p "$source_dir"
+      if [ ! -d "$source_dir" ]; then
+        message ERROR "Failed to create directory $source_dir"
+        return 1
+      fi
+      composer create-project laravel/laravel $source_dir
+    fi
+  else
+    mkdir -p "$source_dir"
+  fi
 
   # Define network
   local network_name="${PREFIX_NAME}_sites_${domain}_net"
@@ -157,7 +173,6 @@ services:
     container_name: ${PREFIX_NAME}_sites_${domain}
     volumes:
       - ${source_dir}:/var/www/${domain}/html
-      - ${source_dir}/.env.production:/var/www/${domain}/html/.env
     networks:
       - ${network_name}
       - ${PREFIX_NAME}_caddy_net
@@ -220,7 +235,7 @@ EOF
     echo "    container_name: ${worker_container}" >>"$compose_file"
     echo "    volumes:" >>"$compose_file"
     echo "      - ${source_dir}:/var/www/${domain}/html" >>"$compose_file"
-    echo "      - ${source_dir}/.env.production:/var/www/${domain}/html/.env" >>"$compose_file"
+    # echo "      - ${source_dir}/.env.production:/var/www/${domain}/html/.env" >>"$compose_file"
     echo "    networks:" >>"$compose_file"
     echo "      - ${network_name}" >>"$compose_file"
     if [ "$use_db" = "Yes" ]; then
