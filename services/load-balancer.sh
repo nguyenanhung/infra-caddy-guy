@@ -87,11 +87,8 @@ ${domain} {
 EOF
 
   # Test Caddy syntax
-  local validate_result
-  docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
-  validate_result=$?
-  if [ "$validate_result" -eq 0 ]; then
-    docker restart "${PREFIX_NAME}_caddy"
+  if caddy_validate; then
+    caddy_reload || return 1
     message INFO "Load balancer for $domain added and Caddy reloaded"
   else
     rm -f "$domain_file"
@@ -142,12 +139,8 @@ delete_load_balancer() {
   message INFO "Load balancer $selected_site deleted"
 
   # Validate and reload Caddy
-  local validate_result
-  docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
-  validate_result=$?
-  if [ "$validate_result" -eq 0 ]; then
-    docker restart "${PREFIX_NAME}_caddy"
-    message INFO "Caddy reloaded successfully"
+  if caddy_validate; then
+    caddy_reload || return 1
   else
     message ERROR "Caddy configuration invalid after deletion"
     return 1
@@ -220,12 +213,8 @@ delete_load_balancer_backend() {
   message INFO "Backend $backend_to_delete removed from $selected_site"
 
   # Validate and reload Caddy
-  local validate_result
-  docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
-  validate_result=$?
-  if [ "$validate_result" -eq 0 ]; then
-    docker restart "${PREFIX_NAME}_caddy"
-    message INFO "Caddy reloaded successfully"
+  if caddy_validate; then
+    caddy_reload || return 1
   else
     mv "$backup_file" "$site_file"
     message ERROR "Caddy configuration invalid after modification, restored backup"

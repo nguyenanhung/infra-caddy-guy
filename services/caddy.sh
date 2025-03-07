@@ -183,12 +183,8 @@ delete_site() {
   message INFO "Site $selected_site deleted"
 
   # Validate and reload Caddy
-  local validate_result
-  docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
-  validate_result=$?
-  if [ "$validate_result" -eq 0 ]; then
-    docker restart "${PREFIX_NAME}_caddy"
-    message INFO "Caddy reloaded successfully"
+  if caddy_validate; then
+    caddy_reload || return 1
   else
     message ERROR "Caddy configuration invalid after deletion"
     return 1
@@ -413,11 +409,8 @@ add_basic_auth() {
   fi
 
   # Test Caddy syntax
-  local validate_result
-  docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
-  validate_result=$?
-  if [ "$validate_result" -eq 0 ]; then
-    docker restart "${PREFIX_NAME}_caddy"
+  if caddy_validate; then
+    caddy_reload || return 1
     message INFO "Basic auth enabled for $domain and Caddy reloaded"
   else
     mv "$backup_file" "$domain_file"
@@ -488,11 +481,8 @@ delete_basic_auth() {
   fi
 
   # Test Caddy syntax
-  local validate_result
-  docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
-  validate_result=$?
-  if [ "$validate_result" -eq 0 ]; then
-    docker restart "${PREFIX_NAME}_caddy"
+  if caddy_validate; then
+    caddy_reload || return 1
     message INFO "Basic auth for $username in $domain deleted and Caddy reloaded"
   else
     mv "$backup_file" "$domain_file"

@@ -500,3 +500,16 @@ restored_original_path() {
     return 1
   fi
 }
+caddy_validate() {
+  docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
+}
+caddy_reload() {
+  message INFO "Reloading Caddy..."
+  if docker restart "${PREFIX_NAME}_caddy"; then
+    message SUCCESS "✅ Caddy reloaded successfully"
+  else
+    message ERROR "❌ Failed to reload Caddy. Please check logs Caddy container"
+    docker logs "${PREFIX_NAME}_caddy" --tail 50
+    return 1
+  fi
+}
