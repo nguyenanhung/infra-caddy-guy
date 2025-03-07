@@ -1,0 +1,12 @@
+#!/bin/bash
+cleanup() {
+  if [ -z "$1" ]; then
+    echo "Error: No file or directory specified."
+    return 1
+  fi
+  echo "Cleanup $1 "
+  rm -rf "$1"
+  mkdir -p "$1"
+}
+cleanup "$HOME/.my-caddy-bash/volumes/data"
+cleanup "$HOME/.my-caddy-bash/container/services"

@@ -1,0 +1,93 @@
+#!/bin/bash
+
+# Check if fzf is installed
+if ! command -v fzf >/dev/null 2>&1; then
+  echo "fzf is not installed. Please install fzf first."
+  exit 1
+fi
+
+# Check if docker is installed
+if ! command -v docker >/dev/null 2>&1; then
+  echo "Docker is not installed. Please install Docker first."
+  exit 1
+fi
+
+if ! docker info >/dev/null 2>&1; then
+  echo "Docker daemon is not running. Please start Docker and try again."
+  exit 1
+fi
+
+# Get running/stopped containers with required fields
+containers=$(docker ps -a --format "{{.ID}} | {{.Names}} | {{.Status}} | {{.Size}} | {{.Image}} | {{.CreatedAt}} | {{.Ports}}" | nl -w2 -s' | ')
+
+# Check if there are no containers
+if [ -z "$containers" ]; then
+  echo "No containers found."
+  exit 1
+fi
+
+# Add header
+header="No | ID | Name | Status | Size | Image | Created | Ports"
+containers="$header\n$containers"
+
+# Format output using column
+containers=$(echo -e "$containers" | column -t -s'|')
+
+# If no argument is given or argument is "list", just show the container list and exit
+if [[ -z "$1" || "$1" == "list" ]]; then
+  echo "$containers"
+  exit 0
+fi
+
+ACTION=$1
+
+# Validate action
+case "$ACTION" in
+start | stop | restart | logs | up | down | build) ;;
+*)
+  echo "Invalid action. Usage: $0 {start|stop|restart|logs|up|down|build|list}"
+  exit 1
+  ;;
+esac
+
+# Special case for "build" (no need to select a container)
+if [[ "$ACTION" == "build" ]]; then
+  echo "Building services with docker-compose..."
+  docker compose build
+  exit 0
+fi
+
+# Display container list with fzf
+selected=$(echo "$containers" | fzf --height 40% --reverse --prompt="Select a container to $ACTION: " --header-lines=1)
+
+# Check if no container was selected
+if [ -z "$selected" ]; then
+  echo "No container selected."
+  exit 1
+fi
+
+# Extract container ID (column 2)
+container_id=$(echo "$selected" | awk '{print $2}')
+
+echo "Performing action '$ACTION' on container: $container_id"
+
+case "$ACTION" in
+start)
+  docker start "$container_id"
+  ;;
+stop)
+  docker stop "$container_id"
+  ;;
+restart)
+  docker restart "$container_id"
+  ;;
+logs)
+  docker logs -f "$container_id"
+  ;;
+up)
+  docker compose up -d
+  ;;
+down)
+  docker compose down
+  ;;
+esac

@@ -1,0 +1,139 @@
+#!/bin/bash
+
+# Set BASE_DIR reliably based on main.sh location
+if command -v realpath >/dev/null 2>&1; then
+  BASE_DIR="$(dirname "$(realpath "$0")")"
+else
+  # Fallback for systems without realpath
+  BASE_DIR="$(cd "$(dirname "$0")" && pwd)"
+fi
+
+# Export BASE_DIR to be available in sourced files
+export BASE_DIR
+
+source "$BASE_DIR/commons/config.sh"
+source "$BASE_DIR/commons/utils.sh"
+source "$BASE_DIR/services/caddy.sh"
+source "$BASE_DIR/commons/menu.sh"
+
+# Parse command
+case "$1" in
+"")
+  bear_welcome
+  ;;
+"init")
+  setup_caddy
+  ;;
+"enable-"*)
+  service_name="${1#enable-}"
+  source "$BASE_DIR/services/common_services.sh"
+  enable_service "$service_name"
+  ;;
+"stop-"*)
+  service_name="${1#stop-}"
+  source "$BASE_DIR/services/common_services.sh"
+  stop_service "$service_name"
+  ;;
+"start-"*)
+  service_name="${1#start-}"
+  source "$BASE_DIR/services/common_services.sh"
+  start_service "$service_name"
+  ;;
+"restart-"*)
+  service_name="${1#restart-}"
+  source "$BASE_DIR/services/common_services.sh"
+  restart_service "$service_name"
+  ;;
+"remove-"*)
+  service_name="${1#remove-}"
+  source "$BASE_DIR/services/common_services.sh"
+  remove_service "$service_name"
+  ;;
+"log-"*)
+  service_name="${1#log-}"
+  source "$BASE_DIR/services/common_services.sh"
+  log_service "$service_name"
+  ;;
+"logs")
+  check_docker_container_logs
+  ;;
+"list")
+  #  find "$CONFIG_DIR/sites/" -maxdepth 1 -type f -name "*.caddy" -exec basename {} .caddy \; | awk '{print NR". "$0}'
+  site_list=$(list_sites)
+  echo "$site_list"
+  ;;
+"install")
+  options="Add new Reverse Proxy\nAdd new Load Balancer Cluster\nAdd new Laravel App\nBuild & Add new Laravel Application"
+  choice=$(echo -e "$options" | fzf --prompt="Select an option: ")
+  case "$choice" in
+  "Add new Reverse Proxy") "$0" add-reverse-proxy ;;
+  "Add new Load Balancer Cluster") "$0" add-load-balancer ;;
+  "Add new Laravel App") "$0" add-laravel ;;
+  "Build & Add new Laravel Application") "$0" laravel-up ;;
+  esac
+  ;;
+"delete")
+  source "$BASE_DIR/services/caddy.sh"
+  delete_site
+  ;;
+"stop")
+  source "$BASE_DIR/services/caddy.sh"
+  stop_site
+  ;;
+"start")
+  source "$BASE_DIR/services/caddy.sh"
+  start_site
+  ;;
+"restart")
+  source "$BASE_DIR/services/caddy.sh"
+  restart_site
+  ;;
+"add-reverse-proxy")
+  source "$BASE_DIR/services/reverse-proxy.sh"
+  add_reverse_proxy
+  ;;
+"delete-reverse-proxy")
+  source "$BASE_DIR/services/reverse-proxy.sh"
+  delete_reverse_proxy
+  ;;
+"add-load-balancer")
+  source "$BASE_DIR/services/load-balancer.sh"
+  add_load_balancer
+  ;;
+"delete-load-balancer")
+  source "$BASE_DIR/services/load-balancer.sh"
+  delete_load_balancer
+  ;;
+"delete-load-balancer-backend")
+  source "$BASE_DIR/services/load-balancer.sh"
+  delete_load_balancer_backend
+  ;;
+"laravel-up")
+  source "$BASE_DIR/services/laravel-up.sh"
+  laravel_up
+  ;;
+"laravel-down")
+  source "$BASE_DIR/services/laravel-up.sh"
+  laravel_down
+  ;;
+"laravel-restore")
+  source "$BASE_DIR/services/laravel-up.sh"
+  laravel_restore
+  ;;
+"laravel-remove")
+  source "$BASE_DIR/services/laravel-up.sh"
+  laravel_remove
+  ;;
+"add-laravel")
+  source "$BASE_DIR/services/laravel.sh"
+  add_laravel
+  ;;
+"delete-laravel")
+  source "$BASE_DIR/services/laravel.sh"
+  delete_laravel
+  ;;
+*)
+  message ERROR "Unknown command: $1"
+  exit 1
+  ;;
+esac

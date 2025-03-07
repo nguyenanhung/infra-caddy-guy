@@ -1,0 +1,35 @@
+#!/bin/sh
+
+# Check if argument is provided
+if [ -z "$1" ]; then
+  echo "Usage: $0 <size> (e.g., 1m, 100m, 1g)" >&2
+  exit 1
+fi
+
+# Convert size input to lowercase
+SIZE=$(echo "$1" | tr '[A-Z]' '[a-z]')
+
+# Define filename
+FILE_NAME=$(echo "$SIZE" | tr '[a-z]' '[A-Z]').dat # Convert to uppercase for naming consistency
+
+# macOS uses mkfile instead of dd
+if [ "$OS_TYPE" = "Darwin" ]; then
+  echo "Creating file: $FILE_NAME with size: $1 on macOS..."
+  mkfile "$SIZE" "./$FILE_NAME"
+else
+  # Parse size and determine count
+  case "$SIZE" in
+  *m) COUNT=$(expr "${SIZE%m}" \* 1024) ;;         # Convert MB to KB count
+  *g) COUNT=$(expr "${SIZE%g}" \* 1024 \* 1024) ;; # Convert GB to KB count
+  *)
+    echo "Invalid size format. Use m for MB, g for GB (e.g., 1m, 100m, 1g)" >&2
+    return 1
+    ;;
+  esac
+
+  # Create file
+  echo "Creating file: $FILE_NAME with size: $1..."
+  dd if=/dev/zero of="$FILE_NAME" bs=1024 count=$COUNT 2>&1 | grep -v "records in" | grep -v "records out"
+fi
+
+echo "File $FILE_NAME created successfully!"

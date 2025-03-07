@@ -1,0 +1,29 @@
+#!/bin/bash
+force_copy() {
+  local src="$1"
+  local dest="$2"
+
+  # Kiểm tra nếu file nguồn không tồn tại
+  if [[ ! -f "$src" ]]; then
+    echo "❌ Source file '$src' does not exist!"
+    return 1
+  fi
+
+  # Copy file và kiểm tra lỗi
+  cp -f "$src" "$dest"
+  if [[ $? -eq 0 ]]; then
+    echo "✅ Copy successful: '$src' → '$dest'"
+    return 0
+  else
+    echo "❌ Failed to copy '$src' to '$dest'"
+    return 1
+  fi
+}
+force_copy "$HOME/.my-caddy-bash/ai-builder.txt" "$HOME/.my-bash/ai-builder-caddy-bash.txt"
+cd "$HOME/.my-bash" || {
+  echo "Failed to change to '$HOME/.my-bash'"
+  exit 1
+}
+git add .
+git commit -m "Update ai-builder-caddy-bash.txt"
+git push origin main
