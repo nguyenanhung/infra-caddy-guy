@@ -108,7 +108,7 @@ laravel_up() {
   mkdir -p "$laravel_dir"
   cat >"$laravel_dir/Dockerfile" <<EOF
 FROM php:${php_version}-fpm-alpine
-RUN apk add --no-cache bash curl git unzip supervisor libpng-dev libjpeg-turbo-dev libwebp-dev zlib-dev \\
+RUN apk add --no-cache bash netcat-openbsd curl git unzip supervisor libpng-dev libjpeg-turbo-dev libwebp-dev zlib-dev \\
     libzip-dev postgresql-dev mariadb-connector-c-dev \\
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \\
     && docker-php-ext-configure gd --with-jpeg --with-webp \\
