@@ -3,7 +3,7 @@
 A lightweight Server management script set, backend is Docker, Caddy Web Server. Makes the life of the infra guy a
 little simpler and easier.
 
-![Screenshot](https://live.staticflickr.com/65535/54371947330_98e6d75c81_b.jpg)
+![Screenshot](https://live.staticflickr.com/65535/54371975845_f827eeeb9c_b.jpg)
 
 ## Installation
 
