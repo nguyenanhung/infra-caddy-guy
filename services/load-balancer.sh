@@ -48,11 +48,11 @@ add_load_balancer() {
   # Ask for load balancing algorithm
   local lb_options="round_robin random least_conn ip_hash"
   local lb_algorithm
-  lb_algorithm=$(prompt_with_fzf "Select load balancing algorithm" "$lb_options" "round_robin")
+  lb_algorithm=$(prompt_with_fzf "Select load balancing algorithm" "$lb_options")
 
   # Ask for sticky sessions
   local sticky_choice
-  sticky_choice=$(prompt_with_fzf "Enable sticky sessions (keep user on same backend)?" "Yes No" "Yes")
+  sticky_choice=$(prompt_with_fzf "Enable sticky sessions (keep user on same backend)?" "Yes No")
   local sticky_config=""
   if [ "$sticky_choice" = "Yes" ]; then
     local session_name
@@ -65,7 +65,7 @@ add_load_balancer() {
 
   # Ask for WebSocket support
   local ws_choice
-  ws_choice=$(prompt_with_fzf "Enable WebSocket support?" "Yes No" "No")
+  ws_choice=$(prompt_with_fzf "Enable WebSocket support?" "Yes No")
   local ws_config=""
   [ "$ws_choice" = "Yes" ] && ws_config="websocket"
 

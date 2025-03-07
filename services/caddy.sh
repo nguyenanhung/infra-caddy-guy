@@ -396,9 +396,9 @@ add_basic_auth() {
 
   # Ask for scope (whole site or specific path)
   local scope_choice
-  scope_choice=$(prompt_with_fzf "Apply basic auth to whole site or specific path?" "Whole site Specific path" "Whole site")
+  scope_choice=$(prompt_with_fzf "Apply basic auth to whole site or specific path?" "Whole-site Specific-path")
   local auth_path=""
-  if [ "$scope_choice" = "Specific path" ]; then
+  if [ "$scope_choice" = "Specific-path" ]; then
     auth_path=$(prompt_with_default "Enter path to protect (e.g., /admin)" "")
     [ -z "$auth_path" ] && {
       message ERROR "Path cannot be empty"
@@ -416,7 +416,7 @@ add_basic_auth() {
 
   if [ -n "$existing_auth" ]; then
     local update_choice
-    update_choice=$(prompt_with_fzf "Username $username already exists. Update password?" "Yes No" "No")
+    update_choice=$(prompt_with_fzf "Username $username already exists. Update password?" "Yes No")
     if [ "$update_choice" = "No" ]; then
       message INFO "Basic auth not updated for $username"
       return 0

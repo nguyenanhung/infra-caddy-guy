@@ -28,13 +28,13 @@ laravel_up() {
 
   # Ask for database usage
   local use_db
-  use_db=$(prompt_with_fzf "Use a database?" "Yes No" "No")
+  use_db=$(prompt_with_fzf "Use a database?" "Yes No")
   local db_type=""
   local db_separate=""
   local db_container=""
   if [ "$use_db" = "Yes" ]; then
-    db_type=$(prompt_with_fzf "Select database type" "mariadb mongodb postgresql" "mariadb")
-    db_separate=$(prompt_with_fzf "Create separate database container?" "Yes No" "No")
+    db_type=$(prompt_with_fzf "Select database type" "mariadb mongodb postgresql")
+    db_separate=$(prompt_with_fzf "Create separate database container?" "Yes No")
     if [ "$db_separate" = "Yes" ]; then
       db_container="db_${domain}_${db_type}"
     else
@@ -44,13 +44,13 @@ laravel_up() {
 
   # Ask for cache usage
   local use_cache
-  use_cache=$(prompt_with_fzf "Use cache (Redis/Memcached)?" "Yes No" "No")
+  use_cache=$(prompt_with_fzf "Use cache (Redis/Memcached)?" "Yes No")
   local cache_type=""
   local cache_separate=""
   local cache_container=""
   if [ "$use_cache" = "Yes" ]; then
-    cache_type=$(prompt_with_fzf "Select cache type" "redis memcached" "redis")
-    cache_separate=$(prompt_with_fzf "Create separate cache container?" "Yes No" "No")
+    cache_type=$(prompt_with_fzf "Select cache type" "redis memcached")
+    cache_separate=$(prompt_with_fzf "Create separate cache container?" "Yes No")
     if [ "$cache_separate" = "Yes" ]; then
       cache_container="cache_${domain}_${cache_type}"
     else
@@ -60,11 +60,11 @@ laravel_up() {
 
   # Ask for worker/scheduler
   local use_worker
-  use_worker=$(prompt_with_fzf "Run worker/scheduler?" "Yes No" "No")
+  use_worker=$(prompt_with_fzf "Run worker/scheduler?" "Yes No")
   local worker_separate=""
   local worker_container=""
   if [ "$use_worker" = "Yes" ]; then
-    worker_separate=$(prompt_with_fzf "Create separate worker/scheduler container?" "Yes No" "No")
+    worker_separate=$(prompt_with_fzf "Create separate worker/scheduler container?" "Yes No")
     if [ "$worker_separate" = "Yes" ]; then
       worker_container="${PREFIX_NAME}_sites_cli_${domain}"
     fi
@@ -72,7 +72,7 @@ laravel_up() {
 
   # Ask for PHP version
   local php_version
-  php_version=$(prompt_with_fzf "Select PHP version" "5.6 7.0 7.1 7.2 7.3 7.4 8.0 8.1 8.2 8.3 8.4" "8.1")
+  php_version=$(prompt_with_fzf "Select PHP version" "8.4 8.3 8.2 8.1 8.0 7.4 7.3 7.2 7.1 7.0")
 
   # Ask for source directory
   local source_dir

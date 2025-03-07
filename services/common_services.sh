@@ -132,7 +132,7 @@ enable_service() {
   # Ask for restart policy with fzf
   local restart_options="unless-stopped on-failure no always"
   local restart_policy
-  restart_policy=$(prompt_with_fzf "Select restart policy for $service_name" "$restart_options" "")
+  restart_policy=$(prompt_with_fzf "Select restart policy for $service_name" "$restart_options")
 
   # Define volume paths
   local data_volume=""
