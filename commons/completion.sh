@@ -3,6 +3,7 @@ _infra_caddy_completions_build() {
   # List of available options for the "container" command
   local commands=(
     "init"
+    "reload-caddy"
     "list"
     "enable-"
     "stop-"

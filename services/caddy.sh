@@ -165,6 +165,15 @@ EOF
   fi
 }
 
+restart_caddy() {
+  if caddy_validate; then
+    caddy_reload
+  else
+    message ERROR "Caddy configuration is not valid"
+    return 1
+  fi
+}
+
 # Helper function to list sites
 list_sites() {
   find "$CONFIG_DIR/sites" -maxdepth 1 -type f -name "*.caddy" -exec basename {} \; | sed 's/\.caddy$//'

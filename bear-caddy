@@ -27,6 +27,9 @@ case "$1" in
 "init")
   setup_caddy
   ;;
+"reload-caddy")
+  restart_caddy
+  ;;
 "enable-"*)
   service_name="${1#enable-}"
   source "$BASE_DIR/services/common_services.sh"

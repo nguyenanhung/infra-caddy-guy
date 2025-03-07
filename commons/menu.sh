@@ -23,6 +23,7 @@ bear_welcome() {
   __display_header_information
   check_docker
   message INFO "  $(basename "$0") init                          - Setup Caddy Web Server"
+  message INFO "  $(basename "$0") reload-caddy                  - Reload Caddy Web Server"
   message INFO "  $(basename "$0") list                          - List Website/Proxy..."
   message INFO "  $(basename "$0") install                       - Install a new site"
   message INFO "  $(basename "$0") stop [domain]                 - Stop running sites"
