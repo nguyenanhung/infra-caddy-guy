@@ -155,6 +155,8 @@ EOF
     if wait_for_health "${PREFIX_NAME}_caddy" "Caddy Web Server"; then
       echo
       docker ps -a --filter "name=${PREFIX_NAME}_caddy"
+      docker exec -it "${PREFIX_NAME}_caddy" apk add --no-cache netcat-openbsd # Install netcat-openbsd for testing purposes
+      docker exec -it "${PREFIX_NAME}_caddy" nc -zv host.docker.internal 80    # Test Caddy call to internal host
     else
       message ERROR "Caddy container ${PREFIX_NAME}_caddy failed to start"
     fi
