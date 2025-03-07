@@ -11,70 +11,24 @@ setup_caddy() {
   check_docker
 
   # Define locations inside config/
+  local caddy_compose_path
   local caddyfile_path
   local sites_path
   local data_path
   local config_path
+  local caddy_default_www
+  caddy_compose_path="$CONFIG_DIR/caddy-docker-compose.yml"
   caddyfile_path="$CONFIG_DIR/Caddyfile"
   sites_path="$CONFIG_DIR/sites"
   data_path="$CONFIG_DIR/caddy_data"
   config_path="$CONFIG_DIR/caddy_config"
-
-  # Create network if not exists
-  local network_check
-  docker network ls | grep -q "$NETWORK_NAME"
-  network_check=$?
-  if [ "$network_check" -ne 0 ]; then
-    docker network create "$NETWORK_NAME"
-    message INFO "Network $NETWORK_NAME created"
-  fi
-
-  # Check if Caddy container exists
-  local container_check
-  docker ps -a | grep -q "${PREFIX_NAME}_caddy"
-  container_check=$?
-  if [ "$container_check" -ne 0 ]; then
-    local image
-    image=$(prompt_with_default "Enter Caddy image" "$(get_mapping_value SERVICE_IMAGES caddy)")
-    if ! docker image inspect "$image" >/dev/null 2>&1; then
-      message INFO "Pulling image ${image}"
-      docker pull "${image}"
-    fi
-    # Create Caddy container
-    # -p 80:80 -p 443:443 expose HTTP and HTTPS ports
-    message INFO "Creating Caddy container"
-    docker run -d \
-      --name "${PREFIX_NAME}_caddy" \
-      --network "$NETWORK_NAME" \
-      --restart unless-stopped \
-      -p 80:80 -p 443:443 \
-      -v "$caddyfile_path:/etc/caddy/Caddyfile" \
-      -v "$sites_path:/etc/caddy/sites" \
-      -v "$data_path:/data" \
-      -v "$config_path:/config" \
-      --add-host=host.docker.internal:host-gateway \
-      --log-opt max-size=10m \
-      --log-opt max-file=3 \
-      --health-cmd='pgrep caddy' \
-      --health-interval=30s \
-      --health-retries=3 \
-      --health-start-period=10s \
-      "$image"
-    message SUCCESS "Caddy container ${PREFIX_NAME}_caddy created successfully"
-    if wait_for_health "${PREFIX_NAME}_caddy" "Caddy Web Server"; then
-      echo
-      docker ps -a --filter "name=${PREFIX_NAME}_caddy"
-    else
-      message ERROR "Caddy container ${PREFIX_NAME}_caddy failed to start"
-    fi
-  else
-    message INFO "Caddy container ${PREFIX_NAME}_caddy already exists"
-  fi
+  caddy_default_www="$CONFIG_DIR/caddy_default_www"
 
   # Ensure required directories exist
   [ ! -d "$sites_path" ] && mkdir -p "$sites_path"
   [ ! -d "$data_path" ] && mkdir -p "$data_path"
   [ ! -d "$config_path" ] && mkdir -p "$config_path"
+  [ ! -d "$caddy_default_www" ] && mkdir -p "$caddy_default_www"
 
   # Create default Caddyfile if not exists
   if [ ! -f "$caddyfile_path" ]; then
@@ -127,6 +81,86 @@ import sites/*.caddy
 
 EOF
     message INFO "Default Caddyfile created"
+  fi
+
+  # Create network if not exists
+  local network_check
+  docker network ls | grep -q "$NETWORK_NAME"
+  network_check=$?
+  if [ "$network_check" -ne 0 ]; then
+    docker network create "$NETWORK_NAME"
+    message INFO "Network $NETWORK_NAME created"
+  fi
+
+  # Check if Caddy container exists
+  local container_check
+  docker ps -a | grep -q "${PREFIX_NAME}_caddy"
+  container_check=$?
+  if [ "$container_check" -ne 0 ]; then
+    local image
+    image=$(prompt_with_default "Enter Caddy image" "$(get_mapping_value SERVICE_IMAGES caddy)")
+    if ! docker image inspect "$image" >/dev/null 2>&1; then
+      message INFO "Pulling image ${image}"
+      docker pull "${image}"
+    fi
+
+    # Create default caddy-docker-compose.yml if not already
+    if [ ! -f "$caddy_compose_path" ]; then
+      cat >"$caddy_compose_path" <<EOF
+services:
+  ${PREFIX_NAME}_caddy:
+    container_name: "${PREFIX_NAME}_caddy"
+    image: "${image}"
+    restart: unless-stopped
+    networks:
+      - "${NETWORK_NAME}"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "${caddyfile_path}:/etc/caddy/Caddyfile"
+      - "${sites_path}:/etc/caddy/sites"
+      - "${data_path}:/data"
+      - "${config_path}:/config"
+      - "${caddy_default_www}:/var/www"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "pgrep", "caddy"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+
+networks:
+  default:
+    name: "${NETWORK_NAME}"
+EOF
+      message INFO "Default docker-compose created"
+    fi
+
+    # Create Caddy container
+    # -p 80:80 -p 443:443 expose HTTP and HTTPS ports
+    cd "$CONFIG_DIR" || {
+      message ERROR "Failed go to ${CONFIG_DIR}"
+      return 1
+    }
+
+    message INFO "Creating Caddy container"
+    docker compose -f "$caddy_compose_path" up -d --remove-orphans
+    message SUCCESS "Caddy container ${PREFIX_NAME}_caddy created successfully"
+
+    if wait_for_health "${PREFIX_NAME}_caddy" "Caddy Web Server"; then
+      echo
+      docker ps -a --filter "name=${PREFIX_NAME}_caddy"
+    else
+      message ERROR "Caddy container ${PREFIX_NAME}_caddy failed to start"
+    fi
+  else
+    message INFO "Caddy container ${PREFIX_NAME}_caddy already exists"
   fi
 }
 
