@@ -142,15 +142,12 @@ EOF
       message INFO "Default docker-compose created"
     fi
 
-    # Create Caddy container
-    # -p 80:80 -p 443:443 expose HTTP and HTTPS ports
     cd "$CONFIG_DIR" || {
       message ERROR "Failed go to ${CONFIG_DIR}"
       return 1
     }
-    echo "Config Directory: ${CONFIG_DIR}"
-    echo "caddy_compose_path: ${caddy_compose_path}"
 
+    # Create Caddy container
     message INFO "Creating Caddy container"
     docker compose -f "$caddy_compose_path" up -d --remove-orphans
     message SUCCESS "Caddy container ${PREFIX_NAME}_caddy created successfully"
