@@ -136,8 +136,8 @@ services:
       start_period: 10s
 
 networks:
-  default:
-    name: "${NETWORK_NAME}"
+  ${NETWORK_NAME}:
+    external: true
 EOF
       message INFO "Default docker-compose created"
     fi
@@ -148,6 +148,8 @@ EOF
       message ERROR "Failed go to ${CONFIG_DIR}"
       return 1
     }
+    echo "Config Directory: ${CONFIG_DIR}"
+    echo "caddy_compose_path: ${caddy_compose_path}"
 
     message INFO "Creating Caddy container"
     docker compose -f "$caddy_compose_path" up -d --remove-orphans
