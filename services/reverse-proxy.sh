@@ -8,6 +8,13 @@ source "$BASE_DIR/commons/utils.sh"
 source "$BASE_DIR/commons/validation.sh"
 
 add_reverse_proxy() {
+  message INFO "This feature is suitable for only performing load balancer configuration to existing backends, and does not create any additional containers. Please make sure the backends are available and ready beforehand!"
+
+  if ! confirm_action "Are you sure you ${GREEN}understand the important note${NC} above and want to ${GREEN}continue${NC}?"; then
+    message INFO "Adding Laravel site to Caddy configuration skipped"
+    return 0
+  fi
+
   local sites_path="$CONFIG_DIR/sites"
 
   # Ask for domain

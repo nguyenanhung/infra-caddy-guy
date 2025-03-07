@@ -8,6 +8,13 @@ source "$BASE_DIR/commons/utils.sh"
 source "$BASE_DIR/commons/validation.sh"
 
 add_laravel() {
+  message INFO "This feature is suitable for the situation where you already have another Laravel Application container with fully built source code, and want to configure Caddy Web Server to update the domain name. In case you need to build a Laravel application from scratch, use the command: infra-caddy laravel-up"
+
+  if ! confirm_action "Are you sure you ${GREEN}understand the important note${NC} above and want to ${GREEN}continue${NC}?"; then
+    message INFO "Adding Laravel site to Caddy configuration skipped"
+    return 0
+  fi
+
   local sites_path="$CONFIG_DIR/sites"
 
   # Ask for domain
