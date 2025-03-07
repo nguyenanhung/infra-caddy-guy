@@ -24,12 +24,12 @@ create_bin_symlink() {
     return 1
   fi
 
-  if [ -e "/usr/bin/$1" ]; then
+  if [ -e "$1" ]; then
     local current_target
-    current_target=$(readlink "/usr/bin/$1")
+    current_target=$(readlink "$1")
 
     if [ "$current_target" != "$2" ]; then
-      echo -e "‼️${RED}Warning${NC}: Link $1 already exists in /usr/bin, but points to $current_target instead of $2."
+      echo -e "‼️${RED}Warning${NC}: Link $1 already exists, but points to $current_target instead of $2."
     else
       echo -e "👉 Link ${GREEN}$1${NC} already exists and points to ${GREEN}$2${NC} correctly. Skip."
     fi
@@ -40,17 +40,17 @@ create_bin_symlink() {
     fi
 
     if [[ ! -e "$2" ]]; then
-      echo -e "❌ ${RED}Error creating symlink${NC}: /usr/bin/$1 -> $2, because $2 is not exists!"
+      echo -e "❌ ${RED}Error creating symlink${NC}: $1 -> $2, because $2 is not exists!"
       return 1
     fi
 
-    if ln -s "$2" "/usr/bin/$1"; then
-      echo -e "✅ ${GREEN}Created symlink success${NC}: /usr/bin/$1 -> $2"
+    if ln -s "$2" "$1"; then
+      echo -e "✅ ${GREEN}Created symlink success${NC}: $1 -> $2"
     else
-      echo -e "❌ ${RED}Error creating symlink${NC}: /usr/bin/$1 -> $2"
+      echo -e "❌ ${RED}Error creating symlink${NC}: $1 -> $2"
       return 1
     fi
   fi
 }
-create_bin_symlink "infra-caddy" "${BASE_DIR}/bear-caddy"
-create_bin_symlink "bear-caddy" "${BASE_DIR}/bear-caddy"
+create_bin_symlink "/usr/bin/infra-caddy" "${BASE_DIR}/bear-caddy"
+create_bin_symlink "/usr/bin/bear-caddy" "${BASE_DIR}/bear-caddy"
