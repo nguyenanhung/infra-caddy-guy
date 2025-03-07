@@ -33,6 +33,5 @@ cd "$MY_BASH" || {
   echo "Failed to change to '$MY_BASH'"
   exit 1
 }
-git add .
-git commit -m "Syncing Caddy Infra from '$(basename "$MY_CADDY_BASH")' to '$(basename "$MY_BASH")'"
+git add -A && git commit -S -m "Syncing Caddy Infra from '$(basename "$MY_CADDY_BASH")' to '$(basename "$MY_BASH")'"
 git push origin main
