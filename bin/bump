@@ -1,0 +1,10 @@
+#!/bin/bash
+bash "$MY_CADDY_BASH/bin/dev-clean"
+bash "$MY_CADDY_BASH/bin/sync-builder"
+cd "$MY_CADDY_BASH" || {
+  echo "Failed to change to '$MY_CADDY_BASH'"
+  exit 1
+}
+git add .
+git commit -m "Bump files at $(date)"
+git push origin main

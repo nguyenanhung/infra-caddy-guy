@@ -1,27 +1,34 @@
 #!/bin/bash
-force_copy() {
+sync_file() {
   local src="$1"
   local dest="$2"
 
   # Kiểm tra nếu file nguồn không tồn tại
-  if [[ ! -f "$src" ]]; then
+  if [[ ! -e "$src" ]]; then
     echo "❌ Source file '$src' does not exist!"
     return 1
   fi
 
-  # Copy file và kiểm tra lỗi
-  cp -f "$src" "$dest"
-  if [[ $? -eq 0 ]]; then
-    echo "✅ Copy successful: '$src' → '$dest'"
+  if rsync -avz --progress -h "$src" "$dest"; then
+    echo "✅ Sync successful: '$src' → '$dest'"
     return 0
   else
-    echo "❌ Failed to copy '$src' to '$dest'"
+    echo "❌ Failed to sync '$src' to '$dest'"
     return 1
   fi
 }
-force_copy "$HOME/.my-caddy-bash/ai-builder.txt" "$HOME/.my-bash/ai-builder-caddy-bash.txt"
-cd "$HOME/.my-bash" || {
-  echo "Failed to change to '$HOME/.my-bash'"
+sync_file "$MY_CADDY_BASH/ai-builder.txt" "$MY_BASH/ai-builder-caddy-bash.txt"
+sync_file "$MY_CADDY_BASH/.gitignore" "$MY_SERVER_SCRIPTS_BEAR_CADDY/.gitignore"
+
+sync_file "$MY_CADDY_BASH/commons/" "$MY_SERVER_SCRIPTS_BEAR_CADDY/commons/"
+sync_file "$MY_CADDY_BASH/config/" "$MY_SERVER_SCRIPTS_BEAR_CADDY/config/"
+sync_file "$MY_CADDY_BASH/container/" "$MY_SERVER_SCRIPTS_BEAR_CADDY/container/"
+sync_file "$MY_CADDY_BASH/services/" "$MY_SERVER_SCRIPTS_BEAR_CADDY/services/"
+sync_file "$MY_CADDY_BASH/volumes/" "$MY_SERVER_SCRIPTS_BEAR_CADDY/volumes/"
+sync_file "$MY_CADDY_BASH/bear-caddy" "$MY_SERVER_SCRIPTS_BEAR_CADDY/bear-caddy"
+
+cd "$MY_BASH" || {
+  echo "Failed to change to '$MY_BASH'"
   exit 1
 }
 git add .
