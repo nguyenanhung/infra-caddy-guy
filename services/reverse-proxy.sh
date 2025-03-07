@@ -64,7 +64,7 @@ EOF
   docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
   validate_result=$?
   if [ "$validate_result" -eq 0 ]; then
-    docker exec "${PREFIX_NAME}_caddy" caddy reload --config "/etc/caddy/Caddyfile"
+    docker restart "${PREFIX_NAME}_caddy"
     message INFO "Reverse proxy for $domain added and Caddy reloaded"
   else
     rm -f "$domain_file"
@@ -119,7 +119,7 @@ delete_reverse_proxy() {
   docker exec "${PREFIX_NAME}_caddy" caddy validate --config "/etc/caddy/Caddyfile"
   validate_result=$?
   if [ "$validate_result" -eq 0 ]; then
-    docker exec "${PREFIX_NAME}_caddy" caddy reload --config "/etc/caddy/Caddyfile"
+    docker restart "${PREFIX_NAME}_caddy"
     message INFO "Caddy reloaded successfully"
   else
     message ERROR "Caddy configuration invalid after deletion"
