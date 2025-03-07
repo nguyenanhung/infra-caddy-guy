@@ -327,13 +327,21 @@ restart_site() {
 add_basic_auth() {
   local sites_path="$CONFIG_DIR/sites"
 
-  # Ask for domain
-  local domain
-  domain=$(prompt_with_default "Enter domain name to enable basic auth" "")
-  [ -z "$domain" ] && {
-    message ERROR "Domain name cannot be empty"
+  # List all .caddy files for selection
+  local site_files
+  site_files=$(find "$sites_path" -maxdepth 1 -type f -name "*.caddy" -exec basename {} \; | sed 's/\.caddy$//')
+  if [ -z "$site_files" ]; then
+    message ERROR "No domains available to enable basic auth"
     return 1
-  }
+  fi
+
+  # Ask for domain with fzf
+  local domain
+  domain=$(echo "$site_files" | fzf --prompt="Select domain to enable basic auth (use up/down keys): ")
+  if [ -z "$domain" ]; then
+    message INFO "No domain selected"
+    return 0
+  fi
 
   # Check if domain exists
   local domain_file="$sites_path/$domain.caddy"
@@ -426,13 +434,21 @@ add_basic_auth() {
 delete_basic_auth() {
   local sites_path="$CONFIG_DIR/sites"
 
-  # Ask for domain
-  local domain
-  domain=$(prompt_with_default "Enter domain name to delete basic auth" "")
-  [ -z "$domain" ] && {
-    message ERROR "Domain name cannot be empty"
+  # List all .caddy files for selection
+  local site_files
+  site_files=$(find "$sites_path" -maxdepth 1 -type f -name "*.caddy" -exec basename {} \; | sed 's/\.caddy$//')
+  if [ -z "$site_files" ]; then
+    message ERROR "No domains available to disable basic auth"
     return 1
-  }
+  fi
+
+  # Ask for domain with fzf
+  local domain
+  domain=$(echo "$site_files" | fzf --prompt="Select domain to disable basic auth (use up/down keys): ")
+  if [ -z "$domain" ]; then
+    message INFO "No domain selected"
+    return 0
+  fi
 
   # Check if domain exists
   local domain_file="$sites_path/$domain.caddy"

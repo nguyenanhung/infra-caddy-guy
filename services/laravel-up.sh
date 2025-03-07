@@ -272,9 +272,28 @@ EOF
     wait_for_health "${PREFIX_NAME}_sites_cli_${domain}" "Laravel Worker/Scheduler"
   fi
 
+  # Ask if user wants basic auth
+  local basic_auth_config=""
+  if confirm_action "Enable ${GREEN}basic auth${NC} for this ${GREEN}Laravel Application${NC}?"; then
+    # Ask for username and password
+    local username
+    username=$(prompt_with_default "Enter basic auth username" "auth-admin")
+    local password
+    password=$(prompt_with_default "Enter basic auth password (leave blank for random)" "")
+    [ -z "$password" ] && password=$(generate_password) && message INFO "Generated password: $password"
+
+    # Generate hashed password
+    local hashed_password
+    hashed_password=$(docker exec "${PREFIX_NAME}_caddy" caddy hash-password --plaintext "$password" | tail -n 1)
+
+    # Prepare basic auth config
+    basic_auth_config="    basic_auth {\n        $username $hashed_password\n    }"
+  fi
+
   # Create Caddy config
   cat >"$domain_file" <<EOF
-$domain {
+${domain} {
+${basic_auth_config}
     #tls internal
     root * /var/www/${domain}/html/public
     encode zstd gzip

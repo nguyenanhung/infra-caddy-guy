@@ -64,23 +64,23 @@ add_load_balancer() {
 
   # Create load balancer config
   cat >"$domain_file" <<EOF
-$domain {
+${domain} {
     @path {
-        path $path
+        path ${path}
     }
     handle @path {
         reverse_proxy {
-            to $backends_list
-            lb_policy $lb_algorithm
-            $sticky_config
-            $health_check
-            $ws_config
+            to ${backends_list}
+            lb_policy ${lb_algorithm}
+            ${sticky_config}
+            ${health_check}
+            ${ws_config}
             fail_duration 30s
             max_fails 3
             unhealthy_status 5xx
         }
     }
-    respond "All backends are down" 503 {
+    respond "We are busy mode" 503 {
         close
     }
 }

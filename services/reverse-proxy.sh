@@ -33,10 +33,29 @@ add_reverse_proxy() {
     return 1
   }
 
-  # Create reverse proxy config
+  # Ask if user wants basic auth
+  local basic_auth_config=""
+  if confirm_action "Enable ${GREEN}basic auth${NC} for this ${GREEN}reverse proxy${NC}?"; then
+    # Ask for username and password
+    local username
+    username=$(prompt_with_default "Enter basic auth username" "auth-admin")
+    local password
+    password=$(prompt_with_default "Enter basic auth password (leave blank for random)" "")
+    [ -z "$password" ] && password=$(generate_password) && message INFO "Generated password: $password"
+
+    # Generate hashed password
+    local hashed_password
+    hashed_password=$(docker exec "${PREFIX_NAME}_caddy" caddy hash-password --plaintext "$password" | tail -n 1)
+
+    # Prepare basic auth config
+    basic_auth_config="    basic_auth {\n        $username $hashed_password\n    }"
+  fi
+
+  # Create reverse proxy config with or without basic auth
   cat >"$domain_file" <<EOF
-$domain {
-    reverse_proxy $upstream_url
+${domain} {
+    reverse_proxy ${upstream_url}
+${basic_auth_config}
 }
 EOF
 
