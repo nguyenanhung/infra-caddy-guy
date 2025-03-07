@@ -102,5 +102,20 @@ Temporary Items
 # On Projects
 ai-builder.txt
 .dev.docker/*
+
+config/caddy_config/*
+!config/caddy_config/.gitkeep
+config/caddy_data/*
+!config/caddy_data/.gitkeep
+config/sites/*
+!config/sites/.gitkeep
+container/services/*
+!container/services/.gitkeep
+container/sites/*
+!container/sites/.gitkeep
+
 volumes/data/*
+!volumes/data/.gitkeep
+
 tests/*
+!tests/.gitkeep
