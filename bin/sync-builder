@@ -32,5 +32,5 @@ cd "$MY_BASH" || {
   exit 1
 }
 git add .
-git commit -m "Syncing Caddy Infra from '$MY_SERVER_SCRIPTS_BEAR_CADDY' to '$MY_BASH'"
+git commit -m "Syncing Caddy Infra from '$(basename "$MY_CADDY_BASH")' to '$(basename "$MY_BASH")'"
 git push origin main
