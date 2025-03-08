@@ -23,7 +23,10 @@ check_require_packages "jq"
 # Parse command
 case "$1" in
 "")
-  bear_welcome
+  bear_menu_interactive
+  ;;
+"introduce")
+  bear_welcome_introduce
   ;;
 "init")
   setup_caddy
@@ -71,25 +74,25 @@ case "$1" in
   ;;
 "install")
   options=(
-    "Add new Reverse Proxy"
-    "Add new Load Balancer Cluster"
-    "Add new Laravel App"
-    "Build & Add new Laravel App"
-    "Build & Add new Laravel App with Apache"
-    "Add new Node.js App"
-    "Build & Add new Node.js App"
     "Add new Static Site"
+    "Add new Reverse Proxy"
+    "Add new Node.js App (Container exists)"
+    "Add new Laravel App (Container exists)"
+    "Build & Add new Laravel App (PHP-FPM)"
+    "Build & Add new Laravel App (Apache2)"
+    "Build & Add new Node.js App"
+    "Add new Load Balancer Cluster"
   )
   choice=$(printf "%s\n" "${options[@]}" | fzf --prompt="Select an option: ")
   case "$choice" in
-  "Add new Reverse Proxy") "$0" add-reverse-proxy ;;
-  "Add new Load Balancer Cluster") "$0" add-load-balancer ;;
-  "Add new Laravel App") "$0" add-laravel ;;
-  "Build & Add new Laravel App") "$0" laravel-up ;;
-  "Build & Add new Laravel App with Apache") "$0" laravel-apache-up ;;
-  "Add new Node.js App") "$0" add-node-app ;;
-  "Build & Add new Node.js App") "$0" node-up ;;
   "Add new Static Site") "$0" add-static-site ;;
+  "Add new Reverse Proxy") "$0" add-reverse-proxy ;;
+  "Add new Node.js App (Container exists)") "$0" add-node-app ;;
+  "Add new Laravel App (Container exists)") "$0" add-laravel ;;
+  "Build & Add new Laravel App (PHP-FPM)") "$0" laravel-up ;;
+  "Build & Add new Laravel App (Apache2)") "$0" laravel-apache-up ;;
+  "Build & Add new Node.js App") "$0" node-up ;;
+  "Add new Load Balancer Cluster") "$0" add-load-balancer ;;
   esac
   ;;
 "delete")
@@ -143,7 +146,7 @@ case "$1" in
   ;;
 "laravel-apache-up")
   source "$BASE_DIR/services/laravel-up-apache.sh"
-  shift           # Shift to remove the first argument
+  shift                  # Shift to remove the first argument
   laravel_up_apache "$@" # Call delete_site with the remaining arguments
   ;;
 "laravel-up")

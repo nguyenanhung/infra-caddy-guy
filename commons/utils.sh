@@ -348,11 +348,15 @@ check_docker_container_logs() {
     exit 1
   fi
   local list_docker_containers selected container_id
-  list_docker_containers=$(docker ps -a --format "{{.Names}} | {{.ID}} | {{.CreatedAt}}" | grep "^${PREFIX_NAME}_")
-  selected=$(echo "$list_docker_containers" | fzf --prompt="Select container to view logs: ")
-  if [ -n "$selected" ]; then
-    container_id=$(echo "$selected" | awk '{print $3}')
-    docker logs -f "$container_id"
+  if [ -n "$1" ]; then
+    docker logs -f "$1"
+  else
+    list_docker_containers=$(docker ps -a --format "{{.Names}} | {{.ID}} | {{.CreatedAt}}" | grep "^${PREFIX_NAME}_")
+    selected=$(echo "$list_docker_containers" | fzf --prompt="Select container to view logs: ")
+    if [ -n "$selected" ]; then
+      container_id=$(echo "$selected" | awk '{print $3}')
+      docker logs -f "$container_id"
+    fi
   fi
 }
 check_container_running() {

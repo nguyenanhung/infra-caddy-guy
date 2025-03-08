@@ -19,7 +19,7 @@ source "$BASE_DIR/commons/utils.sh"
 source "$BASE_DIR/commons/validation.sh"
 
 # Function to display welcome message for Bear Caddy
-bear_welcome() {
+bear_welcome_introduce() {
   __display_header_information
   check_docker
   message INFO "  $(basename "$0") init                          - Setup Caddy Web Server"
@@ -69,4 +69,72 @@ bear_welcome() {
   echo
   message INFO "...and more great features will be added soon.."
   print_message
+}
+bear_menu_interactive() {
+  __display_header_information
+  check_docker
+  options=(
+    "Introduction"
+    "Setup Caddy Server" "Reload Caddy Server" "Join Container to Caddy Network" "Disconnect Caddy Network"
+    "Check Container Logs"
+    "List all Sites" "Install new Site" "Stop Sites" "Start Sites" "Restart Sites" "Delete Sites"
+    "Enable Basic Auth" "Disable Basic Auth"
+    "Add Static Site" "Delete Static Site"
+    "Add Reverse Proxy" "Delete Reverse Proxy"
+    "Add Load Balancer Cluster" "Delete Load Balancer Cluster" "Delete Load Balancer Backend"
+    "Add new Node.js App (Container exists)"
+    "Delete Node.js App"
+    "Build & Add new Node.js App"
+    "Add new Laravel App (Container exists)"
+    "Build & Add new Laravel App (PHP-FPM)"
+    "Delete Laravel App"
+  )
+  prompt="Enter your selected menu you want [0 = Exit]: "
+  PS3=$'\n'"${prompt} "
+  select opt in "${options[@]}" "Exit"; do
+    case "$REPLY" in
+
+    1) bash ${BASE_DIR}/bear-caddy introduce ;;
+    2) bash ${BASE_DIR}/bear-caddy init ;;
+    3) bash ${BASE_DIR}/bear-caddy reload-caddy ;;
+    4) bash ${BASE_DIR}/bear-caddy join-caddy ;;
+    5) bash ${BASE_DIR}/bear-caddy disconnect-caddy ;;
+    6) bash ${BASE_DIR}/bear-caddy logs ;;
+    7) bash ${BASE_DIR}/bear-caddy list ;;
+    8) bash ${BASE_DIR}/bear-caddy install ;;
+    9) bash ${BASE_DIR}/bear-caddy stop ;;
+    10) bash ${BASE_DIR}/bear-caddy start ;;
+    11) bash ${BASE_DIR}/bear-caddy restart ;;
+    12) bash ${BASE_DIR}/bear-caddy delete ;;
+    13) bash ${BASE_DIR}/bear-caddy basic-auth ;;
+    14) bash ${BASE_DIR}/bear-caddy delete-basic-auth ;;
+    15) bash ${BASE_DIR}/bear-caddy add-reverse-proxy ;;
+    16) bash ${BASE_DIR}/bear-caddy delete-reverse-proxy ;;
+    17) bash ${BASE_DIR}/bear-caddy add-static-site ;;
+    18) bash ${BASE_DIR}/bear-caddy delete-static-site ;;
+    19) bash ${BASE_DIR}/bear-caddy add-load-balancer ;;
+    20) bash ${BASE_DIR}/bear-caddy delete-load-balancer ;;
+    21) bash ${BASE_DIR}/bear-caddy delete-load-balancer-backend ;;
+    22) bash ${BASE_DIR}/bear-caddy laravel-up ;;
+    23) bash ${BASE_DIR}/bear-caddy add-laravel ;;
+    24) bash ${BASE_DIR}/bear-caddy delete-laravel ;;
+    25) bash ${BASE_DIR}/bear-caddy node-up ;;
+    26) bash ${BASE_DIR}/bear-caddy add-node-app ;;
+    27) bash ${BASE_DIR}/bear-caddy delete-node-app ;;
+
+    $((${#options[@]} + 1)) | 0 | exit)
+      printf "\nGoodbye!\nSee you again at https://bash.nguyenanhung.com/\n\n"
+      break
+      ;;
+    q | quit | ":quit" | ":q")
+      printf "\nGoodbye!\nSee you again at https://bash.nguyenanhung.com/\n\n"
+      exit
+      ;;
+    *)
+      echo -e "\nYou entered the wrong number, please enter the number in order on the list [${GREEN}1-$((${#options[@]} + 1))${NC}]"
+      continue
+      ;;
+    esac
+  done
+
 }
