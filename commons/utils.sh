@@ -453,11 +453,25 @@ docker_network_connect() {
     message ERROR "Network name, service name must be provided. Usage: $0 <network_name> <container_name> [container_ip]"
     return
   fi
-
-  if [ -n "$connect_container_ip" ]; then
-    docker network connect "$connect_network_name" "$connect_container_name" --ip "$connect_container_ip" >/dev/null 2>&1
+  if ! docker network inspect "$connect_network_name" >/dev/null 2>&1; then
+    message ERROR "Network '$connect_network_name' not exists." >&2
+    return 1
+  fi
+  if ! docker inspect "$connect_container_name" >/dev/null 2>&1; then
+    message ERROR "Container '$connect_container_name' not exists." >&2
+    return 1
+  fi
+  # Check if the container is already connected to the network
+  if docker network inspect "$connect_network_name" | jq -e ".[] | .Containers | has(\"$connect_container_name\")" >/dev/null; then
+    message INFO "Container '$connect_container_name' is already connected to network '$connect_network_name'."
   else
-    docker network connect "$connect_network_name" "$connect_container_name" >/dev/null 2>&1
+    message INFO " Connecting container '$connect_container_name' to network '$connect_network_name'..."
+    if [ -n "$connect_container_ip" ]; then
+      docker network connect "$connect_network_name" "$connect_container_name" --ip "$connect_container_ip" >/dev/null 2>&1
+    else
+      docker network connect "$connect_network_name" "$connect_container_name" >/dev/null 2>&1
+    fi
+    message SUCCESS "Container '$connect_container_name' is now connected to network '$connect_network_name'."
   fi
 }
 docker_network_disconnect() {
@@ -476,7 +490,22 @@ docker_network_disconnect() {
     message ERROR "Network name, service name must be provided. Usage: $0 <network_name> <container_name>"
     return
   fi
-  docker network disconnect "$disconnect_network_name" "$disconnect_container_name" >/dev/null 2>&1
+  if ! docker network inspect "$disconnect_network_name" >/dev/null 2>&1; then
+    message ERROR "Network '$disconnect_network_name' not exists." >&2
+    return 1
+  fi
+  if ! docker inspect "$disconnect_container_name" >/dev/null 2>&1; then
+    message ERROR "Container '$disconnect_container_name' not exists." >&2
+    return 1
+  fi
+
+  if docker network inspect "$disconnect_network_name" | jq -e ".[] | .Containers | has(\"$disconnect_container_name\")" >/dev/null; then
+    message INFO "Disconnecting container '$disconnect_container_name' from network '$disconnect_network_name'..."
+    docker network disconnect "$disconnect_network_name" "$disconnect_container_name" >/dev/null 2>&1
+    message SUCCESS " Container '$disconnect_container_name' has been disconnected from network '$disconnect_network_name'."
+  else
+    message INFO " Container '$disconnect_container_name' is not connected to network '$disconnect_network_name'. No action needed."
+  fi
 }
 join_caddy_network() {
   local container_name=$1
