@@ -16,19 +16,19 @@ setup_caddy() {
   local sites_path
   local data_path
   local config_path
-  local caddy_default_www
+  local infra_caddy_sites_path
   caddy_compose_path="$CONFIG_DIR/docker-compose.yml"
   caddyfile_path="$CONFIG_DIR/Caddyfile"
   sites_path="$CONFIG_DIR/sites"
   data_path="$CONFIG_DIR/caddy_data"
   config_path="$CONFIG_DIR/caddy_config"
-  caddy_default_www="/home/infra-caddy-sites"
+  infra_caddy_sites_path="/home/infra-caddy-sites"
 
   # Ensure required directories exist
   [ ! -d "$sites_path" ] && mkdir -p "$sites_path"
   [ ! -d "$data_path" ] && mkdir -p "$data_path"
   [ ! -d "$config_path" ] && mkdir -p "$config_path"
-  [ ! -d "$caddy_default_www" ] && mkdir -p "$caddy_default_www"
+  [ ! -d "$infra_caddy_sites_path" ] && sudo mkdir -p "$infra_caddy_sites_path"
 
   # Create default Caddyfile if not exists
   if [ ! -f "$caddyfile_path" ]; then
@@ -122,7 +122,7 @@ services:
       - "${sites_path}:/etc/caddy/sites"
       - "${data_path}:/data"
       - "${config_path}:/config"
-      - "${caddy_default_www}:/var/www"
+      - "${infra_caddy_sites_path}:/var/www"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     logging:
