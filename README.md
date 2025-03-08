@@ -8,7 +8,7 @@ little simpler and easier.
 ## Installation
 
 ```bash
-git clone git@github.com:nguyenanhung/caddy-bash-guy.git && cd caddy-bash-guy && ./bin/enable-shortcut
+git clone git@github.com:nguyenanhung/infra-caddy-guy.git && cd infra-caddy-guy && ./bin/enable-shortcut
 ```
 
 and use it
