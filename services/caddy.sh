@@ -139,7 +139,7 @@ networks:
   ${NETWORK_NAME}:
     external: true
 EOF
-      message INFO "Default docker-compose created"
+      message INFO "Default docker-compose.yml created at ${caddy_compose_path}"
     fi
 
     cd "$CONFIG_DIR" || {

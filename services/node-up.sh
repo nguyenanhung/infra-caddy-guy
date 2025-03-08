@@ -39,35 +39,43 @@ node_up() {
   }; }
 
   # Check and install NestJS if directory is empty
+  local install_nestjs
   if [ -z "$(ls -A "$source_dir")" ]; then
-    local install_nestjs="${5:-$(prompt_with_fzf "Directory $source_dir is empty. Install NestJS?" "Yes No")}"
-    if [ "$install_nestjs" = "Yes" ]; then
-      message INFO "Installing NestJS in $source_dir as user $PM2_USER..."
-      sudo -u "$PM2_USER" bash -c "cd $source_dir && npm install -g @nestjs/cli && nest new . --skip-git --package-manager npm"
-    fi
+    install_nestjs="${5:-$(prompt_with_fzf "Directory ${source_dir} is empty. Install NestJS?" "Yes No")}"
   fi
 
   # Ask for database (no args, always interactive for now)
-  local use_db db_type db_separate db_container="db_${domain}"
+  local use_db db_type db_separate db_container="db_${domain}" db_port
   use_db=$(prompt_with_fzf "Use a database?" "Yes No")
   if [ "$use_db" = "Yes" ]; then
-    db_type=$(prompt_with_fzf "Select database type" "mariadb mongodb postgresql")
+    db_type=$(prompt_with_fzf "Select database type" "mariadb mysql percona mongodb postgresql")
     db_separate=$(prompt_with_fzf "Run database in a separate container?" "Yes No")
     if [ "$db_separate" = "Yes" ]; then
       db_container="db_${domain}_${db_type}"
+      # Ask for DB port based on default
+      case "$db_type" in
+      "mariadb" | "mysql" | "percona") db_port=$(prompt_with_default "Enter port for $db_type" "3306") ;;
+      "mongodb") db_port=$(prompt_with_default "Enter port for $db_type" "27017") ;;
+      "postgresql") db_port=$(prompt_with_default "Enter port for $db_type" "5432") ;;
+      esac
     else
       db_container="${PREFIX_NAME}_${db_type}"
     fi
   fi
 
   # Ask for cache (no args, always interactive for now)
-  local use_cache cache_type cache_separate cache_container="cache_${domain}"
+  local use_cache cache_type cache_separate cache_container="cache_${domain}" cache_port
   use_cache=$(prompt_with_fzf "Use cache (Redis/Memcached)?" "Yes No")
   if [ "$use_cache" = "Yes" ]; then
     cache_type=$(prompt_with_fzf "Select cache type" "redis memcached")
     cache_separate=$(prompt_with_fzf "Run cache in a separate container?" "Yes No")
     if [ "$cache_separate" = "Yes" ]; then
       cache_container="cache_${domain}_${cache_type}"
+      # Ask for cache port based on default
+      case "$cache_type" in
+      "redis") cache_port=$(prompt_with_default "Enter port for $cache_type" "6379") ;;
+      "memcached") cache_port=$(prompt_with_default "Enter port for $cache_type" "11211") ;;
+      esac
     else
       cache_container="${PREFIX_NAME}_${cache_type}"
     fi
@@ -85,29 +93,89 @@ node_up() {
     cat >"$env_file" <<EOF
 NODE_PORT=${node_port}
 EOF
-    if [ "$use_db" = "Yes" ] && [[ "$db_type" == "mariadb" || "$db_type" == "mysql" ]]; then
-      local db_root_password=$(generate_password)
-      local db_user="node_${domain}"
-      local db_password=$(generate_password)
-      local db_database="node_db_${domain}"
-      echo "DB_ROOT_PASSWORD=${db_root_password}" >>"$env_file"
-      echo "DB_USER=${db_user}" >>"$env_file"
-      echo "DB_PASSWORD=${db_password}" >>"$env_file"
-      echo "DB_DATABASE=${db_database}" >>"$env_file"
+    # Database credentials
+    if [ "$use_db" = "Yes" ]; then
+      case "$db_type" in
+      "mariadb" | "mysql")
+        local db_root_password=$(generate_password)
+        local db_user="node_${domain}"
+        local db_password=$(generate_password)
+        local db_database="node_db_${domain}"
+        echo "DB_ROOT_PASSWORD=${db_root_password}" >>"$env_file"
+        echo "DB_USER=${db_user}" >>"$env_file"
+        echo "DB_PASSWORD=${db_password}" >>"$env_file"
+        echo "DB_DATABASE=${db_database}" >>"$env_file"
+        [ "$db_separate" = "Yes" ] && echo "DB_PORT=${db_port}" >>"$env_file"
+        ;;
+      "mongodb")
+        local mongo_admin_user="admin_${domain}"
+        local mongo_admin_password=$(generate_password)
+        local mongo_db="node_db_${domain}"
+        echo "MONGO_INITDB_ROOT_USERNAME=${mongo_admin_user}" >>"$env_file"
+        echo "MONGO_INITDB_ROOT_PASSWORD=${mongo_admin_password}" >>"$env_file"
+        echo "MONGO_INITDB_DATABASE=${mongo_db}" >>"$env_file"
+        if [ "$db_separate" = "Yes" ]; then
+          echo "MONGO_URL=mongodb://${mongo_admin_user}:${mongo_admin_password}@${db_container}:${db_port}/${mongo_db}?authSource=admin" >>"$env_file"
+        else
+          echo "# MONGO_URL will depend on shared container port" >>"$env_file"
+        fi
+        ;;
+      "postgresql")
+        local pg_user="node_${domain}"
+        local pg_password=$(generate_password)
+        local pg_database="node_db_${domain}"
+        echo "POSTGRES_USER=${pg_user}" >>"$env_file"
+        echo "POSTGRES_PASSWORD=${pg_password}" >>"$env_file"
+        echo "POSTGRES_DB=${pg_database}" >>"$env_file"
+        if [ "$db_separate" = "Yes" ]; then
+          echo "PG_CONNECTION_STRING=postgres://${pg_user}:${pg_password}@${db_container}:${db_port}/${pg_database}" >>"$env_file"
+        else
+          echo "# PG_CONNECTION_STRING will depend on shared container port" >>"$env_file"
+        fi
+        ;;
+      esac
     fi
-    if [ "$use_cache" = "Yes" ] && [ "$cache_type" = "redis" ]; then
-      local redis_password=$(generate_password)
-      echo "REDIS_PASSWORD=${redis_password}" >>"$env_file"
+
+    # Cache credentials
+    if [ "$use_cache" = "Yes" ]; then
+      case "$cache_type" in
+      "redis")
+        local redis_password=$(generate_password)
+        echo "REDIS_PASSWORD=${redis_password}" >>"$env_file"
+        if [ "$cache_separate" = "Yes" ]; then
+          echo "REDIS_URL=redis://:${redis_password}@${cache_container}:${cache_port}" >>"$env_file"
+        else
+          echo "# REDIS_URL will depend on shared container port" >>"$env_file"
+        fi
+        ;;
+      "memcached")
+        echo "# Memcached does not support authentication by default" >>"$env_file"
+        if [ "$cache_separate" = "Yes" ]; then
+          echo "MEMCACHED_HOST=${cache_container}" >>"$env_file"
+          echo "MEMCACHED_PORT=${cache_port}" >>"$env_file"
+        else
+          echo "# MEMCACHED_HOST and PORT will depend on shared container" >>"$env_file"
+        fi
+        ;;
+      esac
     fi
   fi
 
-  # Create Dockerfile
+  # Create Dockerfile (with conditional NestJS installation)
   cat >"$dockerfile" <<EOF
 FROM node:${node_version}-alpine
 WORKDIR /app
 COPY . .
 RUN npm install
 RUN npm install -g pm2
+EOF
+  if [ "$install_nestjs" = "Yes" ]; then
+    cat >>"$dockerfile" <<EOF
+RUN npm install -g @nestjs/cli
+RUN nest new . --skip-git --package-manager npm
+EOF
+  fi
+  cat >>"$dockerfile" <<EOF
 CMD ["pm2-runtime", "ecosystem.config.js"]
 EOF
 
@@ -167,7 +235,7 @@ services:
 EOF
   if [ -f "$env_file" ]; then
     echo "    env_file:" >>"$compose_file"
-    echo "      - .env" >>"$compose_file"
+    echo "      - .env" >>"$env_file"
   fi
   if [ "$use_db" = "Yes" ] || [ "$use_cache" = "Yes" ]; then
     echo "    depends_on:" >>"$compose_file"
@@ -182,6 +250,8 @@ EOF
     echo "    container_name: ${db_container}" >>"$compose_file"
     echo "    volumes:" >>"$compose_file"
     echo "      - $CONFIG_DIR/${db_container}/data:${SERVICE_PORTS[$db_type]}" >>"$compose_file"
+    echo "    ports:" >>"$compose_file"
+    echo "      - \"${db_port}:${SERVICE_PORTS[$db_type]}\"" >>"$compose_file"
     echo "    networks:" >>"$compose_file"
     echo "      - ${sites_network_name}" >>"$compose_file"
     echo "    healthcheck:" >>"$compose_file"
@@ -189,7 +259,7 @@ EOF
     echo "      interval: 30s" >>"$compose_file"
     echo "      retries: 3" >>"$compose_file"
     echo "      start_period: 10s" >>"$compose_file"
-    if [[ "$db_type" == "mariadb" || "$db_type" == "mysql" ]]; then
+    if [[ "$db_type" == "mariadb" || "$db_type" == "mysql" || "$db_type" == "mongodb" || "$db_type" == "postgresql" ]]; then
       echo "    env_file:" >>"$compose_file"
       echo "      - .env" >>"$compose_file"
     fi
@@ -202,6 +272,8 @@ EOF
     echo "    container_name: ${cache_container}" >>"$compose_file"
     echo "    volumes:" >>"$compose_file"
     echo "      - $CONFIG_DIR/${cache_container}/data:${SERVICE_PORTS[$cache_type]}" >>"$compose_file"
+    echo "    ports:" >>"$compose_file"
+    echo "      - \"${cache_port}:${SERVICE_PORTS[$cache_type]}\"" >>"$compose_file"
     echo "    networks:" >>"$compose_file"
     echo "      - ${sites_network_name}" >>"$compose_file"
     echo "    healthcheck:" >>"$compose_file"
@@ -216,30 +288,27 @@ EOF
   fi
 
   # Start containers and wait for health
-  docker-compose -f "$compose_file" up -d
-  if [ "$use_db" = "Yes" ]; then
-    local timeout=60 count=0
-    while [ "$(docker inspect --format='{{.State.Health.Status}}' "$db_container" 2>/dev/null || echo "unhealthy")" != "healthy" ]; do
-      [ $count -ge $timeout ] && {
-        message ERROR "$db_type is not healthy after $timeout seconds"
-        return 1
-      }
-      message INFO "$db_type is not healthy yet. Retrying..."
-      sleep 5
-      ((count += 5))
-    done
+  docker compose -f "$compose_file" up -d
+
+  # If NestJS was installed, copy the generated source back to host
+  if [ "$install_nestjs" = "Yes" ]; then
+    message INFO "Copying NestJS source from container to $source_dir..."
+    local container_name="${PREFIX_NAME}_sites_${domain}"
+    if ! docker cp "$container_name:/app/." "$source_dir" 2>/dev/null; then
+      message ERROR "Failed to copy NestJS source from $container_name to $source_dir"
+      docker compose -f "$compose_file" down
+      return 1
+    fi
+    message INFO "Successfully copied NestJS source to $source_dir"
+    docker compose -f "$compose_file" restart
   fi
+
+  if [ "$use_db" = "Yes" ]; then
+    wait_for_health "$db_container" "$db_type"
+  fi
+
   if [ "$use_cache" = "Yes" ]; then
-    local timeout=60 count=0
-    while [ "$(docker inspect --format='{{.State.Health.Status}}' "$cache_container" 2>/dev/null || echo "unhealthy")" != "healthy" ]; do
-      [ $count -ge $timeout ] && {
-        message ERROR "$cache_type is not healthy after $timeout seconds"
-        return 1
-      }
-      message INFO "$cache_type is not healthy yet. Retrying..."
-      sleep 5
-      ((count += 5))
-    done
+    wait_for_health "$cache_container" "$cache_type"
   fi
 
   # Configure Caddy reverse proxy
@@ -250,6 +319,7 @@ $domain {
     reverse_proxy http://${PREFIX_NAME}_sites_${domain}:${node_port}
 }
 EOF
+
   if caddy_validate && caddy_reload; then
     message INFO "Node.js app for $domain is up and running"
     [ -f "$env_file" ] && {
@@ -330,7 +400,7 @@ node_remove() {
   local backup_file="$BACKUP_DIR/$domain.caddy.$(date +%Y%m%d_%H%M%S)"
   cp "$domain_file" "$backup_file"
   rm -f "$domain_file"
-  [ -f "$compose_file" ] && docker-compose -f "$compose_file" down
+  [ -f "$compose_file" ] && docker compose -f "$compose_file" down
   caddy_reload && message INFO "Node.js app for $domain removed, Caddy config backed up to $backup_file" || {
     mv "$backup_file" "$domain_file"
     message ERROR "Failed to remove Node.js app for $domain"

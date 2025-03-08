@@ -326,7 +326,7 @@ EOF
     message ERROR "Failed to change to directory $laravel_dir"
     return 1
   }
-  if ! docker-compose up -d; then
+  if ! docker compose up -d; then
     message ERROR "Failed to start containers with docker-compose"
     return 1
   fi
@@ -412,7 +412,7 @@ EOF
     message INFO "Laravel site $domain set up and Caddy reloaded"
   else
     rm -f "$domain_file"
-    docker-compose down
+    docker compose down
     message ERROR "Invalid Caddy configuration, Laravel setup aborted"
     return 1
   fi
@@ -560,7 +560,7 @@ laravel_remove() {
   # Stop and remove containers
   local laravel_dir="$laravel_base_dir/$domain"
   cd "$laravel_dir" || return 1
-  docker-compose down
+  docker compose down
   message INFO "Stopped and removed containers for $domain"
 
   # Remove Caddy config
