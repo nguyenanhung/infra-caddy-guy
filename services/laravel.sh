@@ -66,6 +66,8 @@ add_laravel() {
     return 1
   fi
 
+  docker exec -it "${laravel_container}" "chmod -R 777 /var/www/${domain}/html/storage"
+
   # Ask if user wants basic auth
   local basic_auth_config=""
   if confirm_action "Enable ${GREEN}basic auth${NC} for this ${GREEN}Laravel Application${NC}?"; then

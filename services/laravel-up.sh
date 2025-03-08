@@ -280,6 +280,7 @@ EOF
 
   # Wait for health of Laravel PHP-FPM container
   wait_for_health "${PREFIX_NAME}_sites_${domain}" "Laravel PHP-FPM"
+  docker exec -it "${PREFIX_NAME}_sites_${domain}" "chmod -R 777 /var/www/${domain}/html/storage"
 
   # Wait for health of worker/scheduler container if separate
   if [ "$worker_separate" = "Yes" ]; then
