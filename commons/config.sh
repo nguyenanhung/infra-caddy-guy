@@ -5,6 +5,7 @@ PREFIX_NAME="bear"
 DEVELOP_BY="Hung Nguyen - hungna.dev@gmail.com"
 SCRIPT_VERSION="1.0.0"
 SCRIPT_BACKUP_ORIGIN_FILE=".bear.backup.original"
+PM2_USER="hungna"
 
 # Default network for Caddy
 NETWORK_NAME="${PREFIX_NAME}_caddy_net"
