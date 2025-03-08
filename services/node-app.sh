@@ -52,7 +52,7 @@ add_node_app() {
   if [ ! -d "$node_dir" ]; then
     mkdir -p "$node_dir"
     local install_nestjs
-    install_nestjs=$(prompt_with_fzf "Directory $node_dir does not exist. Install NestJS?" "Yes No" "No")
+    install_nestjs=$(prompt_with_fzf "Directory $node_dir does not exist. Install NestJS?" "Yes No")
     if [ "$install_nestjs" = "Yes" ]; then
       message INFO "Installing NestJS in $node_dir as user $PM2_USER..."
       sudo -u "$PM2_USER" bash -c "cd $node_dir && npm install -g @nestjs/cli && nest new . --skip-git --package-manager npm"
@@ -72,14 +72,14 @@ add_node_app() {
 
   # Ask if user wants basic auth
   local use_basic_auth
-  use_basic_auth=$(prompt_with_fzf "Enable basic auth for this Node.js app?" "Yes No" "No")
+  use_basic_auth=$(prompt_with_fzf "Enable basic auth for this Node.js app?" "Yes No")
   local basic_auth_config=""
   if [ "$use_basic_auth" = "Yes" ]; then
     # Ask for scope (whole site or specific path)
     local scope_choice
-    scope_choice=$(prompt_with_fzf "Apply basic auth to whole site or specific path?" "Whole site Specific path" "Whole site")
+    scope_choice=$(prompt_with_fzf "Apply basic auth to whole site or specific path?" "Whole-site Specific-path")
     local auth_path=""
-    if [ "$scope_choice" = "Specific path" ]; then
+    if [ "$scope_choice" = "Specific-path" ]; then
       auth_path=$(prompt_with_default "Enter path to protect (e.g., /admin)" "")
       [ -z "$auth_path" ] && {
         message ERROR "Path cannot be empty"
