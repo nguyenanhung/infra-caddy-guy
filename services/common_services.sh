@@ -92,7 +92,6 @@ enable_service() {
     echo "MONGO_INITDB_ROOT_PASSWORD=${password}" >>"$env_file"
     echo "MONGO_INITDB_DATABASE=${database_name}" >>"$env_file"
     echo "MONGO_URL=mongodb://${username}:${password}@${container_name}:${default_port}/${database_name}?authSource=admin" >>"$env_file"
-    default_healthcheck="mongosh -u ${username} -p ${password} --authenticationDatabase admin --eval 'db.runCommand({ping:1})' --quiet"
     ;;
   mariadb | mysql | percona)
     root_password=$(prompt_with_default "Enter ${service_name} root password (leave blank for random)" "$(generate_password)")
@@ -105,7 +104,6 @@ enable_service() {
     echo "MYSQL_USER=${username}" >>"$env_file"
     echo "MYSQL_PASSWORD=${password}" >>"$env_file"
     echo "MYSQL_DATABASE=${database_name}" >>"$env_file"
-    default_healthcheck="${service_name} -h 127.0.0.1 -u${username} -p${password} -e 'SELECT 1' --silent --skip-column-names"
     ;;
   postgresql)
     username=$(prompt_with_default "Enter PostgreSQL username" "postgres")
@@ -116,7 +114,6 @@ enable_service() {
     echo "POSTGRES_PASSWORD=${password}" >>"$env_file"
     echo "POSTGRES_DB=${database_name}" >>"$env_file"
     echo "PG_CONNECTION_STRING=postgres://${username}:${password}@${container_name}:${default_port}/${database_name}" >>"$env_file"
-    default_healthcheck="PGPASSWORD=${password} pg_isready -h localhost -U ${username} -d ${database_name}"
     ;;
   rabbitmq)
     username=$(prompt_with_default "Enter RabbitMQ username" "guest")
@@ -134,7 +131,6 @@ enable_service() {
     echo "ELASTIC_PASSWORD=${password}" >>"$env_file"
     echo "ELASTICSEARCH_URL=${service_url}" >>"$env_file"
     echo "discovery.type=single-node" >>"$env_file"
-    default_healthcheck="curl -s -u ${username}:${password} ${service_url}/_cluster/health | grep -q '\"status\":\"green\"'"
     ;;
   influxdb)
     username=$(prompt_with_default "Enter InfluxDB username" "admin")
@@ -145,7 +141,6 @@ enable_service() {
     echo "INFLUXDB_ADMIN_PASSWORD=${password}" >>"$env_file"
     echo "INFLUXDB_DB=${database_name}" >>"$env_file"
     echo "INFLUXDB_HTTP_AUTH_ENABLED=true" >>"$env_file"
-    default_healthcheck="influx -username ${username} -password ${password} -database ${database_name} ping"
     ;;
   redis)
     if confirm_action "Enable password for Redis?"; then
@@ -153,7 +148,6 @@ enable_service() {
       [ -z "$password" ] && password=$(generate_password)
       echo "REDIS_PASSWORD=${password}" >"$env_file"
       echo "REDIS_URL=redis://:${password}@${container_name}:${default_port}" >>"$env_file"
-      default_healthcheck="redis-cli -a ${password} ping -h localhost"
     else
       echo "# Redis running without password" >"$env_file"
     fi

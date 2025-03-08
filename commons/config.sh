@@ -102,14 +102,14 @@ SERVICE_PORTS=(
 # Default healthcheck commands (customized per service)
 declare -A SERVICE_HEALTHCHECKS
 SERVICE_HEALTHCHECKS=(
-  ["redis"]="redis-cli ping -h localhost"
+  ["redis"]="redis-cli -a \$REDIS_PASSWORD ping -h localhost"
   ["memcached"]="printf 'stats\n' | nc -w 1 localhost 11211"
-  ["mongodb"]="mongosh --eval 'db.runCommand({ping:1})' --quiet"
+  ["mongodb"]="mongosh -u \$MONGO_INITDB_ROOT_USERNAME -p \$MONGO_INITDB_ROOT_PASSWORD --authenticationDatabase admin --eval 'db.runCommand({ping:1})' --quiet"
   ["mariadb"]="mariadb-admin ping -h 127.0.0.1 -u\$MYSQL_USER -p\$MYSQL_PASSWORD --silent"
   ["mysql"]="mysql -h 127.0.0.1 -u\$MYSQL_USER -p\$MYSQL_PASSWORD -e 'SELECT 1' --silent --skip-column-names"
   ["percona"]="mysql -h 127.0.0.1 -u\$MYSQL_USER -p\$MYSQL_PASSWORD -e 'SELECT 1' --silent --skip-column-names"
-  ["postgresql"]="pg_isready -h localhost"
-  ["influxdb"]="influx ping || exit 1"
+  ["postgresql"]="PGPASSWORD=\$POSTGRES_USER pg_isready -h localhost -U \$POSTGRES_PASSWORD -d \$POSTGRES_DB"
+  ["influxdb"]="influx -username \$INFLUXDB_ADMIN_USER-password \$INFLUXDB_ADMIN_PASSWORD -database \$INFLUXDB_DB ping"
   ["rabbitmq"]="rabbitmq-diagnostics check_port_listener"
   ["beanstalkd"]="echo stats | nc -w 1 localhost 11300"
   ["gearmand"]="gearadmin --server-version"
