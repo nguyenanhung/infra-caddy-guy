@@ -17,12 +17,12 @@ setup_caddy() {
   local data_path
   local config_path
   local caddy_default_www
-  caddy_compose_path="$CONFIG_DIR/caddy-docker-compose.yml"
+  caddy_compose_path="$CONFIG_DIR/docker-compose.yml"
   caddyfile_path="$CONFIG_DIR/Caddyfile"
   sites_path="$CONFIG_DIR/sites"
   data_path="$CONFIG_DIR/caddy_data"
   config_path="$CONFIG_DIR/caddy_config"
-  caddy_default_www="$CONFIG_DIR/caddy_default_www"
+  caddy_default_www="/home/infra-caddy-sites"
 
   # Ensure required directories exist
   [ ! -d "$sites_path" ] && mkdir -p "$sites_path"
@@ -104,7 +104,7 @@ EOF
       docker pull "${image}"
     fi
 
-    # Create default caddy-docker-compose.yml if not already
+    # Create default docker-compose.yml if not already
     if [ ! -f "$caddy_compose_path" ]; then
       cat >"$caddy_compose_path" <<EOF
 services:
@@ -157,6 +157,8 @@ EOF
       docker ps -a --filter "name=${PREFIX_NAME}_caddy"
       docker exec -it "${PREFIX_NAME}_caddy" apk add --no-cache netcat-openbsd # Install netcat-openbsd for testing purposes
       docker exec -it "${PREFIX_NAME}_caddy" nc -zv host.docker.internal 80    # Test Caddy call to internal host
+      print_message
+      message NOTE "If your application is PHP and needs to run with FPM (eg: Laravel, WordPress ...), you need to deploy your source code to the /home/infra-caddy-sites/<domain>/html directory for the application to work. Other applications like NodeJS, ReactJS can use reverse-proxy so you can deploy anywhere."
     else
       message ERROR "Caddy container ${PREFIX_NAME}_caddy failed to start"
     fi

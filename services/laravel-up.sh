@@ -76,7 +76,7 @@ laravel_up() {
 
   # Ask for source directory
   local source_dir
-  source_dir=$(prompt_with_default "Enter Laravel source directory" "/home/${domain}/laravel")
+  source_dir=$(prompt_with_default "Enter Laravel source directory" "/home/infra-caddy-sites/${domain}/html")
   [ -z "$source_dir" ] && {
     message ERROR "Source directory cannot be empty"
     return 1
@@ -182,7 +182,7 @@ services:
       - ${network_name}
       - ${PREFIX_NAME}_caddy_net
     healthcheck:
-      test: ["CMD", "php-fpm-healthcheck"]
+      test: ["CMD", "nc", "-z", "localhost", "9000"]
       interval: 30s
       retries: 3
       start_period: 10s
@@ -243,6 +243,11 @@ EOF
     # echo "      - ${source_dir}/.env.production:/var/www/${domain}/html/.env" >>"$compose_file"
     echo "    networks:" >>"$compose_file"
     echo "      - ${network_name}" >>"$compose_file"
+    echo "    healthcheck:" >>"$compose_file"
+    echo "      test: [\"CMD\", \"php\", \"-v\"]" >>"$compose_file"
+    echo "      interval: 30s" >>"$compose_file"
+    echo "      retries: 3" >>"$compose_file"
+    echo "      start_period: 10s" >>"$compose_file"
     if [ "$use_db" = "Yes" ]; then
       echo "    depends_on:" >>"$compose_file"
       echo "      - ${db_container}" >>"$compose_file"

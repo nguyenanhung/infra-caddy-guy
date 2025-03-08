@@ -104,7 +104,7 @@ test.sh
 ai-builder.txt
 .dev.docker/*
 
-config/caddy-docker-compose.yml
+config/docker-compose.yml
 config/caddy_config/*
 !config/caddy_config/.gitkeep
 config/caddy_data/*

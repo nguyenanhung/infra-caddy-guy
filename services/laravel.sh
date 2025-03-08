@@ -34,11 +34,16 @@ add_laravel() {
 
   # Ask for root directory
   local root_directory
-  root_directory=$(prompt_with_default "Enter root directory for Laravel (e.g., /var/www/laravel/public)" "")
+  root_directory="/home/infra-caddy-sites/${domain}/html"
   [ -z "$root_directory" ] && {
     message ERROR "Root directory cannot be empty"
     return 1
   }
+  if [ ! -d "$root_directory" ]; then
+    message NOTE "If your application is PHP and needs to run with FPM (eg: Laravel, WordPress ...), you need to deploy your source code to the /home/infra-caddy-sites/<domain>/html directory for the application to work."
+    message INFO "Please change your application to path ${root_directory} and try again."
+    return
+  fi
 
   # Ask for Laravel container and port
   local laravel_container
