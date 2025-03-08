@@ -174,6 +174,10 @@ enable_service() {
   local env_file="$CONTAINER_DIR/services/$container_name/.env"
   local compose_file="$CONTAINER_DIR/services/$container_name/docker-compose.yml"
 
+  # Get the compose version dynamically
+  local include_docker_version
+  include_docker_version=$(set_compose_version)
+
   # Show overview and confirm
   print_message "Overview of new service ${service_name}"
   message INFO "Network name: ${NETWORK_NAME}"
@@ -190,6 +194,7 @@ enable_service() {
   message INFO "Mount Volumes: $data_volume"
   message INFO "Environment File: $env_file"
   message INFO "Docker Compose File: $compose_file"
+  message INFO "Docker Compose Version Syntax: $include_docker_version"
   print_message
   confirm_action "Do you want to proceed with enabling ${GREEN}${service_name}${NC}?" || {
     message INFO "Action canceled"
@@ -199,6 +204,12 @@ enable_service() {
   # Generate docker-compose.yml
   mkdir -p "$CONTAINER_DIR/services/$container_name"
   cat >"$compose_file" <<EOF
+${include_docker_version}
+
+networks:
+  ${NETWORK_NAME}:
+    external: true
+
 services:
   ${PREFIX_NAME}_${service_name}:
     image: ${image}
@@ -308,14 +319,6 @@ EOF
       interval: 30s
       retries: 3
       start_period: 10s
-EOF
-
-  # Add Networks
-  cat >>"$compose_file" <<EOF
-
-networks:
-  $NETWORK_NAME:
-    external: true
 EOF
 
   # Start the service

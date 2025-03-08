@@ -102,8 +102,8 @@ laravel_up() {
   fi
 
   # Define network
-  local network_name="${PREFIX_NAME}_sites_${domain}_net"
-  docker network create "$network_name" --driver bridge 2>/dev/null || message INFO "Network $network_name already exists"
+  local sites_network_name="${PREFIX_NAME}_sites_${domain}_net"
+  docker network create "$sites_network_name" --driver bridge 2>/dev/null || message INFO "Network $sites_network_name already exists"
 
   # Create Dockerfile for Laravel PHP-FPM
   local laravel_dir="$laravel_base_dir/$domain"
@@ -174,9 +174,16 @@ EOF
 
   # Create docker-compose.yml
   local compose_file="$laravel_dir/docker-compose.yml"
+
+  # Get the compose version dynamically
+  local include_docker_version
+  include_docker_version=$(set_compose_version)
+
+  # Write compose file with dynamic version
   cat >"$compose_file" <<EOF
+${include_docker_version}
 networks:
-  ${network_name}:
+  ${sites_network_name}:
     driver: bridge
   ${PREFIX_NAME}_caddy_net:
     external: true
@@ -188,15 +195,28 @@ services:
     container_name: ${PREFIX_NAME}_sites_${domain}
     volumes:
       - ${source_dir}:/var/www/${domain}/html
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
-      - ${network_name}
-      - ${PREFIX_NAME}_caddy_net
+      - ${sites_network_name}
+      - ${NETWORK_NAME}
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "9000"]
       interval: 30s
       retries: 3
       start_period: 10s
 EOF
+
+  # Combine depends_on into a single block for the main Laravel service
+  if [ "$use_db" = "Yes" ] || [ "$use_cache" = "Yes" ]; then
+    echo "    depends_on:" >>"$compose_file"
+    if [ "$use_db" = "Yes" ]; then
+      echo "      - ${db_container}" >>"$compose_file"
+    fi
+    if [ "$use_cache" = "Yes" ]; then
+      echo "      - ${cache_container}" >>"$compose_file"
+    fi
+  fi
 
   # Add database if separate
   if [ "$db_separate" = "Yes" ] && [ -n "$db_type" ]; then
@@ -206,20 +226,19 @@ EOF
     echo "    volumes:" >>"$compose_file"
     echo "      - $CONFIG_DIR/${db_container}/data:${SERVICE_PORTS[$db_type]}" >>"$compose_file"
     echo "    networks:" >>"$compose_file"
-    echo "      - ${network_name}" >>"$compose_file"
+    echo "      - ${sites_network_name}" >>"$compose_file"
     echo "    healthcheck:" >>"$compose_file"
     echo "      test: [\"CMD-SHELL\", \"${SERVICE_HEALTHCHECKS[$db_type]}\"]" >>"$compose_file"
     echo "      interval: 30s" >>"$compose_file"
     echo "      retries: 3" >>"$compose_file"
     echo "      start_period: 10s" >>"$compose_file"
-    if [ "$db_type" = "mariadb" ]; then
+    if [[ "$db_type" == "mariadb" || "$db_type" == "mysql" || "$db_type" == "percona" ]]; then
       echo "    environment:" >>"$compose_file"
       echo "      - MYSQL_ROOT_PASSWORD=$(generate_password)" >>"$compose_file"
-      echo "      - MYSQL_DATABASE=laravel_${domain}" >>"$compose_file"
+      echo "      - MYSQL_DATABASE=laravel_db_${domain}" >>"$compose_file"
+      echo "      - MYSQL_USER=laravel_admin_${domain}" >>"$compose_file"
+      echo "      - MYSQL_PASSWORD=$(generate_password)" >>"$compose_file"
     fi
-  elif [ "$use_db" = "Yes" ]; then
-    echo "    depends_on:" >>"$compose_file"
-    echo "      - ${db_container}" >>"$compose_file"
   fi
 
   # Add cache if separate
@@ -230,15 +249,12 @@ EOF
     echo "    volumes:" >>"$compose_file"
     echo "      - $CONFIG_DIR/${cache_container}/data:${SERVICE_PORTS[$cache_type]}" >>"$compose_file"
     echo "    networks:" >>"$compose_file"
-    echo "      - ${network_name}" >>"$compose_file"
+    echo "      - ${sites_network_name}" >>"$compose_file"
     echo "    healthcheck:" >>"$compose_file"
     echo "      test: [\"CMD-SHELL\", \"${SERVICE_HEALTHCHECKS[$cache_type]}\"]" >>"$compose_file"
     echo "      interval: 30s" >>"$compose_file"
     echo "      retries: 3" >>"$compose_file"
     echo "      start_period: 10s" >>"$compose_file"
-  elif [ "$use_cache" = "Yes" ]; then
-    echo "    depends_on:" >>"$compose_file"
-    echo "      - ${cache_container}" >>"$compose_file"
   fi
 
   # Add worker/scheduler if separate
@@ -251,20 +267,24 @@ EOF
     echo "    volumes:" >>"$compose_file"
     echo "      - ${source_dir}:/var/www/${domain}/html" >>"$compose_file"
     # echo "      - ${source_dir}/.env.production:/var/www/${domain}/html/.env" >>"$compose_file"
+    echo "    extra_hosts:" >>"$compose_file"
+    echo "      - \"host.docker.internal:host-gateway\"" >>"$compose_file"
     echo "    networks:" >>"$compose_file"
-    echo "      - ${network_name}" >>"$compose_file"
+    echo "      - ${sites_network_name}" >>"$compose_file"
     echo "    healthcheck:" >>"$compose_file"
-    echo "      test: [\"CMD\", \"php\", \"-v\"]" >>"$compose_file"
+    echo "      test: [\"CMD\", \"supervisorctl\", \"status\"]" >>"$compose_file"
     echo "      interval: 30s" >>"$compose_file"
     echo "      retries: 3" >>"$compose_file"
     echo "      start_period: 10s" >>"$compose_file"
-    if [ "$use_db" = "Yes" ]; then
+    # Combine depends_on into a single block
+    if [ "$use_db" = "Yes" ] || [ "$use_cache" = "Yes" ]; then
       echo "    depends_on:" >>"$compose_file"
-      echo "      - ${db_container}" >>"$compose_file"
-    fi
-    if [ "$use_cache" = "Yes" ]; then
-      echo "    depends_on:" >>"$compose_file"
-      echo "      - ${cache_container}" >>"$compose_file"
+      if [ "$use_db" = "Yes" ]; then
+        echo "      - ${db_container}" >>"$compose_file"
+      fi
+      if [ "$use_cache" = "Yes" ]; then
+        echo "      - ${cache_container}" >>"$compose_file"
+      fi
     fi
   fi
 

@@ -436,38 +436,47 @@ docker_hard_reset() {
 }
 docker_network_connect() {
   local connect_network_name=$1
-  local connect_service_name=$2
-  local connect_service_ip=$3
+  local connect_container_name=$2
+  local connect_container_ip=$3
+
+  if [ -z "$connect_network_name" ]; then
+    connect_network_name=$(prompt_with_default "Please enter the network name you want ${connect_container_name} will disconnect it" "${NETWORK_NAME}")
+  fi
   if [ -z $connect_network_name ]; then
     connect_network_name="${NETWORK_NAME}"
   fi
-  if [ -z "$connect_service_name" ]; then
-    connect_service_name=$(prompt_with_default "Please enter container name you want to connect to ${connect_service_name}")
+
+  if [ -z "$connect_container_name" ]; then
+    connect_container_name=$(prompt_with_default "Please enter container name you want to connect to ${connect_container_name}")
   fi
-  if [ -z "$connect_service_name" ]; then
-    message ERROR "Network name, service name must be provided. Usage: $0 <network_name> <container_name> [service_ip]"
+  if [ -z "$connect_container_name" ]; then
+    message ERROR "Network name, service name must be provided. Usage: $0 <network_name> <container_name> [container_ip]"
     return
   fi
-  if [ -n "$connect_service_ip" ]; then
-    docker network connect "$connect_network_name" "$connect_service_name" --ip "$connect_service_ip"
+
+  if [ -n "$connect_container_ip" ]; then
+    docker network connect "$connect_network_name" "$connect_container_name" --ip "$connect_container_ip"
   else
-    docker network connect "$connect_network_name" "$connect_service_name"
+    docker network connect "$connect_network_name" "$connect_container_name"
   fi
 }
 docker_network_disconnect() {
   local disconnect_network_name=$1
-  local disconnect_service_name=$2
+  local disconnect_container_name=$2
+  if [ -z "$disconnect_network_name" ]; then
+    disconnect_network_name=$(prompt_with_default "Please enter the network name you want ${disconnect_container_name} will disconnect it" "${NETWORK_NAME}")
+  fi
   if [ -z $disconnect_network_name ]; then
     disconnect_network_name="${NETWORK_NAME}"
   fi
-  if [ -z "$disconnect_service_name" ]; then
-    disconnect_service_name=$(prompt_with_default "Please enter container name you want to disconnect to ${disconnect_service_name}")
+  if [ -z "$disconnect_container_name" ]; then
+    disconnect_container_name=$(prompt_with_default "Please enter container name you want to disconnect to ${disconnect_container_name}")
   fi
-  if [ -z "$disconnect_service_name" ]; then
+  if [ -z "$disconnect_container_name" ]; then
     message ERROR "Network name, service name must be provided. Usage: $0 <network_name> <container_name>"
     return
   fi
-  docker network disconnect "$disconnect_network_name" "$disconnect_service_name"
+  docker network disconnect "$disconnect_network_name" "$disconnect_container_name"
 }
 join_caddy_network() {
   local container_name=$1
@@ -475,10 +484,25 @@ join_caddy_network() {
     container_name=$(prompt_with_default "Please enter container name you want to connect to ${container_name}")
   fi
   if [ -z "$container_name" ]; then
-    message ERROR "Network name, service name must be provided. Usage: $0 <container_name>"
+    message ERROR "Container name must be provided. Usage: $0 <container_name>"
     return
   fi
   docker_network_connect "${NETWORK_NAME}" "$container_name"
+}
+set_compose_version() {
+  local docker_version include_docker_version
+  docker_version=$(docker version --format '{{.Server.Version}}' 2>/dev/null || echo "0.0.0")
+  local major_version=$(echo "$docker_version" | cut -d'.' -f1)
+  local minor_version=$(echo "$docker_version" | cut -d'.' -f2)
+
+  # Decide whether to include version (use 3.8 for engines < 19.03, omit for newer ones)
+  if [ "$major_version" -lt 19 ] || { [ "$major_version" -eq 19 ] && [ "$minor_version" -lt 3 ]; }; then
+    include_docker_version="version: '3.8'"
+  else
+    include_docker_version=""
+  fi
+
+  echo "$include_docker_version"
 }
 get_mapping_value() {
   local -n map=$1
