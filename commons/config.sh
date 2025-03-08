@@ -48,6 +48,7 @@ SERVICE_IMAGES=(
   ["phpmyadmin"]="phpmyadmin:latest"
   ["adminer"]="adminer:latest"
   ["uptime-kuma"]="louislam/uptime-kuma:latest"
+  ["n8n"]="n8nio/n8n:latest"
 )
 
 # Default resource limits
@@ -65,11 +66,12 @@ SERVICE_RESOURCES=(
   ["rabbitmq"]="--cpus=1 --memory=512m"
   ["beanstalkd"]="--cpus=0.5 --memory=256m"
   ["gearmand"]="--cpus=0.5 --memory=256m"
-  ["elasticsearch"]="--cpus=0.5 --memory=512m"
+  ["elasticsearch"]="--cpus=1 --memory=1g"
   ["mailhog"]="--cpus=0.5 --memory=256m"
   ["phpmyadmin"]="--cpus=0.5 --memory=512m"
   ["adminer"]="--cpus=0.5 --memory=256m"
   ["uptime-kuma"]="--cpus=0.5 --memory=512m"
+  ["n8n"]="--cpus=1 --memory=1g"
 )
 
 # Default ports (internal)
@@ -91,6 +93,7 @@ SERVICE_PORTS=(
   ["phpmyadmin"]="80"
   ["adminer"]="8080"
   ["uptime-kuma"]="3001"
+  ["n8n"]="5678"
 )
 
 # Default healthcheck commands (customized per service)
@@ -112,4 +115,5 @@ SERVICE_HEALTHCHECKS=(
   ["phpmyadmin"]="curl -s -o /dev/null -w '%{http_code}' http://localhost:80"
   ["adminer"]="curl -s -o /dev/null -w '%{http_code}' http://localhost:8080"
   ["uptime-kuma"]="curl -s -o /dev/null -w '%{http_code}' http://localhost:3001"
+  ["n8n"]="curl -s -o /dev/null -w '%{http_code}' http://localhost:5678"
 )

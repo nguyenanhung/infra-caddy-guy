@@ -96,7 +96,7 @@ EOF
     # Database credentials
     if [ "$use_db" = "Yes" ]; then
       case "$db_type" in
-      "mariadb" | "mysql")
+      "mariadb" | "mysql" | "percona")
         local db_root_password=$(generate_password)
         local db_user="node_${domain}"
         local db_password=$(generate_password)
@@ -259,7 +259,7 @@ EOF
     echo "      interval: 30s" >>"$compose_file"
     echo "      retries: 3" >>"$compose_file"
     echo "      start_period: 10s" >>"$compose_file"
-    if [[ "$db_type" == "mariadb" || "$db_type" == "mysql" || "$db_type" == "mongodb" || "$db_type" == "postgresql" ]]; then
+    if [[ "$db_type" == "mariadb" || "$db_type" == "mysql" || "$db_type" == "percona" || "$db_type" == "mongodb" || "$db_type" == "postgresql" ]]; then
       echo "    env_file:" >>"$compose_file"
       echo "      - .env" >>"$compose_file"
     fi
