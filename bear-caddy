@@ -70,13 +70,26 @@ case "$1" in
   echo "$site_list"
   ;;
 "install")
-  options="Add new Reverse Proxy\nAdd new Load Balancer Cluster\nAdd new Laravel App\nBuild & Add new Laravel Application"
-  choice=$(echo -e "$options" | fzf --prompt="Select an option: ")
+  options=(
+    "Add new Reverse Proxy"
+    "Add new Load Balancer Cluster"
+    "Add new Laravel App"
+    "Build & Add new Laravel App"
+    "Build & Add new Laravel App with Apache"
+    "Add new Node.js App"
+    "Build & Add new Node.js App"
+    "Add new Static Site"
+  )
+  choice=$(printf "%s\n" "${options[@]}" | fzf --prompt="Select an option: ")
   case "$choice" in
   "Add new Reverse Proxy") "$0" add-reverse-proxy ;;
   "Add new Load Balancer Cluster") "$0" add-load-balancer ;;
   "Add new Laravel App") "$0" add-laravel ;;
-  "Build & Add new Laravel Application") "$0" laravel-up ;;
+  "Build & Add new Laravel App") "$0" laravel-up ;;
+  "Build & Add new Laravel App with Apache") "$0" laravel-apache-up ;;
+  "Add new Node.js App") "$0" add-node-app ;;
+  "Build & Add new Node.js App") "$0" node-up ;;
+  "Add new Static Site") "$0" add-static-site ;;
   esac
   ;;
 "delete")
@@ -127,6 +140,11 @@ case "$1" in
   source "$BASE_DIR/services/load-balancer.sh"
   shift                             # Shift to remove the first argument
   delete_load_balancer_backend "$@" # Call delete_site with the remaining arguments
+  ;;
+"laravel-apache-up")
+  source "$BASE_DIR/services/laravel-up-apache.sh"
+  shift           # Shift to remove the first argument
+  laravel_up_apache "$@" # Call delete_site with the remaining arguments
   ;;
 "laravel-up")
   source "$BASE_DIR/services/laravel-up.sh"
@@ -180,22 +198,22 @@ case "$1" in
   ;;
 "node-up")
   source "$BASE_DIR/services/node-up.sh"
-  shift           # Shift to remove the first argument
+  shift        # Shift to remove the first argument
   node_up "$@" # Call delete_site with the remaining arguments
   ;;
 "node-down")
   source "$BASE_DIR/services/node-up.sh"
-  shift             # Shift to remove the first argument
+  shift          # Shift to remove the first argument
   node_down "$@" # Call delete_site with the remaining arguments
   ;;
 "node-restore")
   source "$BASE_DIR/services/node-up.sh"
-  shift                # Shift to remove the first argument
+  shift             # Shift to remove the first argument
   node_restore "$@" # Call delete_site with the remaining arguments
   ;;
 "node-remove")
   source "$BASE_DIR/services/node-up.sh"
-  shift               # Shift to remove the first argument
+  shift            # Shift to remove the first argument
   node_remove "$@" # Call delete_site with the remaining arguments
   ;;
 "join-caddy")

@@ -431,7 +431,6 @@ ${basic_auth_config}
     }
     import file_static_caching
     import file_forbidden_restricted
-    import wordpress
 }
 EOF
 

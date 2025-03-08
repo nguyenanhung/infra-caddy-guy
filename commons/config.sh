@@ -49,6 +49,7 @@ SERVICE_IMAGES=(
   ["adminer"]="adminer:latest"
   ["uptime-kuma"]="louislam/uptime-kuma:latest"
   ["n8n"]="n8nio/n8n:latest"
+  ["minio"]="bitnami/minio:latest"
 )
 
 # Default resource limits
@@ -72,6 +73,7 @@ SERVICE_RESOURCES=(
   ["adminer"]="--cpus=0.5 --memory=256m"
   ["uptime-kuma"]="--cpus=0.5 --memory=512m"
   ["n8n"]="--cpus=1 --memory=1g"
+  ["minio"]="--cpus=1 --memory=1g"
 )
 
 # Default ports (internal)
@@ -94,6 +96,7 @@ SERVICE_PORTS=(
   ["adminer"]="8080"
   ["uptime-kuma"]="3001"
   ["n8n"]="5678"
+  ["minio"]="9001"
 )
 
 # Default healthcheck commands (customized per service)
@@ -116,4 +119,27 @@ SERVICE_HEALTHCHECKS=(
   ["adminer"]="curl -s -o /dev/null -w '%{http_code}' http://localhost:8080"
   ["uptime-kuma"]="curl -s -o /dev/null -w '%{http_code}' http://localhost:3001"
   ["n8n"]="curl -s -o /dev/null -w '%{http_code}' http://localhost:5678"
+  ["minio"]="curl -s -o /dev/null -w '%{http_code}' http://localhost:9001"
+)
+
+declare -A SERVICE_MOUNT_PATHS
+SERVICE_MOUNT_PATHS=(
+  ["redis"]="/data"
+  ["memcached"]=""
+  ["mongodb"]="/data/db"
+  ["mariadb"]="/var/lib/mysql"
+  ["mysql"]="/var/lib/mysql"
+  ["percona"]="/var/lib/mysql"
+  ["postgresql"]="/var/lib/postgresql/data"
+  ["influxdb"]="/var/lib/influxdb2"
+  ["rabbitmq"]="/var/lib/rabbitmq"
+  ["beanstalkd"]=""
+  ["gearmand"]=""
+  ["elasticsearch"]="/usr/share/elasticsearch/data"
+  ["mailhog"]=""
+  ["phpmyadmin"]=""
+  ["adminer"]=""
+  ["uptime-kuma"]="/app/data"
+  ["n8n"]="/home/node/.n8n"
+  ["minio"]="/data"
 )
