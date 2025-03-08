@@ -25,6 +25,10 @@ cleanup() {
     echo "Error: No file or directory specified."
     return 1
   fi
+  if ! confirm_action "Do you want to removing $1. Are you sure?"; then
+    message INFO "Skipping removal of $1"
+    return
+  fi
   echo "Cleanup $1 "
   if [[ "$(uname)" == "Darwin" ]]; then
     rm -rf "$1"
