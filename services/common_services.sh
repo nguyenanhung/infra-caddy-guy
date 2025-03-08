@@ -43,9 +43,9 @@ enable_service() {
   local image=$(prompt_with_fzf "Select image for $service_name" "$image_options" "$default_image")
 
   # Ask for external port
-  local default_port_suggestions="$default_port $((default_port + 1)) $((default_port + 2)) 127.0.0.1:$default_port"
+  local default_port_suggestions="127.0.0.1:${default_port} 127.0.0.1:$((default_port + 1)) 127.0.0.1:$((default_port + 2)) ${default_port} $((default_port + 1)) $((default_port + 2))"
   message INFO "Internal port for $service_name will be fixed at $default_port"
-  local external_port=$(prompt_with_fzf "Select or enter an external port to map to $service_name's internal port $default_port" "$default_port_suggestions" "$default_port")
+  local external_port=$(prompt_with_fzf "Select or enter an external port to map to $service_name's internal port $default_port. (Note: If you need to set up security (some applications like redis), it's best to choose the range 127.0.0.1:xxx)" "$default_port_suggestions" "$default_port")
   while ! validate_port_mapping "$external_port" || ! check_port "$(echo "$external_port" | grep -o '[0-9]\+$')"; do
     message ERROR "Port $external_port is invalid or already in use."
     external_port=$(prompt_with_fzf "Select or enter a different external port for $service_name" "$default_port_suggestions" "$default_port")
