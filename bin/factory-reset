@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Base directory of the project (root of bear-caddy/)
+# Use BASE_DIR from main.sh if set; otherwise calculate from config.sh
+if [ -z "$BASE_DIR" ]; then
+  if command -v realpath >/dev/null 2>&1; then
+    BASE_DIR="$(dirname "$(dirname "$(realpath "$0")")")"
+  else
+    # Fallback for systems without realpath
+    BASE_DIR="$(cd "$(dirname "$(dirname "$0")")" && pwd)"
+  fi
+fi
+
+# shellcheck source=./../commons/color.sh
+source "$BASE_DIR/commons/color.sh"
+# shellcheck source=./../commons/config.sh
+source "$BASE_DIR/commons/config.sh"
+# shellcheck source=./../commons/utils.sh
+source "$BASE_DIR/commons/utils.sh"
+
+check_bash_version
+
+./docker-cleanup
+
+./reset-build
+
+message SUCCESS "Hard Reset Finished"

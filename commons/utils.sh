@@ -404,6 +404,36 @@ wait_for_health() {
 
   message INFO "${service_type} → ${container_name} is healthy"
 }
+# Docker hard reset and cleanup
+docker_hard_reset() {
+  docker ps
+  if ! confirm_action "Do you want to hard reset all containers and cleanup docker data? Are you sure you want to?"; then
+    message INFO "Aborting ...!"
+    return
+  fi
+  message INFO "🛑 Stopping all running containers..."
+  docker ps -q | xargs -r docker stop
+
+  message INFO "🗑️ Removing all containers..."
+  docker ps -aq | xargs -r docker rm -f
+
+  message INFO "🗑️ Removing all volumes..."
+  docker volume ls -q | xargs -r docker volume rm
+
+  message INFO "🗑️ Removing all networks (except default ones)..."
+  docker network ls | awk 'NR>1 && $2!="bridge" && $2!="host" && $2!="none" {print $1}' | xargs -r docker network rm
+
+  message INFO "🗑️ Removing all images..."
+  docker images -q | xargs -r docker rmi -f
+
+  message INFO "⚙️ Pruning Docker system..."
+  docker system prune -af --volumes
+
+  message INFO "🔄 Restarting Docker service..."
+  sudo systemctl restart docker
+
+  message INFO "✅ Docker has been reset to a clean state!"
+}
 get_mapping_value() {
   local -n map=$1
   local key=$2

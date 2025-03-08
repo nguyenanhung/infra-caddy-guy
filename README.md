@@ -17,11 +17,17 @@ cd caddy-bash-guy && ./bear-caddy
 - [x] Docker, fzf
 - [x] Caddy Web Server: sites, reverse proxy, load balancer and basic authentication
 - [x] Laravel Builder: Start from scratch with Laravel Framework, select version, worker and anything...
-- [x] WordPress Builder: Start from scratch with WordPress and choose theme, plugins..
-- [x] NodeJS/ReactJS/VueJS Builder
+- [x] WordPress Builder: Start from scratch with WordPress and choose theme, plugins...
+- [ ] NodeJS/ReactJS/VueJS Builder
+- [ ] CodeIgniter3/CodeIgniter Builder
+- [ ] Symfony Builder
 - [x] ... and others packages supporting, can be mentioned as `redis`, `memcached`, `mongodb`, `mariadb`, `mysql`,
   `percona`, `postgresql`, `influxdb`, `rabbitmq`, `beanstalkd`, `gearmand`, `elasticsearch`, `mailhog`, `phpmyadmin`,
   `adminer`, `uptime-kuma`
+
+## Deployment
+
+- [ ] Blue/Green Rolling Deployment
 
 ## Integration
 

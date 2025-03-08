@@ -26,6 +26,7 @@ sync_file "$MY_CADDY_BASH/bin/" "$MY_SERVER_SCRIPTS_BEAR_CADDY/bin/"
 sync_file "$MY_CADDY_BASH/commons/" "$MY_SERVER_SCRIPTS_BEAR_CADDY/commons/"
 sync_file "$MY_CADDY_BASH/config/" "$MY_SERVER_SCRIPTS_BEAR_CADDY/config/"
 sync_file "$MY_CADDY_BASH/container/" "$MY_SERVER_SCRIPTS_BEAR_CADDY/container/"
+sync_file "$MY_CADDY_BASH/deploy/" "$MY_SERVER_SCRIPTS_BEAR_CADDY/deploy/"
 sync_file "$MY_CADDY_BASH/services/" "$MY_SERVER_SCRIPTS_BEAR_CADDY/services/"
 sync_file "$MY_CADDY_BASH/volumes/" "$MY_SERVER_SCRIPTS_BEAR_CADDY/volumes/"
 
