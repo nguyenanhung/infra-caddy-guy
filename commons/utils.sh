@@ -469,6 +469,17 @@ docker_network_disconnect() {
   fi
   docker network disconnect "$disconnect_network_name" "$disconnect_service_name"
 }
+join_caddy_network() {
+  local container_name=$1
+  if [ -z "$container_name" ]; then
+    container_name=$(prompt_with_default "Please enter container name you want to connect to ${container_name}")
+  fi
+  if [ -z "$container_name" ]; then
+    message ERROR "Network name, service name must be provided. Usage: $0 <container_name>"
+    return
+  fi
+  docker_network_connect "${NETWORK_NAME}" "$container_name"
+}
 get_mapping_value() {
   local -n map=$1
   local key=$2
