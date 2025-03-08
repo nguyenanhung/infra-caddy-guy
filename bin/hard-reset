@@ -19,13 +19,16 @@ source "$BASE_DIR/commons/config.sh"
 source "$BASE_DIR/commons/utils.sh"
 
 check_bash_version
-
+FORCE_REMOVE="false"
+if [ "$1" = "force" ]; then
+  FORCE_REMOVE="true"
+fi
 cleanup() {
   if [ -z "$1" ]; then
     echo "Error: No file or directory specified."
     return 1
   fi
-  if ! confirm_action "Do you want to removing $1. Are you sure?"; then
+  if [ "$FORCE_REMOVE" = "false" ] && ! confirm_action "Do you want to removing $1. Are you sure?"; then
     message INFO "Skipping removal of $1"
     return
   fi
