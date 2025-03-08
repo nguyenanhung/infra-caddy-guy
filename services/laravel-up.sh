@@ -108,9 +108,10 @@ laravel_up() {
   mkdir -p "$laravel_dir"
   cat >"$laravel_dir/Dockerfile" <<EOF
 FROM php:${php_version}-fpm-alpine
-RUN apk add --no-cache bash netcat-openbsd curl git unzip supervisor \\
-    libpng-dev libjpeg-turbo-dev libwebp-dev zlib-dev libzip-dev \\
-    postgresql-dev mariadb-connector-c-dev autoconf g++ make \\
+RUN apk add --no-cache build-base  bash netcat-openbsd curl git unzip supervisor \\
+    libpng-dev libjpeg-turbo-dev libwebp-dev zlib-dev libzip-dev libxml2-dev icu-dev freetype-dev libpq \\
+    postgresql-dev mariadb-connector-c-dev autoconf pkgconfig g++ make oniguruma-dev openssl-dev inotify-tools \\
+    zip jpegoptim optipng pngquant gifsicle unzip \\
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \\
     && docker-php-ext-configure gd --with-jpeg --with-webp \\
     && docker-php-ext-install pdo pdo_mysql pdo_pgsql mysqli gd zip bcmath pcntl exif mbstring soap intl opcache gd \\
@@ -123,9 +124,10 @@ EOF
   if [ "$worker_separate" = "Yes" ]; then
     cat >"$laravel_dir/Dockerfile.cli" <<EOF
 FROM php:${php_version}-cli-alpine
-RUN apk add --no-cache bash netcat-openbsd curl git unzip supervisor \\
-    libpng-dev libjpeg-turbo-dev libwebp-dev zlib-dev libzip-dev \\
-    postgresql-dev mariadb-connector-c-dev autoconf g++ make \\
+RUN apk add --no-cache build-base  bash netcat-openbsd curl git unzip supervisor \\
+    libpng-dev libjpeg-turbo-dev libwebp-dev zlib-dev libzip-dev libxml2-dev icu-dev freetype-dev libpq \\
+    postgresql-dev mariadb-connector-c-dev autoconf pkgconfig g++ make oniguruma-dev openssl-dev inotify-tools \\
+    zip jpegoptim optipng pngquant gifsicle unzip \\
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \\
     && docker-php-ext-configure gd --with-jpeg --with-webp \\
     && docker-php-ext-install pdo pdo_mysql pdo_pgsql mysqli gd zip bcmath pcntl exif mbstring soap intl opcache gd \\
