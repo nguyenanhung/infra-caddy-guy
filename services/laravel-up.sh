@@ -178,6 +178,7 @@ EOF
 
   # Create docker-compose.yml
   local compose_file="$laravel_dir/docker-compose.yml"
+  local env_file="$laravel_dir/.env"
 
   # Get the compose version dynamically
   local include_docker_version
@@ -211,6 +212,12 @@ services:
       start_period: 10s
 EOF
 
+  # Add env_file for PHP-FPM if DB is used
+  if [ "$use_db" = "Yes" ]; then
+    echo "    env_file:" >>"$compose_file"
+    echo "      - .env" >>"$compose_file"
+  fi
+
   # Combine depends_on into a single block for the main Laravel service
   if [ "$use_db" = "Yes" ] || [ "$use_cache" = "Yes" ]; then
     echo "    depends_on:" >>"$compose_file"
@@ -224,6 +231,19 @@ EOF
 
   # Add database if separate
   if [ "$db_separate" = "Yes" ] && [ -n "$db_type" ]; then
+    # Generate environment variables and write to .env
+    local mysql_root_password=$(generate_password)
+    local mysql_user="laravel_admin_${domain}"
+    local mysql_password=$(generate_password)
+    local mysql_database="laravel_db_${domain}"
+
+    cat >"$env_file" <<EOF
+MYSQL_ROOT_PASSWORD=${mysql_root_password}
+MYSQL_DATABASE=${mysql_database}
+MYSQL_USER=${mysql_user}
+MYSQL_PASSWORD=${mysql_password}
+EOF
+
     echo "  ${db_container}:" >>"$compose_file"
     echo "    image: ${SERVICE_IMAGES[$db_type]}" >>"$compose_file"
     echo "    container_name: ${db_container}" >>"$compose_file"
@@ -237,12 +257,17 @@ EOF
     echo "      retries: 3" >>"$compose_file"
     echo "      start_period: 10s" >>"$compose_file"
     if [[ "$db_type" == "mariadb" || "$db_type" == "mysql" || "$db_type" == "percona" ]]; then
-      echo "    environment:" >>"$compose_file"
-      echo "      - MYSQL_ROOT_PASSWORD=$(generate_password)" >>"$compose_file"
-      echo "      - MYSQL_DATABASE=laravel_db_${domain}" >>"$compose_file"
-      echo "      - MYSQL_USER=laravel_admin_${domain}" >>"$compose_file"
-      echo "      - MYSQL_PASSWORD=$(generate_password)" >>"$compose_file"
+      echo "    env_file:" >>"$compose_file"
+      echo "      - .env" >>"$compose_file"
     fi
+
+    # Inform user about DB credentials
+    message INFO "Database credentials generated in $env_file:"
+    message INFO "  MYSQL_ROOT_PASSWORD: ${mysql_root_password}"
+    message INFO "  MYSQL_USER: ${mysql_user}"
+    message INFO "  MYSQL_PASSWORD: ${mysql_password}"
+    message INFO "  MYSQL_DATABASE: ${mysql_database}"
+    message INFO "Update ${source_dir}/.env with these values if needed."
   fi
 
   # Add cache if separate
@@ -270,7 +295,6 @@ EOF
     echo "    container_name: ${worker_container}" >>"$compose_file"
     echo "    volumes:" >>"$compose_file"
     echo "      - ${source_dir}:/var/www/${domain}/html" >>"$compose_file"
-    # echo "      - ${source_dir}/.env.production:/var/www/${domain}/html/.env" >>"$compose_file"
     echo "    extra_hosts:" >>"$compose_file"
     echo "      - \"host.docker.internal:host-gateway\"" >>"$compose_file"
     echo "    networks:" >>"$compose_file"
@@ -280,6 +304,11 @@ EOF
     echo "      interval: 30s" >>"$compose_file"
     echo "      retries: 3" >>"$compose_file"
     echo "      start_period: 10s" >>"$compose_file"
+    # Add env_file for CLI if DB is used
+    if [ "$use_db" = "Yes" ]; then
+      echo "    env_file:" >>"$compose_file"
+      echo "      - .env" >>"$compose_file"
+    fi
     # Combine depends_on into a single block
     if [ "$use_db" = "Yes" ] || [ "$use_cache" = "Yes" ]; then
       echo "    depends_on:" >>"$compose_file"
@@ -506,9 +535,9 @@ laravel_remove() {
   fi
 
   if [ -z "$domain" ] || ! validate_domain "$domain"; then
-  message INFO "No site selected"
-  return 0
-fi
+    message INFO "No site selected"
+    return 0
+  fi
 
   local site_file="$sites_path/$domain.caddy"
   validate_file_exists "$site_file" || {
