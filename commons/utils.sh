@@ -455,9 +455,9 @@ docker_network_connect() {
   fi
 
   if [ -n "$connect_container_ip" ]; then
-    docker network connect "$connect_network_name" "$connect_container_name" --ip "$connect_container_ip"
+    docker network connect "$connect_network_name" "$connect_container_name" --ip "$connect_container_ip" >/dev/null 2>&1
   else
-    docker network connect "$connect_network_name" "$connect_container_name"
+    docker network connect "$connect_network_name" "$connect_container_name" >/dev/null 2>&1
   fi
 }
 docker_network_disconnect() {
@@ -476,7 +476,7 @@ docker_network_disconnect() {
     message ERROR "Network name, service name must be provided. Usage: $0 <network_name> <container_name>"
     return
   fi
-  docker network disconnect "$disconnect_network_name" "$disconnect_container_name"
+  docker network disconnect "$disconnect_network_name" "$disconnect_container_name" >/dev/null 2>&1
 }
 join_caddy_network() {
   local container_name=$1
