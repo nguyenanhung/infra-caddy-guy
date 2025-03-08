@@ -19,11 +19,15 @@ add_reverse_proxy() {
 
   # Ask for domain
   local domain
-  domain=$(prompt_with_default "Enter domain name for reverse proxy" "")
-  [ -z "$domain" ] && {
-    message ERROR "Domain name cannot be empty"
-    return 1
-  }
+  if [ -n "$1" ]; then
+    domain="$1"
+  else
+    domain=$(prompt_with_default "Enter domain name for reverse proxy" "")
+    [ -z "$domain" ] && {
+      message ERROR "Domain name cannot be empty"
+      return 1
+    }
+  fi
 
   # Check if domain already exists
   local domain_file="$sites_path/$domain.caddy"
@@ -91,12 +95,15 @@ delete_reverse_proxy() {
 
   # Let user select site with fzf
   local selected_site
-  selected_site=$(echo "$site_files" | fzf --prompt="Select reverse proxy to delete (use up/down keys): ")
-  if [ -z "$selected_site" ]; then
-    message INFO "No reverse proxy selected"
+  if [ -n "$1" ]; then
+    selected_site="$1"
+  else
+    selected_site=$(echo "$site_files" | fzf --prompt="Select reverse proxy to delete (use up/down keys): ")
+  fi
+  if [ -z "$selected_site" ] || ! validate_domain "$selected_site"; then
+    message INFO "No domain or invalid domain selected"
     return 0
   fi
-
   local site_file="$sites_path/$selected_site.caddy"
   validate_file_exists "$site_file" || {
     message ERROR "Reverse proxy $selected_site not found"

@@ -199,11 +199,15 @@ delete_site() {
     return 0
   fi
 
-  # Let user select site with fzf
   local selected_site
-  selected_site=$(echo "$site_files" | fzf --prompt="Select site to delete (use up/down keys): ")
-  if [ -z "$selected_site" ]; then
-    message INFO "No site selected"
+  if [ -n "$1" ]; then
+    selected_site="$1"
+  else
+    # Let user select site with fzf
+    selected_site=$(echo "$site_files" | fzf --prompt="Select site to delete (use up/down keys): ")
+  fi
+  if [ -z "$selected_site" ] || ! validate_domain "$selected_site"; then
+    message INFO "No domain or invalid domain selected"
     return 0
   fi
 
@@ -238,9 +242,15 @@ delete_site() {
 }
 
 stop_site() {
-  local stop_options="Stop all sites Stop one site"
   local stop_choice
-  stop_choice=$(echo "$stop_options" | fzf --prompt="Select stop option: ")
+  local selected_site
+  if [ -n "$1" ]; then
+    selected_site="$1"
+    stop_choice="Stop one site"
+  else
+    local stop_options="Stop all sites Stop one site"
+    stop_choice=$(echo "$stop_options" | fzf --prompt="Select stop option: ")
+  fi
   if [ "$stop_choice" = "Stop all sites" ]; then
     docker stop "${PREFIX_NAME}_caddy" && message INFO "Caddy web server stopped"
     local sites
@@ -262,8 +272,9 @@ stop_site() {
     if [ -z "$sites" ]; then
       message INFO "No sites available to stop"
     else
-      local selected_site
-      selected_site=$(echo "$sites" | fzf --prompt="Select site to stop (use up/down keys): ")
+      if [ -z "$selected_site" ]; then
+        selected_site=$(echo "$sites" | fzf --prompt="Select site to stop (use up/down keys): ")
+      fi
       if [ -n "$selected_site" ]; then
         local containers
         containers=$(get_site_containers "$selected_site")
@@ -280,9 +291,16 @@ stop_site() {
 }
 
 start_site() {
-  local start_options="Start all sites Start one site"
   local start_choice
-  start_choice=$(echo "$start_options" | fzf --prompt="Select start option: ")
+  local selected_site
+  if [ -n "$1" ]; then
+    selected_site="$1"
+    start_choice="Start one site"
+  else
+    local start_options="Start all sites Start one site"
+    start_choice=$(echo "$start_options" | fzf --prompt="Select start option: ")
+  fi
+
   if [ "$start_choice" = "Start all sites" ]; then
     local sites
     sites=$(list_sites)
@@ -305,8 +323,9 @@ start_site() {
     if [ -z "$sites" ]; then
       message INFO "No sites available to start"
     else
-      local selected_site
-      selected_site=$(echo "$sites" | fzf --prompt="Select site to start (use up/down keys): ")
+      if [ -z "$selected_site" ]; then
+        selected_site=$(echo "$sites" | fzf --prompt="Select site to start (use up/down keys): ")
+      fi
       if [ -n "$selected_site" ]; then
         local containers
         containers=$(get_site_containers "$selected_site")
@@ -324,9 +343,15 @@ start_site() {
 }
 
 restart_site() {
-  local restart_options="Restart all sites Restart one site"
   local restart_choice
-  restart_choice=$(echo "$restart_options" | fzf --prompt="Select restart option: ")
+  local selected_site
+  if [ -n "$1" ]; then
+    selected_site="$1"
+    restart_choice="Restart one site"
+  else
+    local restart_options="Restart all sites Restart one site"
+    restart_choice=$(echo "$restart_options" | fzf --prompt="Select restart option: ")
+  fi
   if [ "$restart_choice" = "Restart all sites" ]; then
     local sites
     sites=$(list_sites)
@@ -349,8 +374,9 @@ restart_site() {
     if [ -z "$sites" ]; then
       message INFO "No sites available to restart"
     else
-      local selected_site
-      selected_site=$(echo "$sites" | fzf --prompt="Select site to restart (use up/down keys): ")
+      if [ -z "$selected_site" ]; then
+        selected_site=$(echo "$sites" | fzf --prompt="Select site to restart (use up/down keys): ")
+      fi
       if [ -n "$selected_site" ]; then
         local containers
         containers=$(get_site_containers "$selected_site")
@@ -380,9 +406,13 @@ add_basic_auth() {
 
   # Ask for domain with fzf
   local domain
-  domain=$(echo "$site_files" | fzf --prompt="Select domain to enable basic auth (use up/down keys): ")
-  if [ -z "$domain" ]; then
-    message INFO "No domain selected"
+  if [ -n "$1" ]; then
+    domain="$1"
+  else
+    domain=$(echo "$site_files" | fzf --prompt="Select domain to enable basic auth (use up/down keys): ")
+  fi
+  if [ -z "$domain" ] || ! validate_domain "$domain"; then
+    message INFO "No domain or invalid domain selected"
     return 0
   fi
 
@@ -482,9 +512,13 @@ delete_basic_auth() {
 
   # Ask for domain with fzf
   local domain
-  domain=$(echo "$site_files" | fzf --prompt="Select domain to disable basic auth (use up/down keys): ")
-  if [ -z "$domain" ]; then
-    message INFO "No domain selected"
+  if [ -n "$1" ]; then
+    domain="$1"
+  else
+    domain=$(echo "$site_files" | fzf --prompt="Select domain to disable basic auth (use up/down keys): ")
+  fi
+  if [ -z "$domain" ] || ! validate_domain "$domain"; then
+    message INFO "No domain or invalid domain selected"
     return 0
   fi
 

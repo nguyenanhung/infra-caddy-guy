@@ -13,11 +13,15 @@ laravel_up() {
 
   # Ask for domain
   local domain
-  domain=$(prompt_with_default "Enter domain name for Laravel site" "")
-  [ -z "$domain" ] && {
-    message ERROR "Domain name cannot be empty"
-    return 1
-  }
+  if [ -n "$1" ]; then
+    domain="$1"
+  else
+    domain=$(prompt_with_default "Enter domain name for Laravel site" "")
+    [ -z "$domain" ] && {
+      message ERROR "Domain name cannot be empty"
+      return 1
+    }
+  fi
 
   # Check if domain already exists
   local domain_file="$sites_path/$domain.caddy"
@@ -396,9 +400,13 @@ laravel_down() {
   fi
 
   local domain
-  domain=$(echo "$site_files" | fzf --prompt="Select Laravel site to delete Caddy config (use up/down keys): ")
-  if [ -z "$domain" ]; then
-    message INFO "No site selected"
+  if [ -n "$1" ]; then
+    domain="$1"
+  else
+    domain=$(echo "$site_files" | fzf --prompt="Select Laravel site to delete Caddy config (use up/down keys): ")
+  fi
+  if [ -z "$domain" ] || ! validate_domain "$domain"; then
+    message INFO "No domain or invalid domain selected"
     return 0
   fi
 
@@ -443,9 +451,13 @@ laravel_restore() {
   fi
 
   local domain
-  domain=$(echo "$backup_files" | fzf --prompt="Select Laravel site to restore (use up/down keys): ")
-  if [ -z "$domain" ]; then
-    message INFO "No site selected"
+  if [ -n "$1" ]; then
+    domain="$1"
+  else
+    domain=$(echo "$backup_files" | fzf --prompt="Select Laravel site to restore (use up/down keys): ")
+  fi
+  if [ -z "$domain" ] || ! validate_domain "$domain"; then
+    message INFO "No domain or invalid domain selected"
     return 0
   fi
 
@@ -487,11 +499,16 @@ laravel_remove() {
   fi
 
   local domain
-  domain=$(echo "$site_files" | fzf --prompt="Select Laravel site to remove (use up/down keys): ")
-  if [ -z "$domain" ]; then
-    message INFO "No site selected"
-    return 0
+  if [ -n "$1" ]; then
+    domain="$1"
+  else
+    domain=$(echo "$site_files" | fzf --prompt="Select Laravel site to remove (use up/down keys): ")
   fi
+
+  if [ -z "$domain" ] || ! validate_domain "$domain"; then
+  message INFO "No site selected"
+  return 0
+fi
 
   local site_file="$sites_path/$domain.caddy"
   validate_file_exists "$site_file" || {

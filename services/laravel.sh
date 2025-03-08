@@ -19,7 +19,11 @@ add_laravel() {
 
   # Ask for domain
   local domain
-  domain=$(prompt_with_default "Enter domain name for Laravel site" "")
+  if [ -n "$1" ]; then
+    domain="$1"
+  else
+    domain=$(prompt_with_default "Enter domain name for Laravel site" "")
+  fi
   [ -z "$domain" ] && {
     message ERROR "Domain name cannot be empty"
     return 1
@@ -151,9 +155,13 @@ delete_laravel() {
 
   # Let user select site with fzf
   local selected_site
-  selected_site=$(echo "$site_files" | fzf --prompt="Select Laravel site to delete (use up/down keys): ")
-  if [ -z "$selected_site" ]; then
-    message INFO "No Laravel site selected"
+  if [ -n "$1" ]; then
+    selected_site="$1"
+  else
+    selected_site=$(echo "$site_files" | fzf --prompt="Select Laravel site to delete (use up/down keys): ")
+  fi
+  if [ -z "$selected_site" ] || ! validate_domain "$selected_site"; then
+    message INFO "No domain or invalid domain selected"
     return 0
   fi
 

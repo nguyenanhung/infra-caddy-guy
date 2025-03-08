@@ -19,11 +19,15 @@ add_load_balancer() {
 
   # Ask for domain
   local domain
-  domain=$(prompt_with_default "Enter domain name for load balancer" "")
-  [ -z "$domain" ] && {
-    message ERROR "Domain name cannot be empty"
-    return 1
-  }
+  if [ -n "$1" ]; then
+    domain="$1"
+  else
+    domain=$(prompt_with_default "Enter domain name for load balancer" "")
+    [ -z "$domain" ] && {
+      message ERROR "Domain name cannot be empty"
+      return 1
+    }
+  fi
 
   # Check if domain already exists
   local domain_file="$sites_path/$domain.caddy"
@@ -118,9 +122,13 @@ delete_load_balancer() {
 
   # Let user select site with fzf
   local selected_site
-  selected_site=$(echo "$site_files" | fzf --prompt="Select load balancer to delete (use up/down keys): ")
-  if [ -z "$selected_site" ]; then
-    message INFO "No load balancer selected"
+  if [ -n "$1" ]; then
+    selected_site="$1"
+  else
+    selected_site=$(echo "$site_files" | fzf --prompt="Select load balancer to delete (use up/down keys): ")
+  fi
+  if [ -z "$selected_site" ] || ! validate_domain "$selected_site"; then
+    message INFO "No domain or invalid domain selected"
     return 0
   fi
 
@@ -168,9 +176,13 @@ delete_load_balancer_backend() {
 
   # Let user select site with fzf
   local selected_site
-  selected_site=$(echo "$site_files" | fzf --prompt="Select load balancer to modify (use up/down keys): ")
-  if [ -z "$selected_site" ]; then
-    message INFO "No load balancer selected"
+  if [ -n "$1" ]; then
+    selected_site="$1"
+  else
+    selected_site=$(echo "$site_files" | fzf --prompt="Select load balancer to modify (use up/down keys): ")
+  fi
+  if [ -z "$selected_site" ] || ! validate_domain "$selected_site"; then
+    message INFO "No domain or invalid domain selected"
     return 0
   fi
 

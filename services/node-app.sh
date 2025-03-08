@@ -17,16 +17,20 @@ add_node_app() {
 
   # Ask for domain with fzf
   local domain
-  if [ -n "$site_files" ]; then
-    domain=$(echo "$site_files" | fzf --prompt="Select existing domain or press Enter to add new (use up/down keys): ")
+  if [ -n "$1" ]; then
+    domain="$1"
+  else
+    if [ -n "$site_files" ]; then
+      domain=$(echo "$site_files" | fzf --prompt="Select existing domain or press Enter to add new (use up/down keys): ")
+    fi
+    if [ -z "$domain" ]; then
+      domain=$(prompt_with_default "Enter new domain name for Node.js app" "")
+    fi
   fi
-  if [ -z "$domain" ]; then
-    domain=$(prompt_with_default "Enter new domain name for Node.js app" "")
+  if [ -z "$domain" ] || ! validate_domain "$domain"; then
+    message INFO "No domain or invalid domain selected"
+    return 0
   fi
-  [ -z "$domain" ] && {
-    message ERROR "Domain name cannot be empty"
-    return 1
-  }
 
   # Check if domain already exists
   local domain_file="$sites_path/$domain.caddy"
@@ -133,11 +137,15 @@ delete_node_app() {
 
   # Ask for domain with fzf
   local domain
-  domain=$(echo "$site_files" | fzf --prompt="Select Node.js app to delete (use up/down keys): ")
-  if [ -z "$domain" ]; then
-    message INFO "No Node.js app selected"
-    return 0
+  if [ -n "$1" ]; then
+    domain="$1"
+  else
+    domain=$(echo "$site_files" | fzf --prompt="Select Node.js app to delete (use up/down keys): ")
   fi
+  if [ -z "$domain" ] || ! validate_domain "$domain"; then
+  message INFO "No domain or invalid domain selected"
+  return 0
+fi
 
   # Check if domain exists
   local domain_file="$sites_path/$domain.caddy"
