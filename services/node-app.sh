@@ -96,7 +96,7 @@ add_node_app() {
 
     # Generate hashed password
     local hashed_password
-    hashed_password=$(docker exec "${PREFIX_NAME}_caddy" caddy hash-password --plaintext "$password" | tail -n 1)
+    hashed_password=$(docker exec "${CADDY_CONTAINER_NAME}" caddy hash-password --plaintext "$password" | tail -n 1)
 
     # Prepare basic auth config
     if [ -n "$auth_path" ]; then

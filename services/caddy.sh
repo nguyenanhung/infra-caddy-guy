@@ -94,7 +94,7 @@ EOF
 
   # Check if Caddy container exists
   local container_check
-  docker ps -a | grep -q "${PREFIX_NAME}_caddy"
+  docker ps -a | grep -q "${CADDY_CONTAINER_NAME}"
   container_check=$?
   if [ "$container_check" -ne 0 ]; then
     local image
@@ -108,8 +108,8 @@ EOF
     if [ ! -f "$caddy_compose_path" ]; then
       cat >"$caddy_compose_path" <<EOF
 services:
-  ${PREFIX_NAME}_caddy:
-    container_name: "${PREFIX_NAME}_caddy"
+  ${CADDY_CONTAINER_NAME}:
+    container_name: "${CADDY_CONTAINER_NAME}"
     image: "${image}"
     restart: unless-stopped
     networks:
@@ -150,20 +150,20 @@ EOF
     # Create Caddy container
     message INFO "Creating Caddy container"
     docker compose -f "$caddy_compose_path" up -d --remove-orphans
-    message SUCCESS "Caddy container ${PREFIX_NAME}_caddy created successfully"
+    message SUCCESS "Caddy container ${CADDY_CONTAINER_NAME} created successfully"
 
-    if wait_for_health "${PREFIX_NAME}_caddy" "Caddy Web Server"; then
+    if wait_for_health "${CADDY_CONTAINER_NAME}" "Caddy Web Server"; then
       echo
-      docker ps -a --filter "name=${PREFIX_NAME}_caddy"
-      docker exec -it "${PREFIX_NAME}_caddy" apk add --no-cache netcat-openbsd # Install netcat-openbsd for testing purposes
-      docker exec -it "${PREFIX_NAME}_caddy" nc -zv host.docker.internal 80    # Test Caddy call to internal host
+      docker ps -a --filter "name=${CADDY_CONTAINER_NAME}"
+      docker exec -it "${CADDY_CONTAINER_NAME}" apk add --no-cache netcat-openbsd # Install netcat-openbsd for testing purposes
+      docker exec -it "${CADDY_CONTAINER_NAME}" nc -zv host.docker.internal 80    # Test Caddy call to internal host
       print_message
       message NOTE "If your application is PHP and needs to run with FPM (eg: Laravel, WordPress ...), you need to deploy your source code to the /home/infra-caddy-sites/<domain>/html directory for the application to work. Other applications like NodeJS, ReactJS can use reverse-proxy so you can deploy anywhere."
     else
-      message ERROR "Caddy container ${PREFIX_NAME}_caddy failed to start"
+      message ERROR "Caddy container ${CADDY_CONTAINER_NAME} failed to start"
     fi
   else
-    message INFO "Caddy container ${PREFIX_NAME}_caddy already exists"
+    message INFO "Caddy container ${CADDY_CONTAINER_NAME} already exists"
   fi
 }
 
@@ -252,7 +252,7 @@ stop_site() {
     stop_choice=$(echo "$stop_options" | fzf --prompt="Select stop option: ")
   fi
   if [ "$stop_choice" = "Stop all sites" ]; then
-    docker stop "${PREFIX_NAME}_caddy" && message INFO "Caddy web server stopped"
+    docker stop "${CADDY_CONTAINER_NAME}" && message INFO "Caddy web server stopped"
     local sites
     sites=$(list_sites)
     if [ -n "$sites" ]; then
@@ -316,7 +316,7 @@ start_site() {
     else
       message INFO "No sites found to start"
     fi
-    docker start "${PREFIX_NAME}_caddy" && message INFO "Caddy web server started"
+    docker start "${CADDY_CONTAINER_NAME}" && message INFO "Caddy web server started"
   elif [ "$start_choice" = "Start one site" ]; then
     local sites
     sites=$(list_sites)
@@ -367,7 +367,7 @@ restart_site() {
     else
       message INFO "No sites found to restart"
     fi
-    docker restart "${PREFIX_NAME}_caddy" && message INFO "Caddy web server restarted"
+    docker restart "${CADDY_CONTAINER_NAME}" && message INFO "Caddy web server restarted"
   elif [ "$restart_choice" = "Restart one site" ]; then
     local sites
     sites=$(list_sites)
@@ -467,7 +467,7 @@ add_basic_auth() {
 
   # Generate hashed password
   local hashed_password
-  hashed_password=$(docker exec "${PREFIX_NAME}_caddy" caddy hash-password --plaintext "$password" | tail -n 1)
+  hashed_password=$(docker exec "${CADDY_CONTAINER_NAME}" caddy hash-password --plaintext "$password" | tail -n 1)
 
   # Backup config before modification
   local backup_file="$BACKUP_DIR/$domain.caddy.$(date +%Y%m%d_%H%M%S)"

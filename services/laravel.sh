@@ -86,7 +86,7 @@ add_laravel() {
 
     # Generate hashed password
     local hashed_password
-    hashed_password=$(docker exec "${PREFIX_NAME}_caddy" caddy hash-password --plaintext "$password" | tail -n 1)
+    hashed_password=$(docker exec "${CADDY_CONTAINER_NAME}" caddy hash-password --plaintext "$password" | tail -n 1)
 
     # Prepare basic auth config
     basic_auth_config="    basic_auth {\n        $username $hashed_password\n    }"

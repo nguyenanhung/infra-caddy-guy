@@ -254,7 +254,7 @@ ${include_docker_version}
 networks:
   ${sites_network_name}:
     driver: bridge
-  ${PREFIX_NAME}_caddy_net:
+  ${NETWORK_NAME}:
     external: true
 services aant:
   ${PREFIX_NAME}_sites_${domain}:
@@ -403,7 +403,7 @@ EOF
     local username=$(prompt_with_default "Enter basic auth username" "auth-admin")
     local password=$(prompt_with_default "Enter basic auth password (leave blank for random)" "")
     [ -z "$password" ] && password=$(generate_password) && message INFO "Generated password: $password"
-    local hashed_password=$(docker exec "${PREFIX_NAME}_caddy" caddy hash-password --plaintext "$password" | tail -n 1)
+    local hashed_password=$(docker exec "${CADDY_CONTAINER_NAME}" caddy hash-password --plaintext "$password" | tail -n 1)
     basic_auth_config="    basic_auth {\n        $username $hashed_password\n    }"
   fi
   cat >"$domain_file" <<EOF

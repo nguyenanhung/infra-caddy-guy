@@ -10,6 +10,9 @@ PM2_USER="hungna"
 # Default network for Caddy
 NETWORK_NAME="${PREFIX_NAME}_caddy_net"
 
+# Default Caddy Container
+CADDY_CONTAINER_NAME="${PREFIX_NAME}_caddy"
+
 # Base directory of the project (root of bear-caddy/)
 # Use BASE_DIR from main.sh if set; otherwise calculate from config.sh
 if [ -z "$BASE_DIR" ]; then
