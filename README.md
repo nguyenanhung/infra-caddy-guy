@@ -7,9 +7,14 @@ little simpler and easier.
 
 ## Installation
 
-```shell
-git clone https://github.com/nguyenanhung/caddy-bash-guy.git
-cd caddy-bash-guy && ./bear-caddy
+```bash
+git clone git@github.com:nguyenanhung/caddy-bash-guy.git && cd caddy-bash-guy && ./bin/enable-shortcut
+```
+
+and use it
+
+```bash
+infra-caddy introduce
 ```
 
 ## Stack
