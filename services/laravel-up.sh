@@ -282,14 +282,14 @@ EOF
 
   # Wait for health of Laravel PHP-FPM container
   wait_for_health "${PREFIX_NAME}_sites_${domain}" "Laravel PHP-FPM"
-  docker exec -it "${PREFIX_NAME}_sites_${domain}" "chmod -R 775 /var/www/${domain}/html/storage"
-  docker exec -it "${PREFIX_NAME}_sites_${domain}" "chmod -R 775 /var/www/${domain}/html/bootstrap/cache"
+  docker exec -it "${PREFIX_NAME}_sites_${domain}" chmod -R 775 "/var/www/${domain}/html/storage"
+  docker exec -it "${PREFIX_NAME}_sites_${domain}" chmod -R 775 "/var/www/${domain}/html/bootstrap/cache"
 
   # Wait for health of worker/scheduler container if separate
   if [ "$worker_separate" = "Yes" ]; then
     wait_for_health "${PREFIX_NAME}_sites_cli_${domain}" "Laravel Worker/Scheduler"
-    docker exec -it "${PREFIX_NAME}_sites_cli_${domain}" "chmod -R 775 /var/www/${domain}/html/storage"
-    docker exec -it "${PREFIX_NAME}_sites_cli_${domain}" "chmod -R 775 /var/www/${domain}/html/bootstrap/cache"
+    docker exec -it "${PREFIX_NAME}_sites_cli_${domain}" chmod -R 775 "/var/www/${domain}/html/storage"
+    docker exec -it "${PREFIX_NAME}_sites_cli_${domain}" chmod -R 775 "/var/www/${domain}/html/bootstrap/cache"
   fi
 
   # Ask if user wants basic auth
