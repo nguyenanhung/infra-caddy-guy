@@ -404,7 +404,13 @@ EOF
     local password=$(prompt_with_default "Enter basic auth password (leave blank for random)" "")
     [ -z "$password" ] && password=$(generate_password) && message INFO "Generated password: $password"
     local hashed_password=$(docker exec "${CADDY_CONTAINER_NAME}" caddy hash-password --plaintext "$password" | tail -n 1)
-    basic_auth_config="    basic_auth {\n        $username $hashed_password\n    }"
+    # Prepare basic auth config
+    local auth_path=""
+    if [ -n "$auth_path" ]; then
+      basic_auth_config="@path_$auth_path {\n    path $auth_path\n}\nhandle @path_$auth_path {\n    basic_auth {\n        $username $hashed_password\n    }\n}"
+    else
+      basic_auth_config="@notAcme {\n    not path /.well-known/acme-challenge/*\n}\nbasic_auth @notAcme {\n    $username $hashed_password\n}"
+    fi
   fi
   cat >"$domain_file" <<EOF
 ${domain} {

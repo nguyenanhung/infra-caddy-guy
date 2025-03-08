@@ -476,16 +476,27 @@ add_basic_auth() {
 
   # Add basic auth to config
   if [ -n "$auth_path" ]; then
-    echo "@path_$auth_path {" >>"$domain_file"
-    echo "    path $auth_path" >>"$domain_file"
-    echo "}" >>"$domain_file"
-    echo "handle @path_$auth_path {" >>"$domain_file"
-    echo "    basic_auth {" >>"$domain_file"
-    echo "        $username $hashed_password" >>"$domain_file"
-    echo "    }" >>"$domain_file"
-    echo "}" >>"$domain_file"
+    # Specific path
+    cat <<EOF >>"$domain_file"
+@path_$auth_path {
+    path $auth_path
+}
+handle @path_$auth_path {
+    basic_auth {
+        $username $hashed_password
+    }
+}
+EOF
   else
-    sed -i "/}/i \    basic_auth {\n        $username $hashed_password\n    }" "$domain_file"
+    # Whole site
+    cat <<EOF >>"$domain_file"
+@notAcme {
+    not path /.well-known/acme-challenge/*
+}
+basic_auth @notAcme {
+    $username $hashed_password
+}
+EOF
   fi
 
   # Test Caddy syntax

@@ -314,9 +314,48 @@ EOF
   # Configure Caddy reverse proxy
   local backup_file="$BACKUP_DIR/$domain.caddy.$(date +%Y%m%d_%H%M%S)"
   [ -f "$domain_file" ] && cp "$domain_file" "$backup_file"
+
+  # Ask if user wants basic auth
+  local use_basic_auth
+  use_basic_auth=$(prompt_with_fzf "Enable basic auth for this Node.js app?" "Yes No")
+  local basic_auth_config=""
+  if [ "$use_basic_auth" = "Yes" ]; then
+    # Ask for scope (whole site or specific path)
+    local scope_choice
+    scope_choice=$(prompt_with_fzf "Apply basic auth to whole site or specific path?" "Whole-site Specific-path")
+    local auth_path=""
+    if [ "$scope_choice" = "Specific-path" ]; then
+      auth_path=$(prompt_with_default "Enter path to protect (e.g., /admin)" "")
+      [ -z "$auth_path" ] && {
+        message ERROR "Path cannot be empty"
+        return 1
+      }
+    fi
+
+    # Ask for username and password
+    local username
+    username=$(prompt_with_default "Enter basic auth username" "auth-admin")
+    local password
+    password=$(prompt_with_default "Enter basic auth password (leave blank for random)" "")
+    [ -z "$password" ] && password=$(generate_password) && message INFO "Generated password: $password"
+
+    # Generate hashed password
+    local hashed_password
+    hashed_password=$(docker exec "${CADDY_CONTAINER_NAME}" caddy hash-password --plaintext "$password" | tail -n 1)
+
+    # Prepare basic auth config
+    local auth_path=""
+    if [ -n "$auth_path" ]; then
+      basic_auth_config="@path_$auth_path {\n    path $auth_path\n}\nhandle @path_$auth_path {\n    basic_auth {\n        $username $hashed_password\n    }\n}"
+    else
+      basic_auth_config="@notAcme {\n    not path /.well-known/acme-challenge/*\n}\nbasic_auth @notAcme {\n    $username $hashed_password\n}"
+    fi
+  fi
+
   cat >"$domain_file" <<EOF
-$domain {
+${domain} {
     reverse_proxy http://${PREFIX_NAME}_sites_${domain}:${node_port}
+${basic_auth_config}
 }
 EOF
 
