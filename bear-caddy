@@ -178,6 +178,26 @@ case "$1" in
   shift                # Shift to remove the first argument
   delete_node_app "$@" # Call delete_site with the remaining arguments
   ;;
+"node-up")
+  source "$BASE_DIR/services/node-up.sh"
+  shift           # Shift to remove the first argument
+  node_up "$@" # Call delete_site with the remaining arguments
+  ;;
+"node-down")
+  source "$BASE_DIR/services/node-up.sh"
+  shift             # Shift to remove the first argument
+  node_down "$@" # Call delete_site with the remaining arguments
+  ;;
+"node-restore")
+  source "$BASE_DIR/services/node-up.sh"
+  shift                # Shift to remove the first argument
+  node_restore "$@" # Call delete_site with the remaining arguments
+  ;;
+"node-remove")
+  source "$BASE_DIR/services/node-up.sh"
+  shift               # Shift to remove the first argument
+  node_remove "$@" # Call delete_site with the remaining arguments
+  ;;
 "join-caddy")
   shift                       # Shift to remove the first argument
   docker_network_connect "$@" # Call delete_site with the remaining arguments

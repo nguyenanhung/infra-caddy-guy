@@ -36,6 +36,10 @@ _infra_caddy_completions_build() {
     "laravel-down"
     "laravel-restore"
     "laravel-remove"
+    "node-up"
+    "node-down"
+    "node-restore"
+    "node-remove"
   )
   local cur="${COMP_WORDS[COMP_CWORD]}"
   mapfile -t COMPREPLY < <(compgen -W "${commands[*]}" -- "$cur")
