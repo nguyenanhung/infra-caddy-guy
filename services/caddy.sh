@@ -292,6 +292,7 @@ start_site() {
         containers=$(get_site_containers "$domain")
         if [ -n "$containers" ]; then
           echo "$containers" | xargs docker start && message INFO "Started containers for $domain"
+          join_caddy_network "$containers"
         fi
       done
     else
@@ -311,6 +312,7 @@ start_site() {
         containers=$(get_site_containers "$selected_site")
         if [ -n "$containers" ]; then
           echo "$containers" | xargs docker start && message INFO "Started containers for $selected_site"
+          join_caddy_network "$containers"
         else
           message INFO "No containers found for $selected_site"
         fi
@@ -334,6 +336,7 @@ restart_site() {
         containers=$(get_site_containers "$domain")
         if [ -n "$containers" ]; then
           echo "$containers" | xargs docker restart && message INFO "Restarted containers for $domain"
+          join_caddy_network "$containers"
         fi
       done
     else
@@ -353,6 +356,7 @@ restart_site() {
         containers=$(get_site_containers "$selected_site")
         if [ -n "$containers" ]; then
           echo "$containers" | xargs docker restart && message INFO "Restarted containers for $selected_site"
+          join_caddy_network "$containers"
         else
           message INFO "No containers found for $selected_site"
         fi
