@@ -145,18 +145,26 @@ EOF
 nodaemon=true
 
 [program:laravel-worker]
-command=php artisan queue:work
+process_name=%(program_name)s_%(process_num)02d
+command=php artisan queue:work --sleep=3 --tries=3
 directory=/var/www/${domain}/html
+autostart=true
 autorestart=true
+user=root
+numprocs=2
 stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
 
 [program:laravel-scheduler]
-command=php artisan schedule:run
+process_name=%(program_name)s_%(process_num)02d
+command=php artisan schedule:work --verbose --no-interaction
 directory=/var/www/${domain}/html
+autostart=true
 autorestart=true
+user=root
+numprocs=1
 stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
 stderr_logfile=/dev/stderr
