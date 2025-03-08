@@ -66,7 +66,8 @@ add_laravel() {
     return 1
   fi
 
-  docker exec -it "${laravel_container}" "chmod -R 777 /var/www/${domain}/html/storage"
+  docker exec -it "${laravel_container}" "chmod -R 775 /var/www/${domain}/html/storage"
+  docker exec -it "${laravel_container}" "chmod -R 775 /var/www/${domain}/html/bootstrap/cache"
 
   # Ask if user wants basic auth
   local basic_auth_config=""
