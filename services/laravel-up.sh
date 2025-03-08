@@ -28,7 +28,7 @@ laravel_up() {
 
   # Ask for database usage
   local use_db
-  use_db=$(prompt_with_fzf "Use a database?" "Yes No")
+  use_db=$(prompt_with_fzf "Use a database for Application?" "Yes No")
   local db_type=""
   local db_separate=""
   local db_container=""
@@ -60,7 +60,7 @@ laravel_up() {
 
   # Ask for worker/scheduler
   local use_worker
-  use_worker=$(prompt_with_fzf "Run worker/scheduler?" "Yes No")
+  use_worker=$(prompt_with_fzf "Run worker/scheduler? Do not turn on if not really necessary!" "Yes No")
   local worker_separate=""
   local worker_container=""
   if [ "$use_worker" = "Yes" ]; then
