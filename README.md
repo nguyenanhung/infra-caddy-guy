@@ -31,7 +31,7 @@ cd caddy-bash-guy && ./bear-caddy
 
 ## Integration
 
-- [x] Amazon Web Services CLI integration (`awscli`)
+- [ ] Amazon Web Services CLI integration (`awscli`)
 
 ## Contact
 
