@@ -87,13 +87,14 @@ laravel_up() {
         message ERROR "Composer is not installed. Please install Composer first."
         return 1
       fi
-
       mkdir -p "$source_dir"
       if [ ! -d "$source_dir" ]; then
         message ERROR "Failed to create directory $source_dir"
         return 1
       fi
-      composer create-project laravel/laravel $source_dir
+      sudo env COMPOSER_ALLOW_SUPERUSER=1 composer create-project laravel/laravel "${source_dir}"
+      sudo chown -R "${USER}:${USER}" "${source_dir}"
+      sudo chmod -R 0777 "${source_dir}/storage"
     fi
   else
     mkdir -p "$source_dir"
