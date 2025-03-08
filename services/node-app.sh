@@ -143,9 +143,9 @@ delete_node_app() {
     domain=$(echo "$site_files" | fzf --prompt="Select Node.js app to delete (use up/down keys): ")
   fi
   if [ -z "$domain" ] || ! validate_domain "$domain"; then
-  message INFO "No domain or invalid domain selected"
-  return 0
-fi
+    message INFO "No domain or invalid domain selected"
+    return 0
+  fi
 
   # Check if domain exists
   local domain_file="$sites_path/$domain.caddy"

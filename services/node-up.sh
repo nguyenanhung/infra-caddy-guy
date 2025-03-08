@@ -11,13 +11,13 @@ node_up() {
   local sites_path="$CONFIG_DIR/sites"
   local node_base_dir="/home/infra-caddy-sites"
 
-  # Ask for domain
-  local domain
-  domain=$(prompt_with_default "Enter domain name for Node.js app" "")
-  [ -z "$domain" ] && {
-    message ERROR "Domain name cannot be empty"
-    return 1
-  }
+  # Domain: $1 or ask
+  local domain="${1:-$(prompt_with_default "Enter domain name for Node.js app" "")}"
+  if [ -z "$domain" ] || ! validate_domain "$domain"; then
+    message INFO "No domain or invalid domain selected"
+    return 0
+  fi
+
   local compose_dir="$node_base_dir/$domain"
   local domain_file="$sites_path/$domain.caddy"
   [ -f "$domain_file" ] && {
@@ -25,17 +25,14 @@ node_up() {
     return 1
   }
 
-  # Ask for Node.js port
-  local node_port
-  node_port=$(prompt_with_default "Enter port for Node.js app" "3000")
+  # Node port: $2 or ask
+  local node_port="${2:-$(prompt_with_default "Enter port for Node.js app" "3000")}"
 
-  # Ask for Node.js version
-  local node_version
-  node_version=$(prompt_with_fzf "Select Node.js version" "16 18 20 22" "18")
+  # Node version: $3 or ask
+  local node_version="${3:-$(prompt_with_fzf "Select Node.js version" "16 18 20 22")}"
 
-  # Ask for source directory
-  local source_dir
-  source_dir=$(prompt_with_default "Enter source directory for Node.js app" "/home/$domain/node-app")
+  # Source directory: $4 or ask
+  local source_dir="${4:-$(prompt_with_default "Enter source directory for Node.js app" "/home/$domain/node-app")}"
   [ ! -d "$source_dir" ] && { mkdir -p "$source_dir" || {
     message ERROR "Cannot create $source_dir"
     return 1
@@ -43,20 +40,19 @@ node_up() {
 
   # Check and install NestJS if directory is empty
   if [ -z "$(ls -A "$source_dir")" ]; then
-    local install_nestjs
-    install_nestjs=$(prompt_with_fzf "Directory $source_dir is empty. Install NestJS?" "Yes No" "No")
+    local install_nestjs="${5:-$(prompt_with_fzf "Directory $source_dir is empty. Install NestJS?" "Yes No")}"
     if [ "$install_nestjs" = "Yes" ]; then
       message INFO "Installing NestJS in $source_dir as user $PM2_USER..."
       sudo -u "$PM2_USER" bash -c "cd $source_dir && npm install -g @nestjs/cli && nest new . --skip-git --package-manager npm"
     fi
   fi
 
-  # Ask for database
+  # Ask for database (no args, always interactive for now)
   local use_db db_type db_separate db_container="db_${domain}"
-  use_db=$(prompt_with_fzf "Use a database?" "Yes No" "No")
+  use_db=$(prompt_with_fzf "Use a database?" "Yes No")
   if [ "$use_db" = "Yes" ]; then
-    db_type=$(prompt_with_fzf "Select database type" "mariadb mongodb postgresql" "mariadb")
-    db_separate=$(prompt_with_fzf "Run database in a separate container?" "Yes No" "No")
+    db_type=$(prompt_with_fzf "Select database type" "mariadb mongodb postgresql")
+    db_separate=$(prompt_with_fzf "Run database in a separate container?" "Yes No")
     if [ "$db_separate" = "Yes" ]; then
       db_container="db_${domain}_${db_type}"
     else
@@ -64,12 +60,12 @@ node_up() {
     fi
   fi
 
-  # Ask for cache
+  # Ask for cache (no args, always interactive for now)
   local use_cache cache_type cache_separate cache_container="cache_${domain}"
-  use_cache=$(prompt_with_fzf "Use cache (Redis/Memcached)?" "Yes No" "No")
+  use_cache=$(prompt_with_fzf "Use cache (Redis/Memcached)?" "Yes No")
   if [ "$use_cache" = "Yes" ]; then
-    cache_type=$(prompt_with_fzf "Select cache type" "redis memcached" "redis")
-    cache_separate=$(prompt_with_fzf "Run cache in a separate container?" "Yes No" "No")
+    cache_type=$(prompt_with_fzf "Select cache type" "redis memcached")
+    cache_separate=$(prompt_with_fzf "Run cache in a separate container?" "Yes No")
     if [ "$cache_separate" = "Yes" ]; then
       cache_container="cache_${domain}_${cache_type}"
     else
@@ -115,13 +111,21 @@ RUN npm install -g pm2
 CMD ["pm2-runtime", "ecosystem.config.js"]
 EOF
 
-  # Create ecosystem.config.js
   if [ ! -f "$ecosystem_file" ]; then
+
+    # Ask for Node.js endpoint (entry point script)
+    local node_endpoint="${6:-$(prompt_with_default "Enter Node.js entry point script (e.g., app.js, main.js)" "main.js")}"
+    [ -z "$node_endpoint" ] && {
+      message ERROR "Node.js entry point cannot be empty"
+      return 1
+    }
+
+    # Create ecosystem.config.js
     cat >"$ecosystem_file" <<EOF
 module.exports = {
   apps: [{
     name: '${domain}',
-    script: './dist/main.js',
+    script: './${node_endpoint}',
     instances: 1,
     autorestart: true,
     watch: false,
@@ -142,7 +146,7 @@ ${include_docker_version}
 networks:
   ${sites_network_name}:
     driver: bridge
-  ${PREFIX_NAME}_caddy_net:
+  ${NETWORK_NAME}:
     external: true
 services:
   ${PREFIX_NAME}_sites_${domain}:
@@ -154,7 +158,7 @@ services:
       - ${source_dir}:/app
     networks:
       - ${sites_network_name}
-      - ${PREFIX_NAME}_caddy_net
+      - ${NETWORK_NAME}
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "${node_port}"]
       interval: 30s
@@ -263,11 +267,11 @@ EOF
 
 node_down() {
   local sites_path="$CONFIG_DIR/sites"
-  local domain=$(prompt_with_fzf "Select domain to take down" "$(ls -1 "$sites_path"/*.caddy | sed 's|.*/||;s|\.caddy||')" "")
-  [ -z "$domain" ] && {
-    message INFO "No domain selected"
+  local domain="${1:-$(prompt_with_fzf "Select domain to take down" "$(ls -1 "$sites_path"/*.caddy | sed 's|.*/||;s|\.caddy||')")}"
+  if [ -z "$domain" ] || ! validate_domain "$domain"; then
+    message INFO "No domain or invalid domain selected"
     return 0
-  }
+  fi
   local domain_file="$sites_path/$domain.caddy"
   [ ! -f "$domain_file" ] && {
     message ERROR "Domain $domain does not exist"
@@ -285,11 +289,11 @@ node_down() {
 
 node_restore() {
   local sites_path="$CONFIG_DIR/sites"
-  local domain=$(prompt_with_fzf "Select domain to restore" "$(ls -1 "$sites_path"/*.caddy | sed 's|.*/||;s|\.caddy||')" "")
-  [ -z "$domain" ] && {
-    message INFO "No domain selected"
+  local domain="${1:-$(prompt_with_fzf "Select domain to restore" "$(ls -1 "$sites_path"/*.caddy | sed 's|.*/||;s|\.caddy||')")}"
+  if [ -z "$domain" ] || ! validate_domain "$domain"; then
+    message INFO "No domain or invalid domain selected"
     return 0
-  }
+  fi
   local domain_file="$sites_path/$domain.caddy"
   local backup_file=$(ls -1t "$BACKUP_DIR/$domain.caddy."* 2>/dev/null | head -n 1)
   [ -z "$backup_file" ] && {
@@ -311,11 +315,11 @@ node_restore() {
 node_remove() {
   local sites_path="$CONFIG_DIR/sites"
   local node_base_dir="/home/infra-caddy-sites"
-  local domain=$(prompt_with_fzf "Select domain to remove" "$(ls -1 "$sites_path"/*.caddy | sed 's|.*/||;s|\.caddy||')" "")
-  [ -z "$domain" ] && {
-    message INFO "No domain selected"
+  local domain="${1:-$(prompt_with_fzf "Select domain to remove" "$(ls -1 "$sites_path"/*.caddy | sed 's|.*/||;s|\.caddy||')")}"
+  if [ -z "$domain" ] || ! validate_domain "$domain"; then
+    message INFO "No domain or invalid domain selected"
     return 0
-  }
+  fi
   local domain_file="$sites_path/$domain.caddy"
   local compose_dir="$node_base_dir/$domain"
   local compose_file="$compose_dir/docker-compose.yml"

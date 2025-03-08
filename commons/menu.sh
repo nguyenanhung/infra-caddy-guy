@@ -43,8 +43,6 @@ bear_welcome() {
   message INFO "  $(basename "$0") delete-basic-auth             - Disable basic authentication"
   message INFO "  $(basename "$0") add-reverse-proxy             - Add Reverse Proxy"
   message INFO "  $(basename "$0") delete-reverse-proxy          - Delete Reverse Proxy"
-  message INFO "  $(basename "$0") add-node-app                  - Add Node.js Application"
-  message INFO "  $(basename "$0") delete-node-app               - Delete Node.js Application"
   message INFO "  $(basename "$0") add-static-site               - Add Static Site"
   message INFO "  $(basename "$0") delete-static-site            - Delete Static Site"
   message INFO "  $(basename "$0") add-load-balancer             - Add Load Balancer"
@@ -54,6 +52,12 @@ bear_welcome() {
   message INFO "  $(basename "$0") laravel-down                  - Down mode for Laravel Application"
   message INFO "  $(basename "$0") laravel-restore               - Restore from Down mode Laravel Application"
   message INFO "  $(basename "$0") laravel-remove                - Removing Laravel Application"
+  message INFO "  $(basename "$0") add-node-app                  - Add Node.js Application"
+  message INFO "  $(basename "$0") delete-node-app               - Delete Node.js Application"
+  message INFO "  $(basename "$0") node-up                       - Build and configure Node.js Application"
+  message INFO "  $(basename "$0") node-down                     - Down mode for Node.js Application"
+  message INFO "  $(basename "$0") node-restore                  - Restore from Down mode Node.js Application"
+  message INFO "  $(basename "$0") node-remove                   - Removing Node.js Application"
   echo
   message INFO "...and more great features will be added soon.."
   print_message
