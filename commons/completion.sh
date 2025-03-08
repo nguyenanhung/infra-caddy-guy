@@ -4,6 +4,8 @@ _infra_caddy_completions_build() {
   local commands=(
     "init"
     "reload-caddy"
+    "join-caddy"
+    "disconnect-caddy"
     "list"
     "enable-"
     "stop-"

@@ -434,53 +434,45 @@ docker_hard_reset() {
 
   message INFO "✅ Docker has been reset to a clean state!"
 }
+docker_network_connect() {
+  local connect_network_name=$1
+  local connect_service_name=$2
+  local connect_service_ip=$3
+  if [ -z $connect_network_name ]; then
+    connect_network_name="${NETWORK_NAME}"
+  fi
+  if [ -z "$connect_service_name" ]; then
+    connect_service_name=$(prompt_with_default "Please enter container name you want to connect to ${connect_service_name}")
+  fi
+  if [ -z "$connect_service_name" ]; then
+    message ERROR "Network name, service name must be provided. Usage: $0 <network_name> <container_name> [service_ip]"
+    return
+  fi
+  if [ -n "$connect_service_ip" ]; then
+    docker network connect "$connect_network_name" "$connect_service_name" --ip "$connect_service_ip"
+  else
+    docker network connect "$connect_network_name" "$connect_service_name"
+  fi
+}
+docker_network_disconnect() {
+  local disconnect_network_name=$1
+  local disconnect_service_name=$2
+  if [ -z $disconnect_network_name ]; then
+    disconnect_network_name="${NETWORK_NAME}"
+  fi
+  if [ -z "$disconnect_service_name" ]; then
+    disconnect_service_name=$(prompt_with_default "Please enter container name you want to disconnect to ${disconnect_service_name}")
+  fi
+  if [ -z "$disconnect_service_name" ]; then
+    message ERROR "Network name, service name must be provided. Usage: $0 <network_name> <container_name>"
+    return
+  fi
+  docker network disconnect "$disconnect_network_name" "$disconnect_service_name"
+}
 get_mapping_value() {
   local -n map=$1
   local key=$2
   echo "${map[$key]}"
-}
-__display_header_information() {
-  local os_compatibility os_name
-  if [ -f /etc/os-release ]; then
-    os_name=$(grep '^PRETTY_NAME=' /etc/os-release | cut -d= -f2- | tr -d '"')
-    os_compatibility=$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2- | tr -d '"')
-  fi
-  break_line
-  echo "
-  ___        __               ____          _     _           ____
- |_ _|_ __  / _|_ __ __ _    / ___|__ _  __| | __| |_   _    / ___|_   _ _   _
-  | || '_ \| |_| '__/ _| |  | |   / _| |/ _| |/ _| | | | |  | |  _| | | | | | |
-  | || | | |  _| | | (_| |  | |__| (_| | (_| | (_| | |_| |  | |_| | |_| | |_| |
- |___|_| |_|_| |_|  \__,_|   \____\__,_|\__,_|\__,_|\__, |   \____|\__,_|\__, |
-                                                    |___/                 |___/
-"
-  echo
-  echo -e "${YELLOW}Powered by ${DEVELOP_BY}${NC}"
-  echo -e "BEAR Caddy Docker Stack - ${GREEN}Premium${NC} scripts version ${YELLOW}${SCRIPT_VERSION}${NC}${NC}"
-  echo
-  if has_command ip; then
-    local ServerIPv4 ServerIPv6
-    ServerIPv4="$(ip addr show | awk '/inet / && !/127.0.0.1/ {print $2}' | cut -d'/' -f1 | grep -Ev '^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[0-1]))')"
-    if [ -z "$ServerIPv4" ]; then
-      ServerIPv4=$(fetch_public_ip)
-    fi
-    ServerIPv6="$(ip addr show | awk '/inet6/ && !/scope link/ {print $2}' | cut -d'/' -f1 | grep -vE '^fe80|^::1')"
-    if [ -n "$ServerIPv6" ]; then
-      echo -e "Server Public IP      : IPv4 ${GREEN}${ServerIPv4}${NC}, IPv6 ${GREEN}${ServerIPv6}${NC}"
-    else
-      echo -e "Server Public IP      : ${GREEN}${ServerIPv4}${NC}"
-    fi
-  fi
-  if [ -n "$SSH_CLIENT" ]; then
-    echo -e "Your login SSH via IP : ${GREEN}$(echo "$SSH_CLIENT" | awk '{print $1}')${NC}"
-  fi
-  echo -e "Server Time           : ${GREEN}$(date +"%a, %Y-%m-%d %H:%M:%S")${NC}"
-  if [ -n "$os_name" ]; then
-    echo -e "Server OS             : ${GREEN}${os_name}${NC} (Compatibility: ${YELLOW}$(uppercase_txt "$os_compatibility")${NC})"
-  fi
-  echo -e "System Uptime         : ${GREEN}$(trim_whitespace "$(uptime)")${NC}"
-  echo -e "Users logged          : ${GREEN}$(trim_whitespace "$(who | wc -l)")${NC}"
-  break_line
 }
 # Function backup path: folder/file
 backup_original_path() {
@@ -542,4 +534,47 @@ caddy_reload() {
     docker logs "${PREFIX_NAME}_caddy" --tail 50
     return 1
   fi
+}
+__display_header_information() {
+  local os_compatibility os_name
+  if [ -f /etc/os-release ]; then
+    os_name=$(grep '^PRETTY_NAME=' /etc/os-release | cut -d= -f2- | tr -d '"')
+    os_compatibility=$(grep '^ID_LIKE=' /etc/os-release | cut -d= -f2- | tr -d '"')
+  fi
+  break_line
+  echo "
+  ___        __               ____          _     _           ____
+ |_ _|_ __  / _|_ __ __ _    / ___|__ _  __| | __| |_   _    / ___|_   _ _   _
+  | || '_ \| |_| '__/ _| |  | |   / _| |/ _| |/ _| | | | |  | |  _| | | | | | |
+  | || | | |  _| | | (_| |  | |__| (_| | (_| | (_| | |_| |  | |_| | |_| | |_| |
+ |___|_| |_|_| |_|  \__,_|   \____\__,_|\__,_|\__,_|\__, |   \____|\__,_|\__, |
+                                                    |___/                 |___/
+"
+  echo
+  echo -e "${YELLOW}Powered by ${DEVELOP_BY}${NC}"
+  echo -e "BEAR Caddy Docker Stack - ${GREEN}Premium${NC} scripts version ${YELLOW}${SCRIPT_VERSION}${NC}${NC}"
+  echo
+  if has_command ip; then
+    local ServerIPv4 ServerIPv6
+    ServerIPv4="$(ip addr show | awk '/inet / && !/127.0.0.1/ {print $2}' | cut -d'/' -f1 | grep -Ev '^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[0-1]))')"
+    if [ -z "$ServerIPv4" ]; then
+      ServerIPv4=$(fetch_public_ip)
+    fi
+    ServerIPv6="$(ip addr show | awk '/inet6/ && !/scope link/ {print $2}' | cut -d'/' -f1 | grep -vE '^fe80|^::1')"
+    if [ -n "$ServerIPv6" ]; then
+      echo -e "Server Public IP      : IPv4 ${GREEN}${ServerIPv4}${NC}, IPv6 ${GREEN}${ServerIPv6}${NC}"
+    else
+      echo -e "Server Public IP      : ${GREEN}${ServerIPv4}${NC}"
+    fi
+  fi
+  if [ -n "$SSH_CLIENT" ]; then
+    echo -e "Your login SSH via IP : ${GREEN}$(echo "$SSH_CLIENT" | awk '{print $1}')${NC}"
+  fi
+  echo -e "Server Time           : ${GREEN}$(date +"%a, %Y-%m-%d %H:%M:%S")${NC}"
+  if [ -n "$os_name" ]; then
+    echo -e "Server OS             : ${GREEN}${os_name}${NC} (Compatibility: ${YELLOW}$(uppercase_txt "$os_compatibility")${NC})"
+  fi
+  echo -e "System Uptime         : ${GREEN}$(trim_whitespace "$(uptime)")${NC}"
+  echo -e "Users logged          : ${GREEN}$(trim_whitespace "$(who | wc -l)")${NC}"
+  break_line
 }

@@ -156,6 +156,12 @@ case "$1" in
   source "$BASE_DIR/services/node-app.sh"
   delete_node_app
   ;;
+"join-caddy")
+  docker_network_connect
+  ;;
+"disconnect-caddy")
+  docker_network_disconnect
+  ;;
 *)
   message ERROR "Unknown command: $1"
   exit 1
