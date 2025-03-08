@@ -117,6 +117,7 @@ RUN apk add --no-cache build-base  bash netcat-openbsd curl git unzip supervisor
     && docker-php-ext-install pdo pdo_mysql pdo_pgsql mysqli gd zip bcmath pcntl exif mbstring soap intl opcache gd \\
     && pecl install redis && docker-php-ext-enable redis
 WORKDIR /var/www/${domain}/html
+EXPOSE 9000
 CMD ["php-fpm"]
 EOF
 
