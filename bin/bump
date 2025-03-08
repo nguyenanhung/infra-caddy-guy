@@ -1,5 +1,5 @@
 #!/bin/bash
-bash "$MY_CADDY_BASH/bin/dev-clean"
+bash "$MY_CADDY_BASH/bin/hard-reset"
 bash "$MY_CADDY_BASH/bin/sync-builder"
 cd "$MY_CADDY_BASH" || {
   echo "Failed to change to '$MY_CADDY_BASH'"
