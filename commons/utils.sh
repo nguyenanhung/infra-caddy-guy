@@ -395,7 +395,7 @@ wait_for_health() {
   local max_retries=20
 
   while [ "$(docker inspect --format='{{.State.Health.Status}}' "$container_name" 2>/dev/null)" != "healthy" ]; do
-    message INFO "${service_type} → ${container_name} is not healthy yet. Retrying..."
+    message INFO "${service_type} → ${container_name} is not healthy yet. Waiting..."
     sleep 5
     ((retry_count++))
 
