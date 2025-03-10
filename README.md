@@ -17,6 +17,40 @@ and use it
 infra-caddy introduce
 ```
 
+## Guidelines
+
+### Important note
+
+#### If another container needs to connect to the Caddy Web Server network, it needs to connect to the Caddy Web Server
+
+network.
+
+##### **Temporary/Short Term: Will be invalidated if restarted or down mode**
+
+> `<container_name>` is the name of the container to connect to.
+
+```shell
+# Connect Caddy Network
+docker network connect bear_caddy_net <container_name>
+```
+
+```shell
+# Disconnect Caddy Network
+docker network disconnect bear_caddy_net <container_name>
+```
+
+##### **Permanent (if using docker-compose)**
+
+Add the network name of the Caddy Web Server to your `docker-compose.yml` file
+
+```yaml
+networks:
+  # ...
+  bear_caddy_net:
+    external: true
+  # ...
+```
+
 ## Stack
 
 - [x] Docker, fzf
