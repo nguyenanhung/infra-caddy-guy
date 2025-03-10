@@ -241,7 +241,6 @@ EOF
           cat >>"$env_file" <<EOF
 REDIS_HOST=${cache_container}
 REDIS_PORT=${cache_port:-6379}
-REDIS_PASSWORD=${redis_password}
 EOF
         else
           echo "# REDIS_HOST and REDIS_PORT depend on shared container" >>"$env_file"
