@@ -9,7 +9,7 @@ source "$BASE_DIR/commons/validation.sh"
 
 node_up() {
   local sites_path="$CONFIG_DIR/sites"
-  local node_base_dir="/home/infra-caddy-sites"
+  local node_base_dir="${CADDY_HOME_DIR}"
 
   # Domain: $1 or ask
   local domain="${1:-$(prompt_with_default "Enter domain name for Node.js app" "")}"
@@ -452,7 +452,7 @@ node_restore() {
 
 node_remove() {
   local sites_path="$CONFIG_DIR/sites"
-  local node_base_dir="/home/infra-caddy-sites"
+  local node_base_dir="${CADDY_HOME_DIR}"
   local domain="${1:-$(prompt_with_fzf "Select domain to remove" "$(find "$sites_path" -maxdepth 1 -type f -name "*.caddy" -exec basename {} .caddy \;)")}"
   if [ -z "$domain" ] || ! validate_domain "$domain"; then
     message INFO "No domain or invalid domain selected"

@@ -9,7 +9,7 @@ source "$BASE_DIR/commons/validation.sh"
 
 add_static_site() {
   local sites_path="$CONFIG_DIR/sites"
-  local static_base_dir="/home/infra-caddy-sites"
+  local static_base_dir="${CADDY_HOME_DIR}"
 
   # List all .caddy files for selection
   local site_files

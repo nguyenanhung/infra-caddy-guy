@@ -39,13 +39,13 @@ add_php_app() {
 
   # Ask for root directory
   local root_directory
-  root_directory="/home/infra-caddy-sites/${domain}/html"
+  root_directory="${CADDY_HOME_DIR}/${domain}/html"
   [ -z "$root_directory" ] && {
     message ERROR "Root directory cannot be empty"
     return 1
   }
   if [ ! -d "$root_directory" ]; then
-    message NOTE "If your application is PHP and needs to run with FPM (eg: Laravel, CodeIgniter, WordPress ...), you need to deploy your source code to the /home/infra-caddy-sites/<domain>/html directory for the application to work."
+    message NOTE "If your application is PHP and needs to run with FPM (eg: Laravel, CodeIgniter, WordPress ...), you need to deploy your source code to the ${CADDY_HOME_DIR}/<domain>/html directory for the application to work."
     message INFO "Please change your application to path ${root_directory} and try again."
     return
   fi

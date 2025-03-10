@@ -27,7 +27,7 @@ laravel_up_apache() {
   local php_version="${2:-$(prompt_with_fzf "Select PHP version" "8.4 8.3 8.2 8.1 8.0 7.4 7.3 7.2 7.1 7.0")}"
 
   # Ask for source directory
-  local source_dir="${3:-$(prompt_with_default "Enter Laravel source directory" "/home/infra-caddy-sites/${domain}/html")}"
+  local source_dir="${3:-$(prompt_with_default "Enter Laravel source directory" "${CADDY_HOME_DIR}/${domain}/html")}"
   [ -z "$source_dir" ] && {
     message ERROR "Source directory cannot be empty"
     return 1
