@@ -149,7 +149,7 @@ EOF
 
     # Create Caddy container
     message INFO "Creating Caddy container"
-    docker compose -f "$caddy_compose_path" up -d --remove-orphans
+    docker compose -f "${caddy_compose_path}" up -d --remove-orphans
     message SUCCESS "Caddy container ${CADDY_CONTAINER_NAME} created successfully"
 
     if wait_for_health "${CADDY_CONTAINER_NAME}" "Caddy Web Server"; then
