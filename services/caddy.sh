@@ -189,6 +189,10 @@ EOF
     # Create default docker-compose.yml if not already
     if [ ! -f "$caddy_compose_path" ]; then
       cat >"$caddy_compose_path" <<EOF
+networks:
+  ${NETWORK_NAME}:
+    external: true
+
 services:
   ${CADDY_CONTAINER_NAME}:
     container_name: "${CADDY_CONTAINER_NAME}"
@@ -217,9 +221,6 @@ services:
       retries: 3
       start_period: 10s
 
-networks:
-  ${NETWORK_NAME}:
-    external: true
 EOF
       message INFO "Default docker-compose.yml created at ${caddy_compose_path}"
     fi
