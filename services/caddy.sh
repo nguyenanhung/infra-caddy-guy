@@ -186,9 +186,15 @@ EOF
       docker pull "${image}"
     fi
 
+    # Ask the container call to host-gateway
+
     # Create default docker-compose.yml if not already
     if [ ! -f "$caddy_compose_path" ]; then
-      cat >"$caddy_compose_path" <<EOF
+      local include_docker_version
+      include_docker_version=$(set_compose_version)
+      cat >"${caddy_compose_path}" <<EOF
+${include_docker_version}
+
 networks:
   ${NETWORK_NAME}:
     external: true
@@ -209,19 +215,32 @@ services:
       - "${data_path}:/data"
       - "${config_path}:/config"
       - "${infra_caddy_sites_path}:/var/www"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     logging:
+      driver: "${DEFAULT_CONTAINER_LOG_DRIVER}"
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: "${DEFAULT_CONTAINER_LOG_MAX_SIZE}"
+        max-file: "${DEFAULT_CONTAINER_LOG_MAX_FILE}"
     healthcheck:
       test: ["CMD", "pgrep", "caddy"]
       interval: 30s
       retries: 3
       start_period: 10s
-
 EOF
+      # Ask for Docker Internal Mapping
+      print_message ""
+      local ENABLE_HOST_DOCKER_INTERNAL="NO"
+      message INFO "host.docker.internal:host-gateway is a way to access the host from within a Docker container without knowing the host's specific IP address.
+      - It uses host-gateway , a special value that helps Docker map host.docker.internal to the host's IP address.
+      - It helps containers that need to call APIs from the host machine (outside the Caddy Stack environment) or connect to services on the host such as database, web server, etc.
+      - If you are unsure of the need or understanding of allowing Docker containers to call out to the host environment, you should not enable this configuration for safety and security reasons!"
+      echo
+      if confirm_action "Now that you have a good understanding of 'host.docker.internal', do you want to enable it?"; then
+        ENABLE_HOST_DOCKER_INTERNAL="YES"
+      fi
+      if [[ "$ENABLE_HOST_DOCKER_INTERNAL" == "YES" ]]; then
+        echo "    extra_hosts:" >>"${caddy_compose_path}"
+        echo "      - \"host.docker.internal:host-gateway\"" >>"${caddy_compose_path}"
+      fi
       message INFO "Default docker-compose.yml created at ${caddy_compose_path}"
     fi
 

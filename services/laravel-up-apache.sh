@@ -82,11 +82,13 @@ EOF
   include_docker_version=$(set_compose_version)
   cat >"$compose_file" <<EOF
 ${include_docker_version}
+
 networks:
   ${sites_network_name}:
     driver: bridge
   ${NETWORK_NAME}:
     external: true
+
 services:
   ${PREFIX_NAME}_sites_${domain}:
     build:
@@ -95,8 +97,6 @@ services:
     container_name: ${PREFIX_NAME}_sites_${domain}
     volumes:
       - ${source_dir}:/var/www/html
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     networks:
       - ${sites_network_name}
       - ${NETWORK_NAME}
@@ -106,7 +106,21 @@ services:
       retries: 3
       start_period: 10s
 EOF
-
+  # Ask for Docker Internal Mapping
+  print_message ""
+  local ENABLE_HOST_DOCKER_INTERNAL="NO"
+  message INFO "host.docker.internal:host-gateway is a way to access the host from within a Docker container without knowing the host's specific IP address.
+      - It uses host-gateway , a special value that helps Docker map host.docker.internal to the host's IP address.
+      - It helps containers that need to call APIs from the host machine (outside the Caddy Stack environment) or connect to services on the host such as database, web server, etc.
+      - If you are unsure of the need or understanding of allowing Docker containers to call out to the host environment, you should not enable this configuration for safety and security reasons!"
+  echo
+  if confirm_action "Now that you have a good understanding of 'host.docker.internal', do you want to enable it?"; then
+    ENABLE_HOST_DOCKER_INTERNAL="YES"
+  fi
+  if [[ "$ENABLE_HOST_DOCKER_INTERNAL" == "YES" ]]; then
+    echo "    extra_hosts:" >>"${compose_file}"
+    echo "      - \"host.docker.internal:host-gateway\"" >>"${compose_file}"
+  fi
   # Start containers
   cd "$laravel_dir" || {
     message ERROR "Failed to change to directory $laravel_dir"

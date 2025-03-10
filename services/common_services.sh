@@ -72,6 +72,17 @@ enable_service() {
   restart_options="unless-stopped on-failure no always"
   restart_policy=$(prompt_with_fzf "Select restart policy for $service_name" "$restart_options")
 
+  # Ask for Docker Internal Mapping
+  local ENABLE_HOST_DOCKER_INTERNAL="NO"
+  message INFO "host.docker.internal:host-gateway is a way to access the host from within a Docker container without knowing the host's specific IP address.
+      - It uses host-gateway , a special value that helps Docker map host.docker.internal to the host's IP address.
+      - It helps containers that need to call APIs from the host machine (outside the Caddy Stack environment) or connect to services on the host such as database, web server, etc.
+      - If you are unsure of the need or understanding of allowing Docker containers to call out to the host environment, you should not enable this configuration for safety and security reasons!"
+  echo
+  if confirm_action "Now that you have a good understanding of 'host.docker.internal', do you want to enable it?"; then
+    ENABLE_HOST_DOCKER_INTERNAL="YES"
+  fi
+
   # Define volume
   local data_volume=""
   [ -n "$default_mount_path" ] && {
@@ -200,13 +211,16 @@ enable_service() {
   include_docker_version=$(set_compose_version)
   cat >"$compose_file" <<EOF
 ${include_docker_version}
+
 networks:
   ${NETWORK_NAME}:
     external: true
+
 services:
   ${container_name}:
     image: ${image}
     container_name: ${container_name}
+    restart: ${restart_policy}
     networks:
       - ${NETWORK_NAME}
     ports:
@@ -217,12 +231,15 @@ services:
           cpus: "${resource_cpus}"
           memory: "${resource_memory}"
     logging:
-      driver: "local"
+      driver: "${DEFAULT_CONTAINER_LOG_DRIVER}"
       options:
-        max-size: "10m"
-        max-file: "3"
-    restart: ${restart_policy}
+        max-size: "${DEFAULT_CONTAINER_LOG_MAX_SIZE}"
+        max-file: "${DEFAULT_CONTAINER_LOG_MAX_FILE}"
 EOF
+  if [[ "$ENABLE_HOST_DOCKER_INTERNAL" == "YES" ]]; then
+    echo "    extra_hosts:" >>"${compose_file}"
+    echo "      - \"host.docker.internal:host-gateway\"" >>"${compose_file}"
+  fi
   [ -s "$env_file" ] && {
     echo "    env_file:" >>"$compose_file"
     echo "      - .env" >>"$compose_file"

@@ -16,6 +16,11 @@ CADDY_CONTAINER_NAME="${PREFIX_NAME}_caddy"
 # Default Home Directory -> mount to /var/www
 CADDY_HOME_DIR="/home/infra-caddy-sites"
 
+# Default Container Configuration
+DEFAULT_CONTAINER_LOG_DRIVER="local"
+DEFAULT_CONTAINER_LOG_MAX_SIZE="10m"
+DEFAULT_CONTAINER_LOG_MAX_FILE="3"
+
 # Base directory of the project (root of bear-caddy/)
 # Use BASE_DIR from main.sh if set; otherwise calculate from config.sh
 if [ -z "$BASE_DIR" ]; then

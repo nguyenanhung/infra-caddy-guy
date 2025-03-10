@@ -81,6 +81,17 @@ node_up() {
     fi
   fi
 
+  # Ask for Docker Internal Mapping
+  local ENABLE_HOST_DOCKER_INTERNAL="NO"
+  message INFO "host.docker.internal:host-gateway is a way to access the host from within a Docker container without knowing the host's specific IP address.
+      - It uses host-gateway , a special value that helps Docker map host.docker.internal to the host's IP address.
+      - It helps containers that need to call APIs from the host machine (outside the Caddy Stack environment) or connect to services on the host such as database, web server, etc.
+      - If you are unsure of the need or understanding of allowing Docker containers to call out to the host environment, you should not enable this configuration for safety and security reasons!"
+  echo
+  if confirm_action "Now that you have a good understanding of 'host.docker.internal', do you want to enable it?"; then
+    ENABLE_HOST_DOCKER_INTERNAL="YES"
+  fi
+
   # Prepare directories and files
   mkdir -p "$compose_dir"
   local compose_file="$compose_dir/docker-compose.yml"
@@ -216,11 +227,13 @@ EOF
   local sites_network_name="${PREFIX_NAME}_sites_${domain}_net"
   cat >"$compose_file" <<EOF
 ${include_docker_version}
+
 networks:
   ${sites_network_name}:
     driver: bridge
   ${NETWORK_NAME}:
     external: true
+
 services:
   ${PREFIX_NAME}_sites_${domain}:
     build:
@@ -238,6 +251,10 @@ services:
       retries: 3
       start_period: 10s
 EOF
+  if [[ "$ENABLE_HOST_DOCKER_INTERNAL" == "YES" ]]; then
+    echo "    extra_hosts:" >>"${compose_file}"
+    echo "      - \"host.docker.internal:host-gateway\"" >>"${compose_file}"
+  fi
   if [ -f "$env_file" ]; then
     echo "    env_file:" >>"$compose_file"
     echo "      - .env" >>"$env_file"
