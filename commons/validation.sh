@@ -7,6 +7,7 @@ validate_ip() {
   if [[ "$ip" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
     local octets
     IFS='.' read -r -a octets <<<"$ip"
+    local octet
     for octet in "${octets[@]}"; do
       [ "$octet" -gt 255 ] && {
         message ERROR "Invalid IP address: $ip (octet $octet exceeds 255)"

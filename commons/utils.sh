@@ -58,10 +58,11 @@ print_message() {
   local NC='\033[0m'
   local CYAN='\033[0;36m'
   local LINE="--------------------------------------------------------------------------"
-  if [ -z "$1" ]; then
-    echo -e "\n${LINE}\n"
+  local MSG=${1:-""}
+  if [ -n "$MSG" ]; then
+    echo -e "\n${LINE}\n${CYAN}$MSG${NC}\n${LINE}\n"
   else
-    echo -e "\n${LINE}\n${CYAN}$1${NC}\n${LINE}\n"
+    echo -e "\n${LINE}\n"
   fi
 }
 has_command() {
@@ -446,7 +447,7 @@ docker_network_connect() {
   if [ -z "$connect_network_name" ]; then
     connect_network_name=$(prompt_with_default "Please enter the network name you want ${connect_container_name} will disconnect it" "${NETWORK_NAME}")
   fi
-  if [ -z $connect_network_name ]; then
+  if [ -z "$connect_network_name" ]; then
     connect_network_name="${NETWORK_NAME}"
   fi
 
@@ -484,7 +485,7 @@ docker_network_disconnect() {
   if [ -z "$disconnect_network_name" ]; then
     disconnect_network_name=$(prompt_with_default "Please enter the network name you want ${disconnect_container_name} will disconnect it" "${NETWORK_NAME}")
   fi
-  if [ -z $disconnect_network_name ]; then
+  if [ -z "$disconnect_network_name" ]; then
     disconnect_network_name="${NETWORK_NAME}"
   fi
   if [ -z "$disconnect_container_name" ]; then
@@ -523,10 +524,10 @@ join_caddy_network() {
   docker_network_connect "${NETWORK_NAME}" "$container_name"
 }
 set_compose_version() {
-  local docker_version include_docker_version
+  local docker_version include_docker_version major_version minor_version
   docker_version=$(docker version --format '{{.Server.Version}}' 2>/dev/null || echo "0.0.0")
-  local major_version=$(echo "$docker_version" | cut -d'.' -f1)
-  local minor_version=$(echo "$docker_version" | cut -d'.' -f2)
+  major_version=$(echo "$docker_version" | cut -d'.' -f1)
+  minor_version=$(echo "$docker_version" | cut -d'.' -f2)
 
   # Decide whether to include version (use 3.8 for engines < 19.03, omit for newer ones)
   if [ "$major_version" -lt 19 ] || { [ "$major_version" -eq 19 ] && [ "$minor_version" -lt 3 ]; }; then
