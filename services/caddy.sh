@@ -48,17 +48,99 @@ setup_caddy() {
 # Security
 (file_forbidden_restricted) {
     @forbidden {
+        # Allowed
         not path /wp-includes/ms-files.php
+
+        # Global Restricted
+        path /.user.ini
+        path /.htaccess
+        path /web.config
+        path /.env
+        path /wp-config.php
+
+        # Restricted file
         path /wp-admin/includes/*.php
         path /wp-includes/*.php
-        path /wp-config.php
         path /wp-content/uploads/*.php
         path /wp-content/debug.log
-        path /.user.ini
-        path /.env
-        path /storage/logs/laravel.log
+        path /storage/logs/*.log
+
+        # Laravel
+        path /config/*.php
+        path /storage/*
+        path /vendor/*
+        path /node_modules/*
+        path /backup/*
+        path /database/*
     }
     respond @forbidden "Access denied" 403
+}
+
+# Improve Header security
+(header_security_default) {
+    header {
+        # Click-jacking protection
+        X-Frame-Options "SAMEORIGIN"
+
+        # Disable clients from sniffing the media type
+        X-Content-Type-Options "nosniff"
+        Content-Security-Policy "upgrade-insecure-requests"
+
+        # Keep referrer data off of HTTP connections
+        Referrer-Policy no-referrer-when-downgrade
+
+        # Enable HSTS
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+        # Enable XSS protection
+        X-Xss-Protection "1; mode=block"
+
+        # Hide server name
+        -Server Caddy
+
+        # CORS settings
+        Access-Control-Allow-Origin *
+        Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+        Access-Control-Allow-Headers "Content-Type, X-CSRF-TOKEN"
+    }
+}
+
+(header_security_common) {
+    X-Frame-Options "SAMEORIGIN"
+    X-Content-Type-Options "nosniff"
+    Referrer-Policy "strict-origin-when-cross-origin"
+    Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    -Server Caddy
+}
+
+(header_security_php) {
+    import header_security_common
+    Content-Security-Policy "upgrade-insecure-requests"
+    X-Xss-Protection "1; mode=block"
+}
+
+(header_security_api) {
+    import header_security_common
+    Access-Control-Allow-Origin *
+    Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+    Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+}
+
+(header_security_spa) {
+    import header_security_common
+    Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
+}
+
+(header_security_static) {
+    import header_security_common
+    Cache-Control "public, max-age=86400, immutable"
+}
+
+(header_security_reverse_proxy) {
+    import header_security_common
+    Access-Control-Allow-Origin *
+    Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+    Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
 }
 
 # WordPress

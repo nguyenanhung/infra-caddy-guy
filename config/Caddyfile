@@ -6,41 +6,123 @@
 
 # Some static files Cache-Control.
 (file_static_caching) {
-	@static {
-		path *.ico *.css *.js *.gif *.jpg *.jpeg *.png *.svg *.woff *.json
-	}
-	header @static Cache-Control max-age=2592000
+    @static {
+        path *.ico *.css *.js *.gif *.jpg *.jpeg *.png *.svg *.woff *.json
+    }
+    header @static Cache-Control max-age=31536000
 }
 
 # Security
 (file_forbidden_restricted) {
     @forbidden {
+        # Allowed
         not path /wp-includes/ms-files.php
+
+        # Global Restricted
+        path /.user.ini
+        path /.htaccess
+        path /web.config
+        path /.env
+        path /wp-config.php
+
+        # Restricted file
         path /wp-admin/includes/*.php
         path /wp-includes/*.php
-        path /wp-config.php
         path /wp-content/uploads/*.php
         path /wp-content/debug.log
-        path /.user.ini
-        path /.env
-        path /storage/logs/laravel.log
+        path /storage/logs/*.log
+
+        # Laravel
+        path /config/*.php
+        path /storage/*
+        path /vendor/*
+        path /node_modules/*
+        path /backup/*
+        path /database/*
     }
     respond @forbidden "Access denied" 403
 }
 
+# Improve Header security
+(header_security_default) {
+    header {
+        # Click-jacking protection
+        X-Frame-Options "SAMEORIGIN"
+
+        # Disable clients from sniffing the media type
+        X-Content-Type-Options "nosniff"
+        Content-Security-Policy "upgrade-insecure-requests"
+
+        # Keep referrer data off of HTTP connections
+        Referrer-Policy no-referrer-when-downgrade
+
+        # Enable HSTS
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+        # Enable XSS protection
+        X-Xss-Protection "1; mode=block"
+
+        # Hide server name
+        -Server Caddy
+
+        # CORS settings
+        Access-Control-Allow-Origin *
+        Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+        Access-Control-Allow-Headers "Content-Type, X-CSRF-TOKEN"
+    }
+}
+
+(header_security_common) {
+    X-Frame-Options "SAMEORIGIN"
+    X-Content-Type-Options "nosniff"
+    Referrer-Policy "strict-origin-when-cross-origin"
+    Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    -Server Caddy
+}
+
+(header_security_php) {
+    import header_security_common
+    Content-Security-Policy "upgrade-insecure-requests"
+    X-Xss-Protection "1; mode=block"
+}
+
+(header_security_api) {
+    import header_security_common
+    Access-Control-Allow-Origin *
+    Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+    Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+}
+
+(header_security_spa) {
+    import header_security_common
+    Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
+}
+
+(header_security_static) {
+    import header_security_common
+    Cache-Control "public, max-age=86400, immutable"
+}
+
+(header_security_reverse_proxy) {
+    import header_security_common
+    Access-Control-Allow-Origin *
+    Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+    Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+}
+
 # Implement security, performance for WordPress
 (wordpress) {
-	# Cache Enabler
-	@cache_enabler {
-		not header_regexp Cookie "comment_author|wordpress_[a-f0-9]+|wp-postpass|wordpress_logged_in"
-		not path_regexp "(/wp-admin/|/xmlrpc.php|/wp-(app|cron|login|register|mail).php|wp-.*.php|/feed/|index.php|wp-comments-popup.php|wp-links-opml.php|wp-locations.php|sitemap(index)?.xml|[a-z0-9-]+-sitemap([0-9]+)?.xml)"
-		not method POST
-		not expression {query} != ''
-	}
+    # Cache Enabler
+    @cache_enabler {
+        not header_regexp Cookie "comment_author|wordpress_[a-f0-9]+|wp-postpass|wordpress_logged_in"
+        not path_regexp "(/wp-admin/|/xmlrpc.php|/wp-(app|cron|login|register|mail).php|wp-.*.php|/feed/|index.php|wp-comments-popup.php|wp-links-opml.php|wp-locations.php|sitemap(index)?.xml|[a-z0-9-]+-sitemap([0-9]+)?.xml)"
+        not method POST
+        not expression {query} != ''
+    }
 
-	route @cache_enabler {
-		try_files /wp-content/cache/cache-enabler/{host}{uri}/https-index.html /wp-content/cache/cache-enabler/{host}{uri}/index.html {path} {path}/index.php?{query}
-	}
+    route @cache_enabler {
+        try_files /wp-content/cache/cache-enabler/ {host} {uri}/https-index.html /wp-content/cache/cache-enabler/ {host} {uri}/index.html {path} {path}/index.php? {query}
+    }
 }
 
 # Site configurations will be imported below

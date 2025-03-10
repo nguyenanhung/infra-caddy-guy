@@ -447,14 +447,8 @@ ${basic_auth_config}
     file_server {
         precompressed gzip
     }
-    header / {
-        X-Frame-Options "SAMEORIGIN"
-        X-Content-Type-Options "nosniff"
-        Access-Control-Allow-Origin *
-        Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
-        Access-Control-Allow-Headers "Content-Type, X-CSRF-TOKEN"
-    }
     import file_static_caching
+    import header_security_php
     import file_forbidden_restricted
 }
 EOF

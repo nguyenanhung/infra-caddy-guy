@@ -112,6 +112,7 @@ add_node_app() {
 $domain {
     reverse_proxy http://host.docker.internal:$port
 $basic_auth_config
+    import header_security_api
 }
 EOF
 

@@ -52,8 +52,8 @@ bear_welcome_introduce() {
   message INFO "  $(basename "$0") delete-load-balancer          - Delete Load Balancer"
   message INFO "  $(basename "$0") delete-load-balancer-backend  - Delete Load Balancer Backend"
 
-  message INFO "  $(basename "$0") add-laravel                   - Add Laravel Application"
-  message INFO "  $(basename "$0") delete-laravel                - Delete Laravel Application"
+  message INFO "  $(basename "$0") add-php-app                   - Add PHP Application"
+  message INFO "  $(basename "$0") delete-php-app                - Delete PHP Application"
   message INFO "  $(basename "$0") laravel-up                    - Build and configure Laravel Application Container"
   message INFO "  $(basename "$0") laravel-down                  - Down mode for Laravel Application Container"
   message INFO "  $(basename "$0") laravel-restore               - Restore from Down mode Laravel Application Container"
@@ -85,9 +85,9 @@ bear_menu_interactive() {
     "Add new Node.js App (Container exists)"
     "Delete Node.js App"
     "Build & Add new Node.js App"
-    "Add new Laravel App (Container exists)"
+    "Add new PHP App (Container exists)"
     "Build & Add new Laravel App (PHP-FPM)"
-    "Delete Laravel App"
+    "Delete PHP App"
   )
   prompt="Enter your selected menu you want [0 = Exit]: "
   PS3=$'\n'"${prompt} "
@@ -116,8 +116,8 @@ bear_menu_interactive() {
     20) bash "${BASE_DIR}/bear-caddy" delete-load-balancer ;;
     21) bash "${BASE_DIR}/bear-caddy" delete-load-balancer-backend ;;
     22) bash "${BASE_DIR}/bear-caddy" laravel-up ;;
-    23) bash "${BASE_DIR}/bear-caddy" add-laravel ;;
-    24) bash "${BASE_DIR}/bear-caddy" delete-laravel ;;
+    23) bash "${BASE_DIR}/bear-caddy" add-php-app ;;
+    24) bash "${BASE_DIR}/bear-caddy" delete-php-app ;;
     25) bash "${BASE_DIR}/bear-caddy" node-up ;;
     26) bash "${BASE_DIR}/bear-caddy" add-node-app ;;
     27) bash "${BASE_DIR}/bear-caddy" delete-node-app ;;

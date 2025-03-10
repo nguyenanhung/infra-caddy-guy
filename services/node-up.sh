@@ -371,6 +371,7 @@ EOL
 ${domain} {
     reverse_proxy http://${PREFIX_NAME}_sites_${domain}:${node_port}
 ${basic_auth_config}
+    import header_security_api
 }
 EOF
 

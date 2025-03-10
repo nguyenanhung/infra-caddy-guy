@@ -151,15 +151,12 @@ ${domain} {
 ${basic_auth_config}
     reverse_proxy ${PREFIX_NAME}_sites_${domain}:80
     encode zstd gzip
-    header / {
-        X-Frame-Options "SAMEORIGIN"
-        X-Content-Type-Options "nosniff"
-        Access-Control-Allow-Origin *
-        Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
-        Access-Control-Allow-Headers "Content-Type, X-CSRF-TOKEN"
+    file_server {
+        precompressed gzip
     }
     import file_static_caching
     import file_forbidden_restricted
+    import header_security_php
 }
 EOF
 

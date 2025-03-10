@@ -72,6 +72,7 @@ add_reverse_proxy() {
 ${domain} {
     reverse_proxy ${upstream_url}
 ${basic_auth_config}
+    import header_security_reverse_proxy
 }
 EOF
 

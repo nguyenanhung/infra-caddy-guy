@@ -88,7 +88,7 @@ case "$1" in
   "Add new Static Site") "$0" add-static-site ;;
   "Add new Reverse Proxy") "$0" add-reverse-proxy ;;
   "Add new Node.js App (Container exists)") "$0" add-node-app ;;
-  "Add new Laravel App (Container exists)") "$0" add-laravel ;;
+  "Add new PHP App (Container exists)") "$0" add-php-app ;;
   "Build & Add new Laravel App (PHP-FPM)") "$0" laravel-up ;;
   "Build & Add new Laravel App (Apache2)") "$0" laravel-apache-up ;;
   "Build & Add new Node.js App") "$0" node-up ;;
@@ -169,15 +169,15 @@ case "$1" in
   shift               # Shift to remove the first argument
   laravel_remove "$@" # Call delete_site with the remaining arguments
   ;;
-"add-laravel")
-  source "$BASE_DIR/services/laravel.sh"
+"add-php-app")
+  source "$BASE_DIR/services/php-app.sh"
   shift            # Shift to remove the first argument
-  add_laravel "$@" # Call delete_site with the remaining arguments
+  add_php_app "$@" # Call delete_site with the remaining arguments
   ;;
-"delete-laravel")
-  source "$BASE_DIR/services/laravel.sh"
+"delete-php-app")
+  source "$BASE_DIR/services/php-app.sh"
   shift               # Shift to remove the first argument
-  delete_laravel "$@" # Call delete_site with the remaining arguments
+  delete_php_app "$@" # Call delete_site with the remaining arguments
   ;;
 "add-static-site")
   source "$BASE_DIR/services/static-site.sh"

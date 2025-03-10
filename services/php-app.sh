@@ -7,11 +7,12 @@ source "$BASE_DIR/commons/utils.sh"
 # shellcheck source=./../commons/validation.sh
 source "$BASE_DIR/commons/validation.sh"
 
-add_laravel() {
-  message INFO "This feature is suitable for the situation where you already have another Laravel Application container with fully built source code, and want to configure Caddy Web Server to update the domain name. In case you need to build a Laravel application from scratch, use the command: infra-caddy laravel-up"
+add_php_app() {
+  message INFO "This feature is suitable for the situation where you already have another PHP Application container with fully built source code, and want to configure Caddy Web Server to update the domain name. "
+  message INFO "In case you need to build a Laravel application from scratch, use the command: infra-caddy laravel-up"
 
   if ! confirm_action "Are you sure you ${GREEN}understand the important note${NC} above and want to ${GREEN}continue${NC}?"; then
-    message INFO "Adding Laravel site to Caddy configuration skipped"
+    message INFO "Adding PHP application site to Caddy configuration skipped"
     return 0
   fi
 
@@ -22,7 +23,7 @@ add_laravel() {
   if [ -n "$1" ]; then
     domain="$1"
   else
-    domain=$(prompt_with_default "Enter domain name for Laravel site" "")
+    domain=$(prompt_with_default "Enter domain name for PHP application site" "")
   fi
   [ -z "$domain" ] && {
     message ERROR "Domain name cannot be empty"
@@ -44,39 +45,39 @@ add_laravel() {
     return 1
   }
   if [ ! -d "$root_directory" ]; then
-    message NOTE "If your application is PHP and needs to run with FPM (eg: Laravel, WordPress ...), you need to deploy your source code to the /home/infra-caddy-sites/<domain>/html directory for the application to work."
+    message NOTE "If your application is PHP and needs to run with FPM (eg: Laravel, CodeIgniter, WordPress ...), you need to deploy your source code to the /home/infra-caddy-sites/<domain>/html directory for the application to work."
     message INFO "Please change your application to path ${root_directory} and try again."
     return
   fi
 
-  # Ask for Laravel container and port
-  local laravel_container
-  laravel_container=$(prompt_with_default "Enter Laravel container name" "")
-  [ -z "$laravel_container" ] && {
-    message ERROR "Laravel container name cannot be empty"
+  # Ask for PHP application container and port
+  local php_app_container
+  php_app_container=$(prompt_with_default "Enter PHP application container name" "")
+  [ -z "$php_app_container" ] && {
+    message ERROR "PHP application container name cannot be empty"
     return 1
   }
 
-  local laravel_container_port
-  laravel_container_port=$(prompt_with_default "Enter Laravel container port" "9000")
-  [ -z "$laravel_container_port" ] && {
-    message ERROR "Laravel container port cannot be empty"
+  local php_app_container_port
+  php_app_container_port=$(prompt_with_default "Enter PHP application container port" "9000")
+  [ -z "$php_app_container_port" ] && {
+    message ERROR "PHP application container port cannot be empty"
     return 1
   }
 
   # Check if container exists
-  if ! docker ps -a --format '{{.Names}}' | grep -q "^$laravel_container$"; then
-    message ERROR "Container $laravel_container does not exist"
+  if ! docker ps -a --format '{{.Names}}' | grep -q "^$php_app_container$"; then
+    message ERROR "Container $php_app_container does not exist"
     return 1
   fi
 
-  docker exec -it "${laravel_container}" "chmod -R 777 /var/www/${domain}/html/storage"
-  docker exec -it "${laravel_container}" "chmod -R 777 /var/www/${domain}/html/bootstrap/cache"
-  join_caddy_network "${laravel_container}"
+  docker exec -it "${php_app_container}" "chmod -R 777 /var/www/${domain}/html/storage"
+  docker exec -it "${php_app_container}" "chmod -R 777 /var/www/${domain}/html/bootstrap/cache"
+  join_caddy_network "${php_app_container}"
 
   # Ask if user wants basic auth
   local basic_auth_config=""
-  if confirm_action "Enable ${GREEN}basic auth${NC} for this ${GREEN}Laravel Application${NC}?"; then
+  if confirm_action "Enable ${GREEN}basic auth${NC} for this ${GREEN}PHP Application${NC}?"; then
     # Ask for username and password
     local username
     username=$(prompt_with_default "Enter basic auth username" "auth-admin")
@@ -97,7 +98,7 @@ add_laravel() {
     fi
   fi
 
-  # Create Laravel config
+  # Create PHP application config
   cat >"$domain_file" <<EOF
 ${domain} {
 ${basic_auth_config}
@@ -106,9 +107,9 @@ ${basic_auth_config}
     encode zstd gzip
 
     # Serve PHP files through php-fpm:
-    php_fastcgi ${laravel_container}:${laravel_container_port}
+    php_fastcgi ${php_app_container}:${php_app_container_port}
 
-    # Laravel Routing
+    # Routing
     @notStatic {
         file {
             try_files {path} /index.php
@@ -121,15 +122,8 @@ ${basic_auth_config}
         precompressed gzip
     }
 
-    header / {
-        X-Frame-Options "SAMEORIGIN"
-        X-Content-Type-Options "nosniff"
-        Access-Control-Allow-Origin *
-        Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
-        Access-Control-Allow-Headers "Content-Type, X-CSRF-TOKEN"
-    }
-
     import file_static_caching
+    import header_security_php
     import file_forbidden_restricted
     import wordpress
 }
@@ -138,15 +132,15 @@ EOF
   # Test Caddy syntax
   if caddy_validate; then
     caddy_reload || return 1
-    message INFO "Laravel site for $domain added and Caddy reloaded"
+    message INFO "PHP application site for $domain added and Caddy reloaded"
   else
     rm -f "$domain_file"
-    message ERROR "Invalid Caddy configuration, Laravel site not added"
+    message ERROR "Invalid Caddy configuration, PHP application site not added"
     return 1
   fi
 }
 
-delete_laravel() {
+delete_php_app() {
   local sites_path="$CONFIG_DIR/sites"
 
   # List all .caddy files
@@ -154,7 +148,7 @@ delete_laravel() {
   site_files=$(find "$sites_path" -maxdepth 1 -type f -name "*.caddy" -exec basename {} \; | sed 's/\.caddy$//')
 
   if [ -z "$site_files" ]; then
-    message INFO "No Laravel sites available to delete"
+    message INFO "No PHP application sites available to delete"
     return 0
   fi
 
@@ -163,7 +157,7 @@ delete_laravel() {
   if [ -n "$1" ]; then
     selected_site="$1"
   else
-    selected_site=$(echo "$site_files" | fzf --prompt="Select Laravel site to delete (use up/down keys): ")
+    selected_site=$(echo "$site_files" | fzf --prompt="Select PHP application site to delete (use up/down keys): ")
   fi
   if [ -z "$selected_site" ] || ! validate_domain "$selected_site"; then
     message INFO "No domain or invalid domain selected"
@@ -172,7 +166,7 @@ delete_laravel() {
 
   local site_file="$sites_path/$selected_site.caddy"
   validate_file_exists "$site_file" || {
-    message ERROR "Laravel site $selected_site not found"
+    message ERROR "PHP application site $selected_site not found"
     return 1
   }
 
@@ -183,14 +177,14 @@ delete_laravel() {
   message INFO "Backed up $selected_site.caddy to $backup_file"
 
   # Confirm deletion
-  confirm_action "Do you want to delete Laravel site $selected_site?" || {
+  confirm_action "Do you want to delete PHP application site $selected_site?" || {
     message INFO "Deletion canceled"
     return 0
   }
 
   # Remove site file
   rm -f "$site_file"
-  message INFO "Laravel site $selected_site deleted"
+  message INFO "PHP application site $selected_site deleted"
 
   # Validate and reload Caddy
   if caddy_validate; then

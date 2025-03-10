@@ -118,6 +118,7 @@ $domain {
     file_server
     try_files {path} {path}/ /index.html /index.htm /dist.html /build.html
 $basic_auth_config
+    import header_security_spa
 }
 EOF
 
