@@ -431,22 +431,37 @@ EOF
       basic_auth_config="@notAcme {\n    not path /.well-known/acme-challenge/*\n}\nbasic_auth @notAcme {\n    $username $hashed_password\n}"
     fi
   fi
+
+  # Write caddy domain configure file
+  local root_directory php_fastcgi_endpoint
+  root_directory="/var/www/${domain}/html/public"
+  php_fastcgi_endpoint="${PREFIX_NAME}_sites_${domain}:9000"
+
   cat >"$domain_file" <<EOF
 ${domain} {
 ${basic_auth_config}
+    # Internal SSL if you need
     #tls internal
-    root * /var/www/${domain}/html/public
+
+    root * ${root_directory}
     encode zstd gzip
-    php_fastcgi ${PREFIX_NAME}_sites_${domain}:9000
+
+    # Serve PHP files through php-fpm:
+    php_fastcgi ${php_fastcgi_endpoint}
+
+    # Enable static file server:
+    file_server {
+        precompressed gzip
+    }
+
+    # Routing for PHP apps
     @notStatic {
         file {
             try_files {path} /index.php
         }
     }
     rewrite @notStatic /index.php?{query}
-    file_server {
-        precompressed gzip
-    }
+
     import file_static_caching
     import header_security_php
     import file_forbidden_restricted

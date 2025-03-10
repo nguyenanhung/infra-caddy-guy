@@ -112,13 +112,13 @@ add_static_site() {
 
   # Create static site config with or without basic auth
   cat >"$domain_file" <<EOF
-$domain {
-    root * $static_dir
+${domain} {
+${basic_auth_config}
+    root * ${static_dir}
+    import header_security_spa
     encode zstd gzip
     file_server
     try_files {path} {path}/ /index.html /index.htm /dist.html /build.html
-$basic_auth_config
-    import header_security_spa
 }
 EOF
 

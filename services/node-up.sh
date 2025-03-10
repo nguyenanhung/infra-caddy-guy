@@ -367,10 +367,14 @@ EOL
     fi
   fi
 
+  # Write caddy config
+  local node_app_endpoint
+  node_app_endpoint="http://${PREFIX_NAME}_sites_${domain}:${node_port}"
+
   cat >"$domain_file" <<EOF
 ${domain} {
-    reverse_proxy http://${PREFIX_NAME}_sites_${domain}:${node_port}
 ${basic_auth_config}
+    reverse_proxy ${node_app_endpoint}
     import header_security_api
 }
 EOF

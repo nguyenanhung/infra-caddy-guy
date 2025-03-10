@@ -99,28 +99,33 @@ add_php_app() {
   fi
 
   # Create PHP application config
+  local php_fastcgi_endpoint
+  php_fastcgi_endpoint="${php_app_container}:${php_app_container_port}"
+
   cat >"$domain_file" <<EOF
 ${domain} {
 ${basic_auth_config}
+    # Internal SSL if you need
     #tls internal
+
     root * ${root_directory}
     encode zstd gzip
 
     # Serve PHP files through php-fpm:
-    php_fastcgi ${php_app_container}:${php_app_container_port}
+    php_fastcgi ${php_fastcgi_endpoint}
 
-    # Routing
+    # Enable static file server:
+    file_server {
+        precompressed gzip
+    }
+
+    # Routing for PHP apps
     @notStatic {
         file {
             try_files {path} /index.php
         }
     }
     rewrite @notStatic /index.php?{query}
-
-    # Enable the static file server:
-    file_server {
-        precompressed gzip
-    }
 
     import file_static_caching
     import header_security_php

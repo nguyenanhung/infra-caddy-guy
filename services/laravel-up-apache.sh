@@ -146,10 +146,15 @@ EOF
       basic_auth_config="@notAcme {\n    not path /.well-known/acme-challenge/*\n}\nbasic_auth @notAcme {\n    $username $hashed_password\n}"
     fi
   fi
+
+  # Write caddy domain config
+  local reverse_proxy_endpoint
+  reverse_proxy_endpoint="${PREFIX_NAME}_sites_${domain}:80"
+
   cat >"$domain_file" <<EOF
 ${domain} {
 ${basic_auth_config}
-    reverse_proxy ${PREFIX_NAME}_sites_${domain}:80
+    reverse_proxy ${reverse_proxy_endpoint}
     encode zstd gzip
     file_server {
         precompressed gzip

@@ -109,9 +109,9 @@ add_node_app() {
 
   # Create reverse proxy config with or without basic auth
   cat >"$domain_file" <<EOF
-$domain {
-    reverse_proxy http://host.docker.internal:$port
-$basic_auth_config
+${domain} {
+${basic_auth_config}
+    reverse_proxy http://host.docker.internal:${port}
     import header_security_api
 }
 EOF
