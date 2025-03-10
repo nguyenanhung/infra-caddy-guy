@@ -60,8 +60,8 @@ networks:
 - [x] Static Site Server
 - [x] Node.js Builder: Start from scratch with NestJS Playbook, select version, port and anything...
 - [x] Node.js Application: Simple and lightweight connect Caddy Web Server with you Node.js Application
-- [ ] CodeIgniter3/CodeIgniter Builder
-- [ ] Symfony Builder
+- [x] PHP Application Routing
+- [x] Improve security (file, header) of common application: PHP, Node.js, SPA, Static site, Reverse Proxy
 
 - [x] ... and others packages supporting, can be mentioned as `redis`, `memcached`, `mongodb`, `mariadb`, `mysql`,
   `percona`, `postgresql`, `influxdb`, `rabbitmq`, `beanstalkd`, `gearmand`, `elasticsearch`, `mailhog`, `phpmyadmin`,
