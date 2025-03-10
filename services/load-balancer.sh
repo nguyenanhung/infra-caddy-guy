@@ -30,9 +30,9 @@ add_load_balancer() {
   fi
 
   # Check if domain already exists
-  local domain_file="$sites_path/$domain.caddy"
+  local domain_file="${sites_path}/${domain}.caddy"
   if [ -f "$domain_file" ]; then
-    message ERROR "Domain $domain already exists in $sites_path"
+    message ERROR "Domain $domain already exists in ${sites_path}"
     return 1
   fi
 
@@ -53,7 +53,7 @@ add_load_balancer() {
   # Ask for load balancing algorithm
   local lb_options="round_robin random least_conn ip_hash"
   local lb_algorithm
-  lb_algorithm=$(prompt_with_fzf "Select load balancing algorithm" "$lb_options")
+  lb_algorithm=$(prompt_with_fzf "Select load balancing algorithm" "${lb_options}")
 
   # Ask for sticky sessions
   local sticky_choice
@@ -62,7 +62,7 @@ add_load_balancer() {
   if [ "$sticky_choice" = "Yes" ]; then
     local session_name
     session_name=$(openssl rand -hex 8) # Random session name
-    sticky_config="sticky cookie lb_$session_name ttl=7200"
+    sticky_config="sticky cookie lb_${session_name} ttl=7200"
   fi
 
   # Enable health check
@@ -133,7 +133,7 @@ delete_load_balancer() {
     return 0
   fi
 
-  local site_file="$sites_path/$selected_site.caddy"
+  local site_file="${sites_path}/${selected_site}.caddy"
   validate_file_exists "$site_file" || {
     message ERROR "Load balancer $selected_site not found"
     return 1
