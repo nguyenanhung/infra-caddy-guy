@@ -47,7 +47,8 @@ add_load_balancer() {
     message ERROR "Backend servers cannot be empty"
     return 1
   }
-  local backends_list=$(echo "$backends" | tr ',' ' ')
+  local backends_list
+  backends_list=$(echo "$backends" | tr ',' ' ')
 
   # Ask for load balancing algorithm
   local lb_options="round_robin random least_conn ip_hash"
@@ -139,7 +140,8 @@ delete_load_balancer() {
   }
 
   # Backup before deletion
-  local backup_file="$BACKUP_DIR/$selected_site.caddy.$(date +%Y%m%d_%H%M%S)"
+  local backup_file
+  backup_file="$BACKUP_DIR/$selected_site.caddy.$(date +%Y%m%d_%H%M%S)"
   cp "$site_file" "$backup_file"
   message INFO "Backed up $selected_site.caddy to $backup_file"
 
@@ -223,7 +225,8 @@ delete_load_balancer_backend() {
   fi
 
   # Backup before modification
-  local backup_file="$BACKUP_DIR/$selected_site.caddy.$(date +%Y%m%d_%H%M%S)"
+  local backup_file
+  backup_file="$BACKUP_DIR/$selected_site.caddy.$(date +%Y%m%d_%H%M%S)"
   cp "$site_file" "$backup_file"
   message INFO "Backed up $selected_site.caddy to $backup_file"
 

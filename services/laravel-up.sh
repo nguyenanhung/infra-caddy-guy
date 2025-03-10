@@ -177,10 +177,11 @@ EOF
     if [ "$use_db" = "Yes" ]; then
       case "$db_type" in
       "mariadb" | "mysql" | "percona")
-        local db_root_password=$(generate_password)
-        local db_user="laravel_${domain}"
-        local db_password=$(generate_password)
-        local db_database="laravel_db_${domain}"
+        local db_root_password db_user db_password db_database
+        db_root_password=$(generate_password)
+        db_user="laravel_${domain}"
+        db_password=$(generate_password)
+        db_database="laravel_db_${domain}"
         echo "MYSQL_ROOT_PASSWORD=${db_root_password}" >>"$env_file"
         echo "DB_CONNECTION=mysql" >>"$env_file"
         echo "DB_HOST=${db_container}" >>"$env_file"
@@ -190,9 +191,10 @@ EOF
         echo "DB_PASSWORD=${db_password}" >>"$env_file"
         ;;
       "mongodb")
-        local mongo_admin_user="admin_${domain}"
-        local mongo_admin_password=$(generate_password)
-        local mongo_db="laravel_db_${domain}"
+        local mongo_admin_user mongo_admin_password mongo_db
+        mongo_admin_user="admin_${domain}"
+        mongo_admin_password=$(generate_password)
+        mongo_db="laravel_db_${domain}"
         echo "MONGO_INITDB_ROOT_USERNAME=${mongo_admin_user}" >>"$env_file"
         echo "MONGO_INITDB_ROOT_PASSWORD=${mongo_admin_password}" >>"$env_file"
         echo "MONGO_INITDB_DATABASE=${mongo_db}" >>"$env_file"
@@ -203,9 +205,10 @@ EOF
         fi
         ;;
       "postgresql")
-        local pg_user="laravel_${domain}"
-        local pg_password=$(generate_password)
-        local pg_database="laravel_db_${domain}"
+        local pg_user pg_password pg_database
+        pg_user="laravel_${domain}"
+        pg_password=$(generate_password)
+        pg_database="laravel_db_${domain}"
         echo "POSTGRES_USER=${pg_user}" >>"$env_file"
         echo "POSTGRES_PASSWORD=${pg_password}" >>"$env_file"
         echo "POSTGRES_DB=${pg_database}" >>"$env_file"
@@ -225,7 +228,8 @@ EOF
     if [ "$use_cache" = "Yes" ]; then
       case "$cache_type" in
       "redis")
-        local redis_password=$(generate_password)
+        local redis_password
+        redis_password=$(generate_password)
         echo "REDIS_PASSWORD=${redis_password}" >>"$env_file"
         if [ "$cache_separate" = "Yes" ]; then
           echo "REDIS_HOST=${cache_container}" >>"$env_file"
@@ -248,7 +252,8 @@ EOF
   fi
 
   # Create docker-compose.yml
-  local include_docker_version=$(set_compose_version)
+  local include_docker_version
+  include_docker_version=$(set_compose_version)
   cat >"$compose_file" <<EOF
 ${include_docker_version}
 networks:
@@ -400,12 +405,13 @@ EOF
   # Configure Caddy
   local basic_auth_config=""
   if confirm_action "Enable ${GREEN}basic auth${NC} for this ${GREEN}Laravel Application${NC}?"; then
-    local username=$(prompt_with_default "Enter basic auth username" "auth-admin")
-    local password=$(prompt_with_default "Enter basic auth password (leave blank for random)" "")
+    local username password hashed_password auth_path
+    username=$(prompt_with_default "Enter basic auth username" "auth-admin")
+    password=$(prompt_with_default "Enter basic auth password (leave blank for random)" "")
     [ -z "$password" ] && password=$(generate_password) && message INFO "Generated password: $password"
-    local hashed_password=$(docker exec "${CADDY_CONTAINER_NAME}" caddy hash-password --plaintext "$password" | tail -n 1)
+    hashed_password=$(docker exec "${CADDY_CONTAINER_NAME}" caddy hash-password --plaintext "$password" | tail -n 1)
     # Prepare basic auth config
-    local auth_path=""
+    auth_path=""
     if [ -n "$auth_path" ]; then
       basic_auth_config="@path_$auth_path {\n    path $auth_path\n}\nhandle @path_$auth_path {\n    basic_auth {\n        $username $hashed_password\n    }\n}"
     else

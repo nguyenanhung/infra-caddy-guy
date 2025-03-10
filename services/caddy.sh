@@ -157,7 +157,7 @@ EOF
       docker ps -a --filter "name=${CADDY_CONTAINER_NAME}"
       docker exec -it "${CADDY_CONTAINER_NAME}" apk add --no-cache netcat-openbsd # Install netcat-openbsd for testing purposes
       docker exec -it "${CADDY_CONTAINER_NAME}" nc -zv host.docker.internal 80    # Test Caddy call to internal host
-      print_message
+      echo
       message NOTE "If your application is PHP and needs to run with FPM (eg: Laravel, WordPress ...), you need to deploy your source code to the /home/infra-caddy-sites/<domain>/html directory for the application to work. Other applications like NodeJS, ReactJS can use reverse-proxy so you can deploy anywhere."
     else
       message ERROR "Caddy container ${CADDY_CONTAINER_NAME} failed to start"
@@ -218,7 +218,8 @@ delete_site() {
   }
 
   # Backup before deletion
-  local backup_file="$BACKUP_DIR/$selected_site.caddy.$(date +%Y%m%d_%H%M%S)"
+  local backup_file
+  backup_file="$BACKUP_DIR/$selected_site.caddy.$(date +%Y%m%d_%H%M%S)"
   cp "$site_file" "$backup_file"
   message INFO "Backed up $selected_site.caddy to $backup_file"
 
@@ -470,7 +471,8 @@ add_basic_auth() {
   hashed_password=$(docker exec "${CADDY_CONTAINER_NAME}" caddy hash-password --plaintext "$password" | tail -n 1)
 
   # Backup config before modification
-  local backup_file="$BACKUP_DIR/$domain.caddy.$(date +%Y%m%d_%H%M%S)"
+  local backup_file
+  backup_file="$BACKUP_DIR/$domain.caddy.$(date +%Y%m%d_%H%M%S)"
   cp "$domain_file" "$backup_file"
   message INFO "Backed up $domain.caddy to $backup_file"
 

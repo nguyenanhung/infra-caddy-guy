@@ -160,7 +160,8 @@ delete_node_app() {
   username=$(prompt_with_default "Enter username to delete from basic auth (leave blank to delete entire app)" "")
 
   # Backup config before modification
-  local backup_file="$BACKUP_DIR/$domain.caddy.$(date +%Y%m%d_%H%M%S)"
+  local backup_file
+  backup_file="$BACKUP_DIR/$domain.caddy.$(date +%Y%m%d_%H%M%S)"
   cp "$domain_file" "$backup_file"
   message INFO "Backed up $domain.caddy to $backup_file"
 

@@ -177,7 +177,8 @@ delete_laravel() {
   }
 
   # Backup before deletion
-  local backup_file="$BACKUP_DIR/$selected_site.caddy.$(date +%Y%m%d_%H%M%S)"
+  local backup_file
+  backup_file="$BACKUP_DIR/$selected_site.caddy.$(date +%Y%m%d_%H%M%S)"
   cp "$site_file" "$backup_file"
   message INFO "Backed up $selected_site.caddy to $backup_file"
 

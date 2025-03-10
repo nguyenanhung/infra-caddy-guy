@@ -39,21 +39,24 @@ enable_service() {
   local default_mount_path="${SERVICE_MOUNT_PATHS[$service_name]}"
 
   # Ask for image version
-  local image_options="latest $(echo "$default_image" | cut -d':' -f1):alpine $(echo "$default_image" | cut -d':' -f1):slim"
-  local image=$(prompt_with_fzf "Select image for $service_name" "$image_options" "$default_image")
+  local image_options image
+  image_options="latest $(echo "$default_image" | cut -d':' -f1):alpine $(echo "$default_image" | cut -d':' -f1):slim"
+  image=$(prompt_with_fzf "Select image for $service_name" "$image_options" "$default_image")
 
   # Ask for external port
   local default_port_suggestions="127.0.0.1:${default_port} 127.0.0.1:$((default_port + 1)) 127.0.0.1:$((default_port + 2)) ${default_port} $((default_port + 1)) $((default_port + 2))"
   message INFO "Internal port for $service_name will be fixed at $default_port"
-  local external_port=$(prompt_with_fzf "Select or enter an external port to map to $service_name's internal port $default_port. (Note: If you need to set up security (some applications like redis), it's best to choose the range 127.0.0.1:xxx)" "$default_port_suggestions" "$default_port")
+  local external_port
+  external_port=$(prompt_with_fzf "Select or enter an external port to map to $service_name's internal port $default_port. (Note: If you need to set up security (some applications like redis), it's best to choose the range 127.0.0.1:xxx)" "$default_port_suggestions" "$default_port")
   while ! validate_port_mapping "$external_port" || ! check_port "$(echo "$external_port" | grep -o '[0-9]\+$')"; do
     message ERROR "Port $external_port is invalid or already in use."
     external_port=$(prompt_with_fzf "Select or enter a different external port for $service_name" "$default_port_suggestions" "$default_port")
   done
 
   # Ask for resource limits
-  local resource_options="--cpus=0.5 --memory=256m --cpus=1 --memory=512m --cpus=1 --memory=1g --cpus=2 --memory=2g custom"
-  local resources=$(prompt_with_fzf "Select or enter resource limits for $service_name" "$resource_options" "$default_resources")
+  local resource_options resources resource_cpus resource_memory
+  resource_options="--cpus=0.5 --memory=256m --cpus=1 --memory=512m --cpus=1 --memory=1g --cpus=2 --memory=2g custom"
+  resources=$(prompt_with_fzf "Select or enter resource limits for $service_name" "$resource_options" "$default_resources")
   if [ "$resources" = "custom" ]; then
     resources=$(prompt_with_default "Enter custom resource limits (e.g., --cpus=1 --memory=512m)" "$default_resources")
     while ! echo "$resources" | grep -qE "--cpus=[0-9.]+ --memory=[0-9]+[mg]"; do
@@ -61,12 +64,13 @@ enable_service() {
       resources=$(prompt_with_default "Enter custom resource limits again" "$default_resources")
     done
   fi
-  local resource_cpus="${resources##*--cpus=}" resource_cpus="${resource_cpus%% *}"
-  local resource_memory="${resources##*--memory=}" resource_memory="${resource_memory%% *}"
+  resource_cpus="${resources##*--cpus=}" resource_cpus="${resource_cpus%% *}"
+  resource_memory="${resources##*--memory=}" resource_memory="${resource_memory%% *}"
 
   # Ask for restart policy
-  local restart_options="unless-stopped on-failure no always"
-  local restart_policy=$(prompt_with_fzf "Select restart policy for $service_name" "$restart_options")
+  local restart_options restart_policy
+  restart_options="unless-stopped on-failure no always"
+  restart_policy=$(prompt_with_fzf "Select restart policy for $service_name" "$restart_options")
 
   # Define volume
   local data_volume=""
@@ -192,7 +196,8 @@ enable_service() {
   [ -f "$env_file" ] && chmod 600 "$env_file"
 
   # Generate docker-compose.yml
-  local include_docker_version=$(set_compose_version)
+  local include_docker_version
+  include_docker_version=$(set_compose_version)
   cat >"$compose_file" <<EOF
 ${include_docker_version}
 networks:

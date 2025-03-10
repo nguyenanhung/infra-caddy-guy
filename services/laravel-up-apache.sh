@@ -78,7 +78,8 @@ CMD ["apache2-foreground"]
 EOF
 
   # Create docker-compose.yml
-  local include_docker_version=$(set_compose_version)
+  local include_docker_version
+  include_docker_version=$(set_compose_version)
   cat >"$compose_file" <<EOF
 ${include_docker_version}
 networks:
@@ -132,10 +133,11 @@ EOF
   # Configure Caddy
   local basic_auth_config=""
   if confirm_action "Enable ${GREEN}basic auth${NC} for this ${GREEN}Laravel Application${NC}?"; then
-    local username=$(prompt_with_default "Enter basic auth username" "auth-admin")
-    local password=$(prompt_with_default "Enter basic auth password (leave blank for random)" "")
+    local username password hashed_password
+    username=$(prompt_with_default "Enter basic auth username" "auth-admin")
+    password=$(prompt_with_default "Enter basic auth password (leave blank for random)" "")
     [ -z "$password" ] && password=$(generate_password) && message INFO "Generated password: $password"
-    local hashed_password=$(docker exec "${CADDY_CONTAINER_NAME}" caddy hash-password --plaintext "$password" | tail -n 1)
+    hashed_password=$(docker exec "${CADDY_CONTAINER_NAME}" caddy hash-password --plaintext "$password" | tail -n 1)
     # Prepare basic auth config
     local auth_path=""
     if [ -n "$auth_path" ]; then
