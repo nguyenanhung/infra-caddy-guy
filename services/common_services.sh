@@ -231,11 +231,13 @@ EOF
     echo "    volumes:" >>"$compose_file"
     echo "      - $data_volume" >>"$compose_file"
   }
-  echo "    healthcheck:" >>"$compose_file"
-  echo "      test: [\"CMD-SHELL\", \"${default_healthcheck}\"]" >>"$compose_file"
-  echo "      interval: 30s" >>"$compose_file"
-  echo "      retries: 3" >>"$compose_file"
-  echo "      start_period: 10s" >>"$compose_file"
+  cat <<EOL >>"$compose_file"
+    healthcheck:
+      test: ["CMD-SHELL", "${default_healthcheck}"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+EOL
 
   # Show overview and confirm
   print_message "Overview of new service ${service_name}"

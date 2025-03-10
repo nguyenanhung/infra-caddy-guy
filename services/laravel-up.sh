@@ -182,22 +182,26 @@ EOF
         db_user="laravel_${domain}"
         db_password=$(generate_password)
         db_database="laravel_db_${domain}"
-        echo "MYSQL_ROOT_PASSWORD=${db_root_password}" >>"$env_file"
-        echo "DB_CONNECTION=mysql" >>"$env_file"
-        echo "DB_HOST=${db_container}" >>"$env_file"
-        echo "DB_PORT=${db_port:-3306}" >>"$env_file"
-        echo "DB_DATABASE=${db_database}" >>"$env_file"
-        echo "DB_USERNAME=${db_user}" >>"$env_file"
-        echo "DB_PASSWORD=${db_password}" >>"$env_file"
+        cat >>"$env_file" <<EOF
+MYSQL_ROOT_PASSWORD=${db_root_password}
+DB_CONNECTION=mysql
+DB_HOST=${db_container}
+DB_PORT=${db_port:-3306}
+DB_DATABASE=${db_database}
+DB_USERNAME=${db_user}
+DB_PASSWORD=${db_password}
+EOF
         ;;
       "mongodb")
         local mongo_admin_user mongo_admin_password mongo_db
         mongo_admin_user="admin_${domain}"
         mongo_admin_password=$(generate_password)
         mongo_db="laravel_db_${domain}"
-        echo "MONGO_INITDB_ROOT_USERNAME=${mongo_admin_user}" >>"$env_file"
-        echo "MONGO_INITDB_ROOT_PASSWORD=${mongo_admin_password}" >>"$env_file"
-        echo "MONGO_INITDB_DATABASE=${mongo_db}" >>"$env_file"
+        cat >>"$env_file" <<EOF
+MONGO_INITDB_ROOT_USERNAME=${mongo_admin_user}
+MONGO_INITDB_ROOT_PASSWORD=${mongo_admin_password}
+MONGO_INITDB_DATABASE=${mongo_db}
+EOF
         if [ "$db_separate" = "Yes" ]; then
           echo "MONGO_URL=mongodb://${mongo_admin_user}:${mongo_admin_password}@${db_container}:${db_port:-27017}/${mongo_db}?authSource=admin" >>"$env_file"
         else
@@ -213,12 +217,14 @@ EOF
         echo "POSTGRES_PASSWORD=${pg_password}" >>"$env_file"
         echo "POSTGRES_DB=${pg_database}" >>"$env_file"
         if [ "$db_separate" = "Yes" ]; then
-          echo "DB_CONNECTION=pgsql" >>"$env_file"
-          echo "DB_HOST=${db_container}" >>"$env_file"
-          echo "DB_PORT=${db_port:-5432}" >>"$env_file"
-          echo "DB_DATABASE=${pg_database}" >>"$env_file"
-          echo "DB_USERNAME=${pg_user}" >>"$env_file"
-          echo "DB_PASSWORD=${pg_password}" >>"$env_file"
+          cat >>"$env_file" <<EOF
+DB_CONNECTION=pgsql
+DB_HOST=${db_container}
+DB_PORT=${db_port:-5432}
+DB_DATABASE=${pg_database}
+DB_USERNAME=${pg_user}
+DB_PASSWORD=${pg_password}
+EOF
         else
           echo "# DB_CONNECTION depends on shared container port" >>"$env_file"
         fi
@@ -232,9 +238,11 @@ EOF
         redis_password=$(generate_password)
         echo "REDIS_PASSWORD=${redis_password}" >>"$env_file"
         if [ "$cache_separate" = "Yes" ]; then
-          echo "REDIS_HOST=${cache_container}" >>"$env_file"
-          echo "REDIS_PORT=${cache_port:-6379}" >>"$env_file"
-          echo "REDIS_PASSWORD=${redis_password}" >>"$env_file"
+          cat >>"$env_file" <<EOF
+REDIS_HOST=${cache_container}
+REDIS_PORT=${cache_port:-6379}
+REDIS_PASSWORD=${redis_password}
+EOF
         else
           echo "# REDIS_HOST and REDIS_PORT depend on shared container" >>"$env_file"
         fi
@@ -292,20 +300,22 @@ EOF
 
   # Add database if separate
   if [ "$db_separate" = "Yes" ] && [ -n "$db_type" ]; then
-    echo "  ${db_container}:" >>"$compose_file"
-    echo "    image: ${SERVICE_IMAGES[$db_type]}" >>"$compose_file"
-    echo "    container_name: ${db_container}" >>"$compose_file"
-    echo "    volumes:" >>"$compose_file"
-    echo "      - $CONFIG_DIR/${db_container}/data:${SERVICE_MOUNT_PATHS[$db_type]}" >>"$compose_file"
-    echo "    ports:" >>"$compose_file"
-    echo "      - \"${db_port:-${SERVICE_PORTS[$db_type]}}:${SERVICE_PORTS[$db_type]}\"" >>"$compose_file"
-    echo "    networks:" >>"$compose_file"
-    echo "      - ${sites_network_name}" >>"$compose_file"
-    echo "    healthcheck:" >>"$compose_file"
-    echo "      test: [\"CMD-SHELL\", \"${SERVICE_HEALTHCHECKS[$db_type]}\"]" >>"$compose_file"
-    echo "      interval: 30s" >>"$compose_file"
-    echo "      retries: 3" >>"$compose_file"
-    echo "      start_period: 10s" >>"$compose_file"
+    cat >>"$compose_file" <<EOF
+  ${db_container}:
+    image: ${SERVICE_IMAGES[$db_type]}
+    container_name: ${db_container}
+    volumes:
+      - $CONFIG_DIR/${db_container}/data:${SERVICE_MOUNT_PATHS[$db_type]}
+    ports:
+      - "${db_port:-${SERVICE_PORTS[$db_type]}}:${SERVICE_PORTS[$db_type]}"
+    networks:
+      - ${sites_network_name}
+    healthcheck:
+      test: ["CMD-SHELL", "${SERVICE_HEALTHCHECKS[$db_type]}"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+EOF
     if [[ "$db_type" == "mariadb" || "$db_type" == "mysql" || "$db_type" == "percona" || "$db_type" == "mongodb" || "$db_type" == "postgresql" ]]; then
       echo "    env_file:" >>"$compose_file"
       echo "      - .env" >>"$compose_file"
@@ -314,20 +324,22 @@ EOF
 
   # Add cache if separate
   if [ "$cache_separate" = "Yes" ] && [ -n "$cache_type" ]; then
-    echo "  ${cache_container}:" >>"$compose_file"
-    echo "    image: ${SERVICE_IMAGES[$cache_type]}" >>"$compose_file"
-    echo "    container_name: ${cache_container}" >>"$compose_file"
-    echo "    volumes:" >>"$compose_file"
-    echo "      - $CONFIG_DIR/${cache_container}/data:${SERVICE_MOUNT_PATHS[$cache_type]}" >>"$compose_file"
-    echo "    ports:" >>"$compose_file"
-    echo "      - \"${cache_port:-${SERVICE_PORTS[$cache_type]}}:${SERVICE_PORTS[$cache_type]}\"" >>"$compose_file"
-    echo "    networks:" >>"$compose_file"
-    echo "      - ${sites_network_name}" >>"$compose_file"
-    echo "    healthcheck:" >>"$compose_file"
-    echo "      test: [\"CMD-SHELL\", \"${SERVICE_HEALTHCHECKS[$cache_type]}\"]" >>"$compose_file"
-    echo "      interval: 30s" >>"$compose_file"
-    echo "      retries: 3" >>"$compose_file"
-    echo "      start_period: 10s" >>"$compose_file"
+    cat >>"$compose_file" <<EOF
+  ${cache_container}:
+    image: ${SERVICE_IMAGES[$cache_type]}
+    container_name: ${cache_container}
+    volumes:
+      - $CONFIG_DIR/${cache_container}/data:${SERVICE_MOUNT_PATHS[$cache_type]}
+    ports:
+      - "${cache_port:-${SERVICE_PORTS[$cache_type]}}:${SERVICE_PORTS[$cache_type]}"
+    networks:
+      - ${sites_network_name}
+    healthcheck:
+      test: ["CMD-SHELL", "${SERVICE_HEALTHCHECKS[$cache_type]}"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+EOF
     if [ "$cache_type" = "redis" ]; then
       echo "    env_file:" >>"$compose_file"
       echo "      - .env" >>"$compose_file"
@@ -336,22 +348,24 @@ EOF
 
   # Add worker/scheduler if separate
   if [ "$worker_separate" = "Yes" ]; then
-    echo "  ${worker_container}:" >>"$compose_file"
-    echo "    build:" >>"$compose_file"
-    echo "      context: ." >>"$compose_file"
-    echo "      dockerfile: Dockerfile.cli" >>"$compose_file"
-    echo "    container_name: ${worker_container}" >>"$compose_file"
-    echo "    volumes:" >>"$compose_file"
-    echo "      - ${source_dir}:/var/www/${domain}/html" >>"$compose_file"
-    echo "    extra_hosts:" >>"$compose_file"
-    echo "      - \"host.docker.internal:host-gateway\"" >>"$compose_file"
-    echo "    networks:" >>"$compose_file"
-    echo "      - ${sites_network_name}" >>"$compose_file"
-    echo "    healthcheck:" >>"$compose_file"
-    echo "      test: [\"CMD\", \"php\", \"-v\"]" >>"$compose_file"
-    echo "      interval: 30s" >>"$compose_file"
-    echo "      retries: 3" >>"$compose_file"
-    echo "      start_period: 10s" >>"$compose_file"
+    cat >>"$compose_file" <<EOF
+  ${worker_container}:
+    build:
+      context: .
+      dockerfile: Dockerfile.cli
+    container_name: ${worker_container}
+    volumes:
+      - ${source_dir}:/var/www/${domain}/html
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - ${sites_network_name}
+    healthcheck:
+      test: ["CMD", "php", "-v"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+EOF
     if [ "$use_db" = "Yes" ]; then
       echo "    env_file:" >>"$compose_file"
       echo "      - .env" >>"$compose_file"
