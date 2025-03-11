@@ -80,7 +80,7 @@ setup_caddy() {
 (header_security_default) {
     header {
         # Click-jacking protection
-        X-Frame-Options "SAMEORIGIN"
+        # X-Frame-Options "SAMEORIGIN"
 
         # Disable clients from sniffing the media type
         X-Content-Type-Options "nosniff"
@@ -107,7 +107,7 @@ setup_caddy() {
 
 (header_security_common) {
     header {
-        X-Frame-Options "SAMEORIGIN"
+        # X-Frame-Options "SAMEORIGIN"
         X-Content-Type-Options "nosniff"
         Referrer-Policy "strict-origin-when-cross-origin"
         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
