@@ -66,10 +66,14 @@ add_reverse_proxy() {
       basic_auth_config="@notAcme {\n    not path /.well-known/acme-challenge/*\n}\nbasic_auth @notAcme {\n    $username $hashed_password\n}"
     fi
   fi
-
+  # Only HTTP Mode
+  local domain_block_name="${domain}"
+  if confirm_action "The system will automatically register an SSL certificate for the domain ${GREEN}${domain}${NC}. Do you want ${YELLOW}to automatically disable HTTPs usage and only use HTTP${NC}?. ${YELLOW}Consideration${NC}: This will affect the security of ${domain}!"; then
+    local domain_block_name="http://${domain}"
+  fi
   # Create reverse proxy config with or without basic auth
   cat >"$domain_file" <<EOF
-${domain} {
+${domain_block_name} {
 ${basic_auth_config}
     import header_security_reverse_proxy
     reverse_proxy ${upstream_url}

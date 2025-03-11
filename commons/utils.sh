@@ -1,7 +1,10 @@
 #!/bin/bash
 
+# shellcheck source=./../commons/color.sh
 source "$BASE_DIR/commons/color.sh"
+# shellcheck source=./../commons/config.sh
 source "$BASE_DIR/commons/config.sh"
+# shellcheck source=./../commons/validation.sh
 source "$BASE_DIR/commons/validation.sh"
 message() {
   local level

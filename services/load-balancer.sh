@@ -73,10 +73,14 @@ add_load_balancer() {
   ws_choice=$(prompt_with_fzf "Enable WebSocket support?" "Yes No")
   local ws_config=""
   [ "$ws_choice" = "Yes" ] && ws_config="websocket"
-
+  # Only HTTP Mode
+  local domain_block_name="${domain}"
+  if confirm_action "The system will automatically register an SSL certificate for the domain ${GREEN}${domain}${NC}. Do you want ${YELLOW}to automatically disable HTTPs usage and only use HTTP${NC}?. ${YELLOW}Consideration${NC}: This will affect the security of ${domain}!"; then
+    local domain_block_name="http://${domain}"
+  fi
   # Create load balancer config
   cat >"$domain_file" <<EOF
-${domain} {
+${domain_block_name} {
     @path {
         path ${path}
     }

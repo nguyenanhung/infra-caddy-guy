@@ -111,9 +111,14 @@ add_static_site() {
     message INFO "Backed up $domain.caddy to $backup_file"
   fi
 
+  # Only HTTP Mode
+  local domain_block_name="${domain}"
+  if confirm_action "The system will automatically register an SSL certificate for the domain ${GREEN}${domain}${NC}. Do you want ${YELLOW}to automatically disable HTTPs usage and only use HTTP${NC}?. ${YELLOW}Consideration${NC}: This will affect the security of ${domain}!"; then
+    local domain_block_name="http://${domain}"
+  fi
   # Create static site config with or without basic auth
   cat >"$domain_file" <<EOF
-${domain} {
+${domain_block_name} {
 ${basic_auth_config}
     root * ${static_dir}
     import header_security_spa

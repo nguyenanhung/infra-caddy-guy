@@ -450,14 +450,18 @@ EOF
       basic_auth_config="@notAcme {\n    not path /.well-known/acme-challenge/*\n}\nbasic_auth @notAcme {\n    $username $hashed_password\n}"
     fi
   fi
-
+  # Only HTTP Mode
+  local domain_block_name="${domain}"
+  if confirm_action "The system will automatically register an SSL certificate for the domain ${GREEN}${domain}${NC}. Do you want ${YELLOW}to automatically disable HTTPs usage and only use HTTP${NC}?. ${YELLOW}Consideration${NC}: This will affect the security of ${domain}!"; then
+    local domain_block_name="http://${domain}"
+  fi
   # Write caddy domain configure file
   local root_directory php_fastcgi_endpoint
   root_directory="/var/www/${domain}/html/public"
   php_fastcgi_endpoint="${PREFIX_NAME}_sites_${domain}:9000"
 
   cat >"$domain_file" <<EOF
-${domain} {
+${domain_block_name} {
 ${basic_auth_config}
     # Internal SSL if you need
     #tls internal

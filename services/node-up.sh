@@ -387,9 +387,13 @@ EOL
   # Write caddy config
   local node_app_endpoint
   node_app_endpoint="http://${PREFIX_NAME}_sites_${domain}:${node_port}"
-
+  # Only HTTP Mode
+  local domain_block_name="${domain}"
+  if confirm_action "The system will automatically register an SSL certificate for the domain ${GREEN}${domain}${NC}. Do you want ${YELLOW}to automatically disable HTTPs usage and only use HTTP${NC}?. ${YELLOW}Consideration${NC}: This will affect the security of ${domain}!"; then
+    local domain_block_name="http://${domain}"
+  fi
   cat >"$domain_file" <<EOF
-${domain} {
+${domain_block_name} {
 ${basic_auth_config}
     reverse_proxy ${node_app_endpoint}
     import header_security_api

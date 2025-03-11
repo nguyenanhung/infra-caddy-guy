@@ -101,9 +101,13 @@ add_php_app() {
   # Create PHP application config
   local php_fastcgi_endpoint
   php_fastcgi_endpoint="${php_app_container}:${php_app_container_port}"
-
+  # Only HTTP Mode
+  local domain_block_name="${domain}"
+  if confirm_action "The system will automatically register an SSL certificate for the domain ${GREEN}${domain}${NC}. Do you want ${YELLOW}to automatically disable HTTPs usage and only use HTTP${NC}?. ${YELLOW}Consideration${NC}: This will affect the security of ${domain}!"; then
+    local domain_block_name="http://${domain}"
+  fi
   cat >"$domain_file" <<EOF
-${domain} {
+${domain_block_name} {
 ${basic_auth_config}
     # Internal SSL if you need
     #tls internal
