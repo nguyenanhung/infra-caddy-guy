@@ -106,41 +106,53 @@ setup_caddy() {
 }
 
 (header_security_common) {
-    X-Frame-Options "SAMEORIGIN"
-    X-Content-Type-Options "nosniff"
-    Referrer-Policy "strict-origin-when-cross-origin"
-    Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-    -Server Caddy
+    header {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        -Server
+    }
 }
 
 (header_security_php) {
     import header_security_common
-    Content-Security-Policy "upgrade-insecure-requests"
-    X-Xss-Protection "1; mode=block"
+    header {
+        Content-Security-Policy "upgrade-insecure-requests"
+        X-Xss-Protection "1; mode=block"
+    }
 }
 
 (header_security_api) {
     import header_security_common
-    Access-Control-Allow-Origin *
-    Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
-    Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+    header {
+        Access-Control-Allow-Origin *
+        Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+        Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+    }
 }
 
 (header_security_spa) {
     import header_security_common
-    Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
+    header {
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
+    }
 }
 
 (header_security_static) {
     import header_security_common
-    Cache-Control "public, max-age=86400, immutable"
+    header {
+        Cache-Control "public, max-age=86400, immutable"
+    }
 }
 
 (header_security_reverse_proxy) {
     import header_security_common
-    Access-Control-Allow-Origin *
-    Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
-    Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+    header {
+        Access-Control-Allow-Origin *
+        Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+        Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+    }
 }
 
 # WordPress
