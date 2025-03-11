@@ -14,6 +14,7 @@ setup_caddy() {
   local caddy_compose_path
   local caddyfile_path
   local sites_path
+  local certs_path
   local data_path
   local config_path
   local infra_caddy_sites_path
@@ -26,6 +27,7 @@ setup_caddy() {
 
   # Ensure required directories exist
   [ ! -d "$sites_path" ] && mkdir -p "$sites_path"
+  [ ! -d "$certs_path" ] && mkdir -p "$certs_path"
   [ ! -d "$data_path" ] && mkdir -p "$data_path"
   [ ! -d "$config_path" ] && mkdir -p "$config_path"
   [ ! -d "$infra_caddy_sites_path" ] && sudo mkdir -p "$infra_caddy_sites_path"
@@ -223,6 +225,7 @@ services:
       - "443:443"
     volumes:
       - "${caddyfile_path}:/etc/caddy/Caddyfile"
+      - "${certs_path}:/etc/caddy/certs"
       - "${sites_path}:/etc/caddy/sites"
       - "${data_path}:/data"
       - "${config_path}:/config"
