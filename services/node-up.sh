@@ -29,10 +29,10 @@ node_up() {
   local node_port="${2:-$(prompt_with_default "Enter port for Node.js app" "3000")}"
 
   # Node version: $3 or ask
-  local node_version="${3:-$(prompt_with_fzf "Select Node.js version" "16 18 20 22")}"
+  local node_version="${3:-$(prompt_with_fzf "Select Node.js version" "16 17 18 19 20 21 22 23")}"
 
   # Source directory: $4 or ask
-  local source_dir="${4:-$(prompt_with_default "Enter source directory for Node.js app" "/home/$domain/node-app")}"
+  local source_dir="${4:-$(prompt_with_default "Enter source directory for Node.js app" "/home/${domain}/node-app")}"
   [ ! -d "$source_dir" ] && { mkdir -p "$source_dir" || {
     message ERROR "Cannot create $source_dir"
     return 1
