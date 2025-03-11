@@ -34,10 +34,11 @@ laravel_up_apache() {
   }
   local install_laravel
   if [ ! -d "$source_dir" ]; then
-    mkdir -p "$source_dir" || {
+    sudo mkdir -p "$source_dir" || {
       message ERROR "Cannot create $source_dir"
       return 1
     }
+    sudo chown -R "${USER}:${USER}" "$source_dir"
     install_laravel="${4:-$(prompt_with_fzf "Source directory $source_dir is empty. Install new Laravel project?" "Yes No" "No")}"
   fi
 
@@ -47,7 +48,8 @@ laravel_up_apache() {
 
   # Create directories and files
   local laravel_dir="$laravel_base_dir/$domain"
-  mkdir -p "$laravel_dir"
+  sudo mkdir -p "$laravel_dir"
+  sudo chown -R "${USER}:${USER}" "$laravel_dir"
   local compose_file="$laravel_dir/docker-compose.yml"
   local dockerfile="$laravel_dir/Dockerfile"
 

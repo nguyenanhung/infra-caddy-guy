@@ -50,7 +50,8 @@ add_node_app() {
   # Prepare Node.js app directory
   local node_dir="$node_base_dir/$domain/node-app"
   if [ ! -d "$node_dir" ]; then
-    mkdir -p "$node_dir"
+    sudo mkdir -p "$node_dir"
+    sudo chown -R "${USER}:${USER}" "$node_dir"
     local install_nestjs
     install_nestjs=$(prompt_with_fzf "Directory $node_dir does not exist. Install NestJS?" "Yes No")
     if [ "$install_nestjs" = "Yes" ]; then

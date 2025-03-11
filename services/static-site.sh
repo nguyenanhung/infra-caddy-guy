@@ -38,7 +38,8 @@ add_static_site() {
   # Prepare static site directory
   local static_dir="$static_base_dir/$domain/dist"
   if [ ! -d "$static_dir" ]; then
-    mkdir -p "$static_dir"
+    sudo mkdir -p "$static_dir"
+    sudo chown -R "${USER}:${USER}" "$static_dir"
     echo "<!DOCTYPE html><html><body><h1>Welcome to $domain</h1></body></html>" >"$static_dir/index.html"
     message INFO "Created static site directory $static_dir with default index.html"
   fi

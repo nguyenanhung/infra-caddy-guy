@@ -108,10 +108,10 @@ bear_menu_interactive() {
     12) bash "${BASE_DIR}/bear-caddy" delete ;;
     13) bash "${BASE_DIR}/bear-caddy" basic-auth ;;
     14) bash "${BASE_DIR}/bear-caddy" delete-basic-auth ;;
-    15) bash "${BASE_DIR}/bear-caddy" add-reverse-proxy ;;
-    16) bash "${BASE_DIR}/bear-caddy" delete-reverse-proxy ;;
-    17) bash "${BASE_DIR}/bear-caddy" add-static-site ;;
-    18) bash "${BASE_DIR}/bear-caddy" delete-static-site ;;
+    15) bash "${BASE_DIR}/bear-caddy" add-static-site ;;
+    16) bash "${BASE_DIR}/bear-caddy" delete-static-site ;;
+    17) bash "${BASE_DIR}/bear-caddy" add-reverse-proxy ;;
+    18) bash "${BASE_DIR}/bear-caddy" delete-reverse-proxy ;;
     19) bash "${BASE_DIR}/bear-caddy" add-load-balancer ;;
     20) bash "${BASE_DIR}/bear-caddy" delete-load-balancer ;;
     21) bash "${BASE_DIR}/bear-caddy" delete-load-balancer-backend ;;
