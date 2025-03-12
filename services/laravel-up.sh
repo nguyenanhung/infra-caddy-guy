@@ -283,7 +283,7 @@ networks:
   ${NETWORK_NAME}:
     external: true
 
-services aant:
+services:
   ${PREFIX_NAME}_sites_${domain}:
     build:
       context: .
