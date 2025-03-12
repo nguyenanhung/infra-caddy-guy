@@ -208,6 +208,74 @@ lowercase_txt() {
     echo "$txt" | tr '[:upper:]' '[:lower:]' # Use tr command for older Bash versions
   fi
 }
+# Function to replace content in a file using SED. Usage: str_replace <search_value> <replace_value> <target_file>
+str_replace() {
+  local search_value="$1"  # The string to search for in the file.
+  local replace_value="$2" # The string to replace the search_value with.
+  local target_file="$3"   # The file where the replacement should occur.
+  # Check if the required parameters are provided
+  if [[ -z "$search_value" || -z "$target_file" ]]; then
+    message ERROR "Missing required parameters: search_value, target_file"
+    message TRACE "Usage: str_replace <search_value> <replace_value> <target_file>"
+    return 1
+  fi
+  # Display warning if replace_value is empty
+  if [[ -z "$replace_value" ]]; then
+    message WARN "Parameters 'replace_value' is empty. It doesn't cause an error, but it will replace search_value (${search_value}) with an empty value."
+  fi
+  # Escape special characters in the search and replacement values
+  local escaped_search_value
+  local escaped_replace_value
+  escaped_search_value=$(printf '%s\n' "$search_value" | sed 's/[\/&]/\\&/g')
+  escaped_replace_value=$(printf '%s\n' "$replace_value" | sed 's/[\/&]/\\&/g')
+  # Check if search_value exists in the target_file
+  if ! grep -q "$escaped_search_value" "$target_file"; then
+    message DEBUG "'${search_value}' not found in '$(basename "$target_file")'. No changes made."
+    return 0
+  fi
+  # Detect the operating system type using uname
+  local os_type uname_out
+  uname_out="$(uname -s)"
+  case "${uname_out}" in
+  Linux*)
+    if [ -f /etc/redhat-release ]; then
+      os_type="rhel" # RHEL/CentOS/Fedora
+    elif [ -f /etc/debian_version ]; then
+      os_type="debian" # Ubuntu/Debian/Mint
+    else
+      os_type="linux" # Other Linux distributions
+    fi
+    ;;
+  Darwin*)
+    os_type="macos" # macOS
+    ;;
+  *)
+    os_type="unknown" # Unknown operating system
+    ;;
+  esac
+  # Check file ownership and use sudo if necessary
+  local sed_command
+  if [[ "$os_type" == "macos" ]]; then
+    sed_command="sed -i"
+  else
+    if [[ "$(stat -c '%U:%G' "$target_file")" == "root:root" ]]; then
+      sed_command="sudo sed -i"
+    else
+      sed_command="sed -i"
+    fi
+  fi
+  # Perform the replacement using sed
+  case "$os_type" in
+  macos)
+    $sed_command '' "s|$escaped_search_value|$escaped_replace_value|g" "$target_file"
+    ;;
+  rhel | debian | linux)
+    $sed_command "s|$escaped_search_value|$escaped_replace_value|g" "$target_file"
+    ;;
+  esac
+  # Display results
+  message INFO "Replacement content from '${search_value}' to '${replace_value}' completed in file: '$(basename "$target_file")'!"
+}
 # Generate random strong password
 generate_password() {
   openssl rand -base64 27 | tr -d '\n' | head -c 36
