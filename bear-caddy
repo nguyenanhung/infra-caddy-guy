@@ -42,6 +42,20 @@ case "$1" in
     exit 1
   fi
   ;;
+"self-update")
+  if [ -d "$BASE_DIR" ]; then
+    cd "$BASE_DIR" || {
+      message ERROR "Failed go to the BASE_DIR of infra-caddy command"
+      exit 1
+    }
+    clear
+    git pull
+    ls -l
+  else
+    message ERROR "Failed to detected BASE_DIR of infra-caddy command"
+    exit 1
+  fi
+  ;;
 "init")
   setup_caddy
   ;;

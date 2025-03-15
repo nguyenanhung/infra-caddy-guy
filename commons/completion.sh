@@ -42,6 +42,7 @@ _infra_caddy_completions_build() {
     "node-restore"
     "node-remove"
     "go"
+    "self-update"
   )
   local cur="${COMP_WORDS[COMP_CWORD]}"
   mapfile -t COMPREPLY < <(compgen -W "${commands[*]}" -- "$cur")
