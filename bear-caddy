@@ -36,7 +36,7 @@ case "$1" in
     }
     clear
     message INFO "You are in the infra-caddy directory"
-    ls -la
+    ls -l
   else
     message ERROR "Failed to detected BASE_DIR of infra-caddy command"
     exit 1
