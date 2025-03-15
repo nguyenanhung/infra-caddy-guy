@@ -29,7 +29,7 @@ case "$1" in
   bear_welcome_introduce
   ;;
 "go")
-  if [ -d "$BASE_DIR"]; then
+  if [ -d "$BASE_DIR" ]; then
     cd "$BASE_DIR" || {
       message ERROR "Failed go to the BASE_DIR of infra-caddy command"
       exit 1
