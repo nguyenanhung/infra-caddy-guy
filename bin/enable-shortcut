@@ -45,11 +45,12 @@ create_bin_symlink() {
       echo -e "❌ ${RED}Error creating symlink${NC}: $1 -> $2, because $2 is not exists!"
       return 1
     fi
+
     local OS
-    local linked_cmd="ln -s "
+    local linked_cmd="ln -nfs "
     OS=$(os_detect)
     if [[ "$OS" != "MacOS" ]]; then
-      linked_cmd="sudo ln -s "
+      linked_cmd="sudo ln -nfs "
     fi
     if $linked_cmd "$2" "$1"; then
       echo -e "✅ ${GREEN}Created symlink success${NC}: $1 -> $2"
