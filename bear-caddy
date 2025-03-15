@@ -28,6 +28,20 @@ case "$1" in
 "introduce")
   bear_welcome_introduce
   ;;
+"go")
+  if [ -d "$BASE_DIR"]; then
+    cd "$BASE_DIR" || {
+      message ERROR "Failed go to the BASE_DIR of infra-caddy command"
+      exit 1
+    }
+    clear
+    message INFO "You are in the infra-caddy directory"
+    ls -la
+  else
+    message ERROR "Failed to detected BASE_DIR of infra-caddy command"
+    exit 1
+  fi
+  ;;
 "init")
   setup_caddy
   ;;
