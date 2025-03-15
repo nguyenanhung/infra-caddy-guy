@@ -597,16 +597,6 @@ add_basic_auth() {
   # Add basic auth to config
   if [ -n "$auth_path" ]; then
     # Specific path
-    #    cat <<EOF >>"$domain_file"
-    #@path_$auth_path {
-    #    path $auth_path
-    #}
-    #handle @path_$auth_path {
-    #    basic_auth {
-    #        $username $hashed_password
-    #    }
-    #}
-    #EOF
     awk -v auth_path="$auth_path" -v username="$username" -v hashed_password="$hashed_password" '
     BEGIN { inserted = 0 }
     {
@@ -625,14 +615,6 @@ add_basic_auth() {
     }' "${domain_file}" >"${domain_file}.tmp" && mv "${domain_file}.tmp" "$domain_file"
   else
     # Whole site
-    #    cat <<EOF >>"$domain_file"
-    #@notAcme {
-    #    not path /.well-known/acme-challenge/*
-    #}
-    #basic_auth @notAcme {
-    #    $username $hashed_password
-    #}
-    #EOF
     awk -v auth_path="$auth_path" -v username="$username" -v hashed_password="$hashed_password" '
     BEGIN { inserted = 0 }
     {
@@ -719,11 +701,12 @@ delete_basic_auth() {
   }
 
   # Remove basic auth block
-  if grep -A 2 "basic_auth" "$domain_file" | grep -q "$username"; then
-    sed -i "/basic_auth/,/}/d" "$domain_file"
-  elif grep -A 2 "@path" "$domain_file" | grep -q "$username"; then
-    sed -i "/@path_.*{/{:a;N;/}/!ba;/$username/d}" "$domain_file"
-  fi
+  awk '
+    BEGIN { delete_block = 0 }
+    /@notAcme|basic_auth/ { delete_block = 1 }
+    delete_block && /\}/ { delete_block = 0; next }
+    !delete_block
+' "$domain_file" >"$domain_file.tmp" && mv "$domain_file.tmp" "$domain_file"
 
   # Test Caddy syntax
   if caddy_validate; then
