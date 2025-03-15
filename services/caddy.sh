@@ -607,15 +607,22 @@ add_basic_auth() {
     #    }
     #}
     #EOF
-    sed -i '0,/{/s/{/{\
-    @path_'"$auth_path"' {\
-        path '"$auth_path"'\
-    }\
-    handle @path_'"$auth_path"' {\
-        basic_auth {\
-            '"$username"' '"$hashed_password"'\
-        }\
-    }/' "$domain_file"
+    awk -v auth_path="$auth_path" -v username="$username" -v hashed_password="$hashed_password" '
+    BEGIN { inserted = 0 }
+    {
+        print $0
+        if (!inserted && /{/) {
+            print "    @path_" auth_path " {"
+            print "        path " auth_path
+            print "    }"
+            print "    handle @path_" auth_path " {"
+            print "        basic_auth {"
+            print "            " username " " hashed_password
+            print "        }"
+            print "    }"
+            inserted = 1
+        }
+    }' "${domain_file}" >"${domain_file}.tmp" && mv "${domain_file}.tmp" "$domain_file"
   else
     # Whole site
     #    cat <<EOF >>"$domain_file"
@@ -626,13 +633,20 @@ add_basic_auth() {
     #    $username $hashed_password
     #}
     #EOF
-    sed -i '0,/{/s/{/{\
-    @notAcme {\
-        not path \/\.well-known\/acme-challenge\/\*\
-    }\
-    basic_auth @notAcme {\
-        '"$username"' '"$hashed_password"'\
-    }/' "$domain_file"
+    awk -v auth_path="$auth_path" -v username="$username" -v hashed_password="$hashed_password" '
+    BEGIN { inserted = 0 }
+    {
+        print $0
+        if (!inserted && /{/) {
+            print "    @notAcme {"
+            print "        not path /.well-known/acme-challenge/*"
+            print "    }"
+            print "    basic_auth @notAcme {"
+            print "        " username " " hashed_password
+            print "    }"
+            inserted = 1
+        }
+    }' "${domain_file}" >"${domain_file}.tmp" && mv "${domain_file}.tmp" "$domain_file"
   fi
 
   # Test Caddy syntax
