@@ -21,6 +21,7 @@ setup_caddy() {
   caddy_compose_path="${CONFIG_DIR}/docker-compose.yml"
   caddyfile_path="${CONFIG_DIR}/Caddyfile"
   sites_path="${CONFIG_DIR}/sites"
+  certs_path="${CONFIG_DIR}/certs"
   data_path="${CONFIG_DIR}/caddy_data"
   config_path="${CONFIG_DIR}/caddy_config"
   infra_caddy_sites_path="${CADDY_HOME_DIR}"
