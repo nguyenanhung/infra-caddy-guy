@@ -669,6 +669,7 @@ caddy_reload() {
   message INFO "Reloading Caddy..."
   if docker restart "${CADDY_CONTAINER_NAME}"; then
     message SUCCESS "✅ Caddy reloaded successfully"
+    wait_for_health "${CADDY_CONTAINER_NAME}" "Caddy Web Server"
   else
     message ERROR "❌ Failed to reload Caddy. Please check logs Caddy container"
     docker logs "${CADDY_CONTAINER_NAME}" --tail 50
