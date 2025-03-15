@@ -31,7 +31,7 @@ setup_caddy() {
   [ ! -d "$certs_path" ] && mkdir -p "$certs_path"
   [ ! -d "$data_path" ] && mkdir -p "$data_path"
   [ ! -d "$config_path" ] && mkdir -p "$config_path"
-  [ ! -d "$infra_caddy_sites_path" ] && sudo mkdir -p "$infra_caddy_sites_path"
+  [ ! -d "$infra_caddy_sites_path" ] && sudo mkdir -p "$infra_caddy_sites_path" && sudo chown -R root:docker "$infra_caddy_sites_path"
 
   # Create default Caddyfile if not exists
   if [ ! -f "$caddyfile_path" ]; then
