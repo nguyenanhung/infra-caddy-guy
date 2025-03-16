@@ -224,6 +224,7 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      - "443:443/udp"
     volumes:
       - "${caddyfile_path}:/etc/caddy/Caddyfile"
       - "${certs_path}:/etc/caddy/certs"
