@@ -11,6 +11,7 @@ setup_caddy() {
   check_docker
 
   # Define locations inside config/
+  local caddy_compose_path_origin
   local caddy_compose_path
   local caddyfile_path
   local sites_path
@@ -18,6 +19,7 @@ setup_caddy() {
   local data_path
   local config_path
   local infra_caddy_sites_path
+  caddy_compose_path_origin="${CONFIG_DIR}/docker-compose.yml"
   caddy_compose_path="${CONFIG_DIR}/docker-compose.yml"
   caddyfile_path="${CONFIG_DIR}/Caddyfile"
   sites_path="${CONFIG_DIR}/sites"
@@ -268,7 +270,11 @@ EOF
 
     # Create Caddy container
     message INFO "Creating Caddy container"
-    docker compose -f "${caddy_compose_path}" up -d --remove-orphans
+    if [[ "${caddy_compose_path}" == "${caddy_compose_path_origin}" ]]; then
+      docker compose up -d --remove-orphans
+    else
+      docker compose -f "${caddy_compose_path}" up -d --remove-orphans
+    fi
     message SUCCESS "Caddy container ${CADDY_CONTAINER_NAME} created successfully"
 
     if wait_for_health "${CADDY_CONTAINER_NAME}" "Caddy Web Server"; then
