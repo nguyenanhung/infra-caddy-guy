@@ -155,9 +155,9 @@ SERVICE_MOUNT_PATHS=(
   ["minio"]="/data"
 )
 docker_compose_command() {
-  if command -v docker-compose &>/dev/null; then
+  if command -v docker-compose >/dev/null 2>&1; then
     docker-compose "$@"
-  elif docker compose version &>/dev/null; then
+  elif docker compose version >/dev/null 2>&1; then
     docker compose "$@"
   else
     echo "❌ Error: Neither 'docker-compose' nor 'docker compose' is installed." >&2
