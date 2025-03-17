@@ -381,6 +381,11 @@ check_docker() {
       exit 1
     fi
   fi
+  if ! check_docker_compose; then
+    if confirm_action "Do you want to install Docker Compose?"; then
+      install_docker_compose
+    fi
+  fi
 }
 # Install Docker (basic, may need customization per OS)
 install_docker() {
@@ -407,6 +412,30 @@ install_docker() {
   else
     message INFO "Docker installation skipped. Please install Docker manually to use this script."
     exit 1
+  fi
+}
+# Check docker-compose installation
+check_docker_compose() {
+  if docker compose version >/dev/null 2>&1 || command -v docker-compose >/dev/null 2>&1; then
+    return 0
+  fi
+  return 1
+}
+# Install Docker Compose (basic, may need customization per OS)
+# Note: This script assumes Docker is already installed and running.
+install_docker_compose() {
+  if check_docker_compose; then
+    message INFO "✅ Docker Compose is already installed."
+    return 0
+  fi
+  message INFO "🔄 Installing Docker Compose..."
+  sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  sudo chmod +x /usr/local/bin/docker-compose
+  if check_docker_compose; then
+    message INFO "✅ Docker Compose installed successfully."
+  else
+    message ERROR "❌ Installation Docker Compose failed. Please check manually." >&2
+    return 1
   fi
 }
 # Check docker logs
