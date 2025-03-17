@@ -429,7 +429,13 @@ install_docker_compose() {
     return 0
   fi
   message INFO "🔄 Installing Docker Compose..."
-  sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  local os_arch
+  os_arch=$(uname -s)-$(uname -m)
+  os_arch=$(lowercase_txt "${os_arch}")
+  if [[ "$os_arch" == "darwin-arm64" ]]; then
+    os_arch="darwin-aarch64"
+  fi
+  sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-${os_arch}" -o /usr/local/bin/docker-compose
   sudo chmod +x /usr/local/bin/docker-compose && sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
   if check_docker_compose; then
     message INFO "✅ Docker Compose installed successfully."
