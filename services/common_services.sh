@@ -277,7 +277,7 @@ EOL
     docker pull "${image}"
   fi
   message INFO "Starting service $service_name"
-  if docker compose up -d; then
+  if docker_compose_command up -d; then
     message SUCCESS "Service $service_name enabled successfully"
     wait_for_health "${container_name}" "${service_name}" && docker ps -a --filter "name=${container_name}"
   else

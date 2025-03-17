@@ -154,3 +154,13 @@ SERVICE_MOUNT_PATHS=(
   ["n8n"]="/home/node/.n8n"
   ["minio"]="/data"
 )
+docker_compose_command() {
+  if command -v docker-compose &>/dev/null; then
+    docker-compose "$@"
+  elif docker compose version &>/dev/null; then
+    docker compose "$@"
+  else
+    echo "❌ Error: Neither 'docker-compose' nor 'docker compose' is installed." >&2
+    return 1
+  fi
+}

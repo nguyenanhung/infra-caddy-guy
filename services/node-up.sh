@@ -319,7 +319,7 @@ EOL
   fi
 
   # Start containers and wait for health
-  docker compose -f "$compose_file" up -d
+  docker_compose_command -f "$compose_file" up -d
 
   # If NestJS was installed, copy the generated source back to host
   if [ "$install_nestjs" = "Yes" ]; then
@@ -327,11 +327,11 @@ EOL
     local container_name="${PREFIX_NAME}_sites_${domain}"
     if ! docker cp "$container_name:/app/." "$source_dir" 2>/dev/null; then
       message ERROR "Failed to copy NestJS source from $container_name to $source_dir"
-      docker compose -f "$compose_file" down
+      docker_compose_command -f "$compose_file" down
       return 1
     fi
     message INFO "Successfully copied NestJS source to $source_dir"
-    docker compose -f "$compose_file" restart
+    docker_compose_command -f "$compose_file" restart
   fi
 
   if [ "$use_db" = "Yes" ]; then
@@ -490,7 +490,7 @@ node_remove() {
   backup_file="$BACKUP_DIR/$domain.caddy.$(date +%Y%m%d_%H%M%S)"
   cp "$domain_file" "$backup_file"
   rm -f "$domain_file"
-  [ -f "$compose_file" ] && docker compose -f "$compose_file" down
+  [ -f "$compose_file" ] && docker_compose_command -f "$compose_file" down
   if caddy_reload; then
     message INFO "Node.js app for $domain removed, Caddy config backed up to $backup_file"
   else

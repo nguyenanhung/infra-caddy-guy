@@ -128,7 +128,7 @@ EOF
     message ERROR "Failed to change to directory $laravel_dir"
     return 1
   }
-  docker compose up -d --build
+  docker_compose_command up -d --build
 
   # Copy Laravel source if installed
   if [ "$install_laravel" = "Yes" ]; then
@@ -136,11 +136,11 @@ EOF
     local container_name="${PREFIX_NAME}_sites_${domain}"
     if ! docker cp "$container_name:/var/www/html/." "$source_dir" 2>/dev/null; then
       message ERROR "Failed to copy Laravel source from $container_name to $source_dir"
-      docker compose down
+      docker_compose_command down
       return 1
     fi
     message INFO "Successfully copied Laravel source to $source_dir"
-    docker compose restart
+    docker_compose_command restart
   fi
 
   # Wait for health
@@ -189,7 +189,7 @@ EOF
     message INFO "Laravel site $domain (Apache) is up and running"
   else
     rm -f "$domain_file"
-    docker compose down
+    docker_compose_command down
     message ERROR "Failed to configure Caddy for $domain"
     return 1
   fi

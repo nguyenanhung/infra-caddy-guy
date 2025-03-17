@@ -271,9 +271,9 @@ EOF
     # Create Caddy container
     message INFO "Creating Caddy container"
     if [[ "${caddy_compose_path}" == "${caddy_compose_path_origin}" ]]; then
-      docker compose up -d --remove-orphans
+      docker_compose_command up -d --remove-orphans
     else
-      docker compose -f "${caddy_compose_path}" up -d --remove-orphans
+      docker_compose_command -f "${caddy_compose_path}" up -d --remove-orphans
     fi
     message SUCCESS "Caddy container ${CADDY_CONTAINER_NAME} created successfully"
 

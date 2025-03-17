@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # Check if fzf is installed
 if ! command -v fzf >/dev/null 2>&1; then
   echo "fzf is not installed. Please install fzf first."
@@ -16,7 +15,16 @@ if ! docker info >/dev/null 2>&1; then
   echo "Docker daemon is not running. Please start Docker and try again."
   exit 1
 fi
-
+docker_compose_command() {
+  if command -v docker-compose &>/dev/null; then
+    docker-compose "$@"
+  elif docker compose version &>/dev/null; then
+    docker compose "$@"
+  else
+    echo "❌ Error: Neither 'docker-compose' nor 'docker compose' is installed." >&2
+    return 1
+  fi
+}
 # Get running/stopped containers with required fields
 containers=$(docker ps -a --format "{{.ID}} | {{.Names}} | {{.Status}} | {{.Size}} | {{.Image}} | {{.CreatedAt}} | {{.Ports}}" | nl -w2 -s' | ')
 
@@ -53,7 +61,7 @@ esac
 # Special case for "build" (no need to select a container)
 if [[ "$ACTION" == "build" ]]; then
   echo "Building services with docker-compose..."
-  docker compose build
+  docker_compose_command build
   exit 0
 fi
 
@@ -85,9 +93,9 @@ logs)
   docker logs -f "$container_id"
   ;;
 up)
-  docker compose up -d
+  docker_compose_command up -d
   ;;
 down)
-  docker compose down
+  docker_compose_command down
   ;;
 esac
