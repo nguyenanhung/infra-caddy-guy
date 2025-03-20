@@ -17,8 +17,8 @@ source "$BASE_DIR/services/caddy.sh"
 source "$BASE_DIR/commons/menu.sh"
 check_bash_version
 check_require_packages "curl"
-check_require_packages "fzf"
 check_require_packages "jq"
+check_require_packages "fzf"
 
 # Parse command
 case "$1" in
@@ -255,6 +255,14 @@ case "$1" in
 "disconnect-caddy")
   shift                          # Shift to remove the first argument
   docker_network_disconnect "$@" # Call delete_site with the remaining arguments
+  ;;
+"docker-disk")
+  shift # Shift to remove the first argument
+  docker_system_disk
+  ;;
+"clean-build-cache")
+  shift # Shift to remove the first argument
+  docker_clean_build_cache
   ;;
 *)
   message ERROR "Unknown command: $1"

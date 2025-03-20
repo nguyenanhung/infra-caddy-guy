@@ -43,6 +43,8 @@ _infra_caddy_completions_build() {
     "node-remove"
     "go"
     "self-update"
+    "docker-disk"
+    "clean-build-cache"
   )
   local cur="${COMP_WORDS[COMP_CWORD]}"
   mapfile -t COMPREPLY < <(compgen -W "${commands[*]}" -- "$cur")

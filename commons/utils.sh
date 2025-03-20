@@ -6,6 +6,7 @@ source "$BASE_DIR/commons/color.sh"
 source "$BASE_DIR/commons/config.sh"
 # shellcheck source=./../commons/validation.sh
 source "$BASE_DIR/commons/validation.sh"
+
 message() {
   local level
   level=$(echo "$1" | tr '[:lower:]' '[:upper:]')
@@ -350,6 +351,7 @@ check_require_packages() {
       else
         package_manager="sudo yum"
       fi
+
       ;;
     *)
       message ERROR "Unsupported OS: $OS. Docker installation may vary."
@@ -359,10 +361,26 @@ check_require_packages() {
 
     if [ -n "$package_manager" ]; then
       message INFO "Installing required packages..."
-      if $package_manager install -y "$packages"; then
-        message SUCCESS "$packages installed successfully"
+      local os_id
+      os_id=$(grep ^ID= /etc/*-release | cut -d= -f2 | tr -d '"')
+      if [[ "$os_id" == "amzn" ]] && [[ "$packages" == "fzf" ]]; then
+        install_fzf_on_amzn
+      else
+        if $package_manager install -y "$packages"; then
+          message SUCCESS "$packages installed successfully"
+        fi
       fi
     fi
+  fi
+}
+install_fzf_on_amzn() {
+  if ! has_command fzf; then
+    sudo git clone --depth 1 https://github.com/junegunn/fzf.git /usr/local/fzf
+    sudo /usr/local/fzf/install --all
+    echo "export PATH=/usr/local/fzf/bin:\$PATH" | sudo tee -a /etc/profile.d/fzf.sh
+    sudo chmod +x /etc/profile.d/fzf.sh
+    source /etc/profile.d/fzf.sh
+    message SUCCESS "fzf installed successfully"
   fi
 }
 # Check Docker installation
@@ -400,13 +418,24 @@ install_docker() {
   message INFO "Installing Docker..."
   if confirm_action "Docker is not installed. Do you want to install Docker?"; then
     message INFO "Installing Docker..."
-    curl -fsSL https://get.docker.com -o install-docker.sh
-    sudo sh install-docker.sh
-    rm install-docker.sh
+    local os_id
+    os_id=$(grep ^ID= /etc/*-release | cut -d= -f2 | tr -d '"')
+    if [[ "$os_id" == "amzn" ]]; then
+      if has_command "dnf"; then
+        sudo dnf install -y docker
+      else
+        sudo yum install -y docker
+      fi
+      sudo systemctl enable --now docker
+    else
+      curl -fsSL https://get.docker.com -o install-docker.sh
+      sudo sh install-docker.sh
+      rm install-docker.sh
+    fi
 
     # Add the current user to the docker group
     sudo usermod -aG docker "$USER"
-
+    newgrp docker
     message SUCCESS "Docker has been installed successfully!"
     message INFO "You may need to log out and back in for group changes to take effect."
   else
@@ -544,6 +573,14 @@ docker_hard_reset() {
   sudo systemctl restart docker
 
   message INFO "✅ Docker has been reset to a clean state!"
+}
+# Calculate Docker System Disk
+docker_system_disk() {
+  docker system df
+}
+# Prune Docker Build Cache
+docker_clean_build_cache() {
+  docker builder prune -a
 }
 docker_network_connect() {
   local connect_network_name=$1
