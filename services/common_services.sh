@@ -13,14 +13,14 @@ enable_service() {
   local container_name="${PREFIX_NAME}_${service_name}"
 
   # Check if container exists
-  if docker ps -a --format '{{.Names}}' | grep -q "^$container_name$"; then
-    message INFO "Container $container_name already exists, skipping creation"
+  if docker ps -a --format '{{.Names}}' | grep -q "^${container_name}$"; then
+    message INFO "Container ${container_name} already exists, skipping creation"
     return 0
   fi
 
   # Validate service
   if [ -z "${SERVICE_IMAGES[$service_name]}" ]; then
-    message ERROR "Service $service_name is not supported"
+    message ERROR "Service ${service_name} is not supported"
     return 1
   fi
 
