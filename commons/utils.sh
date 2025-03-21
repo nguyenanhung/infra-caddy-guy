@@ -773,7 +773,7 @@ __display_header_information() {
     if [ -z "$ServerIPv4" ]; then
       ServerIPv4=$(fetch_public_ip)
     fi
-    ServerIPv6="$(ip addr show | awk '/inet6/ && !/scope link/ {print $2}' | cut -d'/' -f1 | grep -vE '^fe80|^::1')"
+    ServerIPv6="$(ip addr show | awk '/inet6/ && !/scope link/ {print $2}' | cut -d'/' -f1 | grep -vE '^fe80|^::1' | head -n1)"
     if [ -n "$ServerIPv6" ]; then
       echo -e "Server Public IP      : IPv4 ${GREEN}${ServerIPv4}${NC}, IPv6 ${GREEN}${ServerIPv6}${NC}"
     else
