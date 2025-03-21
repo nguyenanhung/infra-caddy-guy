@@ -25,7 +25,7 @@ case "$1" in
 "")
   bear_menu_interactive
   ;;
-"introduce")
+"introduce" | "intro" | "help")
   bear_welcome_introduce
   ;;
 "go")

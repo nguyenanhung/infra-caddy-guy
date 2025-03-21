@@ -2,6 +2,9 @@
 _infra_caddy_completions_build() {
   # List of available options for the "container" command
   local commands=(
+    "help"
+    "introduce"
+    "intro"
     "init"
     "reload-caddy"
     "join-caddy"
