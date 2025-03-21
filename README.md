@@ -5,6 +5,22 @@ little simpler and easier.
 
 ![Screenshot](https://live.staticflickr.com/65535/54371975845_f827eeeb9c_b.jpg)
 
+## Scope of Workflow
+
+The purpose of this script is to simplify the installation process, especially for projects running standalone servers
+or staging, dev environments.
+
+It may not be suitable for cloud auto-scaling, because I don't really intend to deploy it that way. Implementing
+auto-scaling requires a higher level of IaC (Infrastructure as Code)
+
+### OS Support
+
+- [x] RHEL Based: CentOS, Almalinux, Rocky Linux and Red Hat Enterprise Linux
+- [x] Fedora based
+- [x] Ubuntu/Debian
+- [x] Amazon Linux 2 and Amazon Linux 2023
+- [x] MacOS
+
 ## Installation
 
 ```bash
@@ -51,7 +67,7 @@ networks:
 
 ## Stack
 
-- [x] Docker, fzf
+- [x] Docker, docker-compose, fzf
 - [x] Caddy Web Server: sites, reverse proxy, load balancer and basic authentication
 - [x] Laravel Builder: Start from scratch with Laravel Framework Playbook, select version, worker and anything...
 - [x] WordPress Builder: Start from scratch with WordPress and choose theme, plugins...
@@ -62,8 +78,8 @@ networks:
 - [x] Improve security (file, header) of common application: PHP, Node.js, SPA, Static site, Reverse Proxy
 
 - [x] ... and others packages supporting, can be mentioned as `redis`, `memcached`, `mongodb`, `mariadb`, `mysql`,
-  `percona`, `postgresql`, `influxdb`, `rabbitmq`, `beanstalkd`, `gearmand`, `elasticsearch`, `mailhog`, `phpmyadmin`,
-  `adminer`, `uptime-kuma`, `n8n`, `minio`
+  `percona`, `postgresql`, `influxdb`, `rabbitmq`, `beanstalkd`, `gearmand`, `elasticsearch`, `mailhog`, `mailpit`,
+  `phpmyadmin`, `adminer`, `uptime-kuma`, `n8n`, `minio`
 
 ## Deployment
 
