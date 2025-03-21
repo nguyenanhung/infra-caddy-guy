@@ -767,22 +767,22 @@ __display_header_information() {
   echo -e "${YELLOW}Powered by ${DEVELOP_BY}${NC}"
   echo -e "BEAR Caddy Docker Stack - ${GREEN}Premium${NC} scripts version ${YELLOW}${SCRIPT_VERSION}${NC}${NC}"
   echo
-  if has_command ip; then
-    local ServerIPv4 ServerIPv6
-    ServerIPv4="$(ip addr show | awk '/inet / && !/127.0.0.1/ {print $2}' | cut -d'/' -f1 | grep -Ev '^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[0-1]))')"
-    if [ -z "$ServerIPv4" ]; then
-      ServerIPv4=$(fetch_public_ip)
-    fi
-    ServerIPv6="$(ip addr show | awk '/inet6/ && !/scope link/ {print $2}' | cut -d'/' -f1 | grep -vE '^fe80|^::1' | head -n1)"
-    if [ -n "$ServerIPv6" ]; then
-      echo -e "Server Public IP      : IPv4 ${GREEN}${ServerIPv4}${NC}, IPv6 ${GREEN}${ServerIPv6}${NC}"
-    else
-      echo -e "Server Public IP      : ${GREEN}${ServerIPv4}${NC}"
-    fi
-  fi
-  if [ -n "$SSH_CLIENT" ]; then
-    echo -e "Your login SSH via IP : ${GREEN}$(echo "$SSH_CLIENT" | awk '{print $1}')${NC}"
-  fi
+#  if has_command ip; then
+#    local ServerIPv4 ServerIPv6
+#    ServerIPv4="$(ip addr show | awk '/inet / && !/127.0.0.1/ {print $2}' | cut -d'/' -f1 | grep -Ev '^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[0-1]))')"
+#    if [ -z "$ServerIPv4" ]; then
+#      ServerIPv4=$(fetch_public_ip)
+#    fi
+#    ServerIPv6="$(ip addr show | awk '/inet6/ && !/scope link/ {print $2}' | cut -d'/' -f1 | grep -vE '^fe80|^::1' | head -n1)"
+#    if [ -n "$ServerIPv6" ]; then
+#      echo -e "Server Public IP      : IPv4 ${GREEN}${ServerIPv4}${NC}, IPv6 ${GREEN}${ServerIPv6}${NC}"
+#    else
+#      echo -e "Server Public IP      : ${GREEN}${ServerIPv4}${NC}"
+#    fi
+#  fi
+#  if [ -n "$SSH_CLIENT" ]; then
+#    echo -e "Your login SSH via IP : ${GREEN}$(echo "$SSH_CLIENT" | awk '{print $1}')${NC}"
+#  fi
   echo -e "Server Time           : ${GREEN}$(date +"%a, %Y-%m-%d %H:%M:%S")${NC}"
   if [ -n "$os_name" ]; then
     echo -e "Server OS             : ${GREEN}${os_name}${NC} (Compatibility: ${YELLOW}$(uppercase_txt "$os_compatibility")${NC})"
