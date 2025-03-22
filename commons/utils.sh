@@ -622,7 +622,7 @@ docker_network_connect() {
   local connect_container_ip=$3
 
   if [ -z "$connect_network_name" ]; then
-    connect_network_name=$(prompt_with_default "Please enter the network name you want ${connect_container_name} will disconnect it" "${NETWORK_NAME}")
+    connect_network_name=$(prompt_with_default "Please enter the network name you want ${connect_container_name} will connect it" "${NETWORK_NAME}")
   fi
   if [ -z "$connect_network_name" ]; then
     connect_network_name="${NETWORK_NAME}"
