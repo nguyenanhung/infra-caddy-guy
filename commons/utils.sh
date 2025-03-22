@@ -621,6 +621,14 @@ docker_network_connect() {
   local connect_container_name=$2
   local connect_container_ip=$3
 
+  if [ -z "$connect_container_name" ]; then
+    connect_container_name=$(prompt_with_default "Please enter container name you want to setup connect")
+  fi
+  if [ -z "$connect_container_name" ]; then
+    message ERROR "Network name, service name must be provided. Usage: $0 <network_name> <container_name> [container_ip]"
+    return
+  fi
+
   if [ -z "$connect_network_name" ]; then
     connect_network_name=$(prompt_with_default "Please enter the network name you want ${connect_container_name} will connect it" "${NETWORK_NAME}")
   fi
@@ -628,13 +636,6 @@ docker_network_connect() {
     connect_network_name="${NETWORK_NAME}"
   fi
 
-  if [ -z "$connect_container_name" ]; then
-    connect_container_name=$(prompt_with_default "Please enter container name you want to connect to ${connect_container_name}")
-  fi
-  if [ -z "$connect_container_name" ]; then
-    message ERROR "Network name, service name must be provided. Usage: $0 <network_name> <container_name> [container_ip]"
-    return
-  fi
   if ! docker network inspect "$connect_network_name" >/dev/null 2>&1; then
     message ERROR "Network '$connect_network_name' not exists." >&2
     return 1
@@ -659,18 +660,18 @@ docker_network_connect() {
 docker_network_disconnect() {
   local disconnect_network_name=$1
   local disconnect_container_name=$2
-  if [ -z "$disconnect_network_name" ]; then
-    disconnect_network_name=$(prompt_with_default "Please enter the network name you want ${disconnect_container_name} will disconnect it" "${NETWORK_NAME}")
-  fi
-  if [ -z "$disconnect_network_name" ]; then
-    disconnect_network_name="${NETWORK_NAME}"
-  fi
   if [ -z "$disconnect_container_name" ]; then
     disconnect_container_name=$(prompt_with_default "Please enter container name you want to disconnect to ${disconnect_container_name}")
   fi
   if [ -z "$disconnect_container_name" ]; then
     message ERROR "Network name, service name must be provided. Usage: $0 <network_name> <container_name>"
     return
+  fi
+  if [ -z "$disconnect_network_name" ]; then
+    disconnect_network_name=$(prompt_with_default "Please enter the network name you want ${disconnect_container_name} will disconnect it" "${NETWORK_NAME}")
+  fi
+  if [ -z "$disconnect_network_name" ]; then
+    disconnect_network_name="${NETWORK_NAME}"
   fi
   if ! docker network inspect "$disconnect_network_name" >/dev/null 2>&1; then
     message ERROR "Network '$disconnect_network_name' not exists." >&2
