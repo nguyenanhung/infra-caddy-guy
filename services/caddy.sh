@@ -627,6 +627,7 @@ add_basic_auth() {
     {
         print $0
         if (!inserted && /{/) {
+            print "    @acmeChallenge path /.well-known/acme-challenge/*"
             print "    @notAcme {"
             print "        not path /.well-known/acme-challenge/*"
             print "    }"
@@ -722,6 +723,234 @@ delete_basic_auth() {
   else
     mv "$backup_file" "$domain_file"
     message ERROR "Invalid Caddy configuration after deletion, restored backup"
+    return 1
+  fi
+}
+
+restricted_add_whitelist_ips() {
+  message INFO "Please note that whitelisting is done on a per-domain basis"
+  message INFO "When using this feature, the system will be configured to only allow access to the Whitelist IPs you provide, so be careful!"
+
+  local sites_path="$CONFIG_DIR/sites"
+  local site_files domain domain_file new_ips internal_ips all_ips backup_file
+
+  # Get available domains
+  site_files=$(find "$sites_path" -maxdepth 1 -type f -name "*.caddy" -exec basename {} \; | sed 's/\.caddy$//')
+  if [ -z "$site_files" ]; then
+    message ERROR "No domains available"
+    return 1
+  fi
+
+  # Select domain
+  domain=$(echo "$site_files" | fzf --prompt="Select domain: ")
+  if [ -z "$domain" ]; then
+    message INFO "No domain selected"
+    return 0
+  fi
+
+  domain_file="$sites_path/$domain.caddy"
+  if [ ! -f "$domain_file" ]; then
+    message ERROR "Domain file not found: $domain_file"
+    return 1
+  fi
+
+  echo
+  if ! confirm_action "Do you want to enable restricted Whitelist IPs for ${domain}!"; then
+    message INFO "Operation cancelled!"
+    return 1
+  fi
+
+  # Get new whitelist IPs
+  new_ips=$(prompt_with_default "Enter IPs to whitelist (space-separated)" "")
+  if [ -z "$new_ips" ]; then
+    message ERROR "No IPs provided"
+    return 1
+  fi
+
+  # Define internal IPs
+  internal_ips="127.0.0.0/8 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+
+  # Merge and remove duplicates
+  all_ips=$(echo "$internal_ips $new_ips" | tr ' ' '\n' | sort -u | tr '\n' ' ')
+
+  # Backup original file
+  backup_file="$BACKUP_DIR/$domain.caddy.$(date +%Y%m%d_%H%M%S)"
+  cp "$domain_file" "$backup_file"
+  message INFO "Backup saved: $backup_file"
+
+  # Update whitelist using awk
+  awk -v ips="$all_ips" '
+    BEGIN { inserted = 0 }
+    /@blocked_ips not remote_ip/ {
+        print "    @blocked_ips not remote_ip " ips;
+        inserted = 1;
+        next;
+    }
+    /@acmeChallenge path \\/.well-known\\/acme-challenge\\/*/ {
+        print;
+        print "    @blocked_ips not remote_ip " ips;
+        print "    respond @blocked_ips \"Access denied\" 403";
+        inserted = 1;
+        next;
+    }
+    /^{/ && inserted == 0 {
+        print;
+        print "    @blocked_ips not remote_ip " ips;
+        print "    respond @blocked_ips \"Access denied\" 403";
+        inserted = 1;
+        next;
+    }
+    { print }
+  ' "$backup_file" >"$domain_file"
+
+  # Validate and reload Caddy
+  if caddy_validate; then
+    caddy_reload || return 1
+    message INFO "Whitelist updated for $domain and Caddy reloaded"
+  else
+    mv "$backup_file" "$domain_file"
+    message ERROR "Invalid Caddy config, restored backup"
+    return 1
+  fi
+}
+
+restricted_remove_whitelist_ips() {
+  message INFO "Please note that whitelisting is done on a per-domain basis"
+  message INFO "The system will remove the IPs you provided from the whitelist. This will make you inaccessible, be careful!"
+
+  local sites_path="$CONFIG_DIR/sites"
+  local site_files domain domain_file existing_ips remove_ips new_ips backup_file
+
+  # Get available domains
+  site_files=$(find "$sites_path" -maxdepth 1 -type f -name "*.caddy" -exec basename {} \; | sed 's/\.caddy$//')
+  if [ -z "$site_files" ]; then
+    message ERROR "No domains available"
+    return 1
+  fi
+
+  # Select domain
+  domain=$(echo "$site_files" | fzf --prompt="Select domain: ")
+  if [ -z "$domain" ]; then
+    message INFO "No domain selected"
+    return 0
+  fi
+
+  domain_file="$sites_path/$domain.caddy"
+  if [ ! -f "$domain_file" ]; then
+    message ERROR "Domain file not found: $domain_file"
+    return 1
+  fi
+
+  echo
+  if ! confirm_action "Do you want to remove IP from restricted Whitelist IPs for domain ${domain}!"; then
+    message INFO "Operation cancelled!"
+    return 1
+  fi
+
+  # Extract existing whitelist IPs
+  existing_ips=$(grep -oP '(?<=@blocked_ips not remote_ip ).*' "$domain_file" | tr ' ' '\n' | sort -u)
+  if [ -z "$existing_ips" ]; then
+    message INFO "No whitelist IPs found"
+    return 0
+  fi
+
+  # Select IPs to remove
+  remove_ips=$(echo "$existing_ips" | fzf --multi --prompt="Select IPs to remove: ")
+  if [ -z "$remove_ips" ]; then
+    message INFO "No IPs selected for removal"
+    return 0
+  fi
+
+  # Calculate new whitelist IPs
+  new_ips=$(comm -23 <(echo "$existing_ips" | sort) <(echo "$remove_ips" | sort) | tr '\n' ' ')
+
+  # Backup original file
+  backup_file="$BACKUP_DIR/$domain.caddy.$(date +%Y%m%d_%H%M%S)"
+  cp "$domain_file" "$backup_file"
+  message INFO "Backup saved: $backup_file"
+
+  # Update file using awk
+  awk -v ips="$new_ips" '
+    BEGIN { updated = 0 }
+    /@blocked_ips not remote_ip/ {
+        if (ips != "") {
+            print "    @blocked_ips not remote_ip " ips;
+            updated = 1;
+        }
+        next;
+    }
+    { print }
+  ' "$backup_file" >"$domain_file"
+
+  # Validate and reload Caddy
+  if caddy_validate; then
+    caddy_reload || return 1
+    message INFO "Whitelist updated for $domain and Caddy reloaded"
+  else
+    mv "$backup_file" "$domain_file"
+    message ERROR "Invalid Caddy config, restored backup"
+    return 1
+  fi
+}
+
+restricted_unblock_ips() {
+  message INFO "Please note that whitelisting is done on a per-domain basis"
+  message INFO "The system will remove the IPs you provided from the whitelist. This will make you inaccessible, be careful!"
+
+  local sites_path="$CONFIG_DIR/sites"
+  local site_files domain domain_file backup_file
+
+  # Get available domains
+  site_files=$(find "$sites_path" -maxdepth 1 -type f -name "*.caddy" -exec basename {} \; | sed 's/\.caddy$//')
+  if [ -z "$site_files" ]; then
+    message ERROR "No domains available"
+    return 1
+  fi
+
+  # Select domain
+  domain=$(echo "$site_files" | fzf --prompt="Select domain: ")
+  if [ -z "$domain" ]; then
+    message INFO "No domain selected"
+    return 0
+  fi
+
+  domain_file="$sites_path/$domain.caddy"
+  if [ ! -f "$domain_file" ]; then
+    message ERROR "Domain file not found: $domain_file"
+    return 1
+  fi
+
+  echo
+  if ! confirm_action "Do you want to unblock access for website ${domain}!"; then
+    message INFO "Operation cancelled!"
+    return 1
+  fi
+
+  # Check if @blocked_ips rules exist
+  if ! grep -qE '^\s*@blocked_ips not remote_ip' "$domain_file"; then
+    message INFO "No block rule found in $domain_file"
+    return 0
+  fi
+
+  # Backup original file
+  backup_file="$BACKUP_DIR/$domain.caddy.$(date +%Y%m%d_%H%M%S)"
+  cp "$domain_file" "$backup_file"
+  message INFO "Backup saved: $backup_file"
+
+  # Remove block rules using awk
+  awk '
+    /^\s*@blocked_ips not remote_ip/ { skip=1; next }
+    /^\s*respond @blocked_ips/ { skip=1; next }
+    { if (!skip) print; skip=0 }
+  ' "$backup_file" >"$domain_file"
+
+  # Validate and reload Caddy
+  if caddy_validate; then
+    caddy_reload || return 1
+    message INFO "Unblocked all IP rules for $domain and reloaded Caddy"
+  else
+    mv "$backup_file" "$domain_file"
+    message ERROR "Invalid Caddy config, restored backup"
     return 1
   fi
 }

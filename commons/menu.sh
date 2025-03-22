@@ -45,6 +45,9 @@ bear_welcome_introduce() {
   message INFO "  $(basename "$0") log-<service>                 - Check Service Container (e.g. mariadb, redis, ...). Example: $(basename "$0") log-redis"
   message INFO "  $(basename "$0") basic-auth                    - Enable basic authentication"
   message INFO "  $(basename "$0") delete-basic-auth             - Disable basic authentication"
+  message INFO "  $(basename "$0") add-whitelist-ips             - Enable whitelisted IPs"
+  message INFO "  $(basename "$0") delete-whitelist-ips          - Delete whitelisted IPs"
+  message INFO "  $(basename "$0") remove-block-ips              - Removing block IPs"
 
   message INFO "  $(basename "$0") add-reverse-proxy             - Add Reverse Proxy"
   message INFO "  $(basename "$0") delete-reverse-proxy          - Delete Reverse Proxy"

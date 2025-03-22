@@ -94,8 +94,8 @@ case "$1" in
   log_service "$service_name"
   ;;
 "logs")
-  shift                            # Shift to remove the first argument
-  check_docker_container_logs "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  check_docker_container_logs "$@"
   ;;
 "list")
   site_list=$(list_sites)
@@ -125,136 +125,148 @@ case "$1" in
   esac
   ;;
 "delete")
-  shift            # Shift to remove the first argument
-  delete_site "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  delete_site "$@"
   ;;
 "stop")
-  shift          # Shift to remove the first argument
-  stop_site "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  stop_site "$@"
   ;;
 "start")
-  shift           # Shift to remove the first argument
-  start_site "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  start_site "$@"
   ;;
 "restart")
-  shift             # Shift to remove the first argument
-  restart_site "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  restart_site "$@"
   ;;
 "basic-auth")
-  shift               # Shift to remove the first argument
-  add_basic_auth "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  add_basic_auth "$@"
   ;;
 "delete-basic-auth")
-  shift                  # Shift to remove the first argument
-  delete_basic_auth "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  delete_basic_auth "$@"
+  ;;
+"add-whitelist-ips")
+  shift # Shift to remove the first argument
+  restricted_add_whitelist_ips "$@"
+  ;;
+"remove-block-ips")
+  shift # Shift to remove the first argument
+  restricted_unblock_ips "$@"
+  ;;
+"delete-whitelist-ips")
+  shift # Shift to remove the first argument
+  restricted_remove_whitelist_ips "$@"
   ;;
 "add-reverse-proxy")
   source "$BASE_DIR/services/reverse-proxy.sh"
-  shift                  # Shift to remove the first argument
-  add_reverse_proxy "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  add_reverse_proxy "$@"
   ;;
 "delete-reverse-proxy")
   source "$BASE_DIR/services/reverse-proxy.sh"
-  shift                     # Shift to remove the first argument
-  delete_reverse_proxy "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  delete_reverse_proxy "$@"
   ;;
 "add-load-balancer")
   source "$BASE_DIR/services/load-balancer.sh"
-  shift                  # Shift to remove the first argument
-  add_load_balancer "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  add_load_balancer "$@"
   ;;
 "delete-load-balancer")
   source "$BASE_DIR/services/load-balancer.sh"
-  shift                     # Shift to remove the first argument
-  delete_load_balancer "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  delete_load_balancer "$@"
   ;;
 "delete-load-balancer-backend")
   source "$BASE_DIR/services/load-balancer.sh"
-  shift                             # Shift to remove the first argument
-  delete_load_balancer_backend "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  delete_load_balancer_backend "$@"
   ;;
 "laravel-apache-up")
   source "$BASE_DIR/services/laravel-up-apache.sh"
-  shift                  # Shift to remove the first argument
-  laravel_up_apache "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  laravel_up_apache "$@"
   ;;
 "laravel-up")
   source "$BASE_DIR/services/laravel-up.sh"
-  shift           # Shift to remove the first argument
-  laravel_up "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  laravel_up "$@"
   ;;
 "laravel-down")
   source "$BASE_DIR/services/laravel-up.sh"
-  shift             # Shift to remove the first argument
-  laravel_down "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  laravel_down "$@"
   ;;
 "laravel-restore")
   source "$BASE_DIR/services/laravel-up.sh"
-  shift                # Shift to remove the first argument
-  laravel_restore "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  laravel_restore "$@"
   ;;
 "laravel-remove")
   source "$BASE_DIR/services/laravel-up.sh"
-  shift               # Shift to remove the first argument
-  laravel_remove "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  laravel_remove "$@"
   ;;
 "add-php-app")
   source "$BASE_DIR/services/php-app.sh"
-  shift            # Shift to remove the first argument
-  add_php_app "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  add_php_app "$@"
   ;;
 "delete-php-app")
   source "$BASE_DIR/services/php-app.sh"
-  shift               # Shift to remove the first argument
-  delete_php_app "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  delete_php_app "$@"
   ;;
 "add-static-site")
   source "$BASE_DIR/services/static-site.sh"
-  shift                # Shift to remove the first argument
-  add_static_site "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  add_static_site "$@"
   ;;
 "delete-static-site")
   source "$BASE_DIR/services/static-site.sh"
-  shift                   # Shift to remove the first argument
-  delete_static_site "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  delete_static_site "$@"
   ;;
 "add-node-app")
   source "$BASE_DIR/services/node-app.sh"
-  shift             # Shift to remove the first argument
-  add_node_app "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  add_node_app "$@"
   ;;
 "delete-node-app")
   source "$BASE_DIR/services/node-app.sh"
-  shift                # Shift to remove the first argument
-  delete_node_app "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  delete_node_app "$@"
   ;;
 "node-up")
   source "$BASE_DIR/services/node-up.sh"
-  shift        # Shift to remove the first argument
-  node_up "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  node_up "$@"
   ;;
 "node-down")
   source "$BASE_DIR/services/node-up.sh"
-  shift          # Shift to remove the first argument
-  node_down "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  node_down "$@"
   ;;
 "node-restore")
   source "$BASE_DIR/services/node-up.sh"
-  shift             # Shift to remove the first argument
-  node_restore "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  node_restore "$@"
   ;;
 "node-remove")
   source "$BASE_DIR/services/node-up.sh"
-  shift            # Shift to remove the first argument
-  node_remove "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  node_remove "$@"
   ;;
 "join-caddy")
-  shift                       # Shift to remove the first argument
-  join_caddy_network "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  join_caddy_network "$@"
   ;;
 "disconnect-caddy")
-  shift                          # Shift to remove the first argument
-  docker_network_disconnect "$@" # Call delete_site with the remaining arguments
+  shift # Shift to remove the first argument
+  docker_network_disconnect "$@"
   ;;
 "docker-disk")
   shift # Shift to remove the first argument
