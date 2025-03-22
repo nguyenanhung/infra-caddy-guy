@@ -578,6 +578,40 @@ docker_hard_reset() {
 docker_system_disk() {
   docker system df
 }
+# Setup Buildx Environment
+docker_setup_buildx_multi_platform_builder() {
+  if ! has_command docker; then
+    message ERROR "Docker is not installed. Please install Docker first."
+    return 1
+  fi
+
+  if ! docker buildx version >/dev/null 2>&1; then
+    message ERROR "Docker Buildx is not installed or not enabled."
+    return 1
+  fi
+  local BUILDX_VERSION ACTIVE_BUILDER
+  # Get Buildx version
+  BUILDX_VERSION=$(docker buildx version | awk '{print $3}')
+  message INFO "Docker Buildx is installed (Version: ${BUILDX_VERSION})"
+
+  # Check Buildx drivers
+  message INFO "\n\033[34m[INFO]\033[0m Checking available builders..."
+  docker buildx ls
+
+  # Find an active builder that supports multi-platform
+  ACTIVE_BUILDER=$(docker buildx ls | grep "docker-container")
+
+  if [[ -z "$ACTIVE_BUILDER" ]]; then
+    message WARN "No active multi-platform builder found. Creating a new one..."
+    docker buildx create --use --name hungng-builder --driver docker-container
+    docker buildx inspect --bootstrap
+    message INFO "New multi-platform builder 'hungng-builder' created and activated."
+    ACTIVE_BUILDER="hungng-builder"
+  else
+    message INFO "Active multi-platform builder detected: ${ACTIVE_BUILDER}"
+  fi
+}
+
 # Prune Docker Build Cache
 docker_clean_build_cache() {
   docker builder prune -a

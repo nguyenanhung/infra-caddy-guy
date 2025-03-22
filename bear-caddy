@@ -264,6 +264,10 @@ case "$1" in
   shift # Shift to remove the first argument
   docker_clean_build_cache
   ;;
+"docker-buildx-multi-platform" | "buildx-multi-platform")
+  shift # Shift to remove the first argument
+  docker_setup_buildx_multi_platform_builder
+  ;;
 *)
   message ERROR "Unknown command: $1"
   exit 1

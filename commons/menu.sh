@@ -22,7 +22,10 @@ source "$BASE_DIR/commons/validation.sh"
 bear_welcome_introduce() {
   __display_header_information
   check_docker
-  message INFO "  $(basename "$0") self-update                   - Infra Caddy Guy's Self-update"
+  message INFO "  $(basename "$0") self-update                   - Infra Caddy Guy's self-update"
+  message INFO "  $(basename "$0") help/intro                    - Infra Caddy Guy's Help / Introspection"
+  message INFO "  $(basename "$0") clean-build-cache             - Clean Docker Build Cache"
+  message INFO "  $(basename "$0") buildx-multi-platform         - Enable Docker Buildx Multi-Platform"
   message INFO "  $(basename "$0") init                          - Setup Caddy Web Server"
   message INFO "  $(basename "$0") reload-caddy                  - Reload Caddy Web Server"
   message INFO "  $(basename "$0") join-caddy                    - Join Caddy Network"

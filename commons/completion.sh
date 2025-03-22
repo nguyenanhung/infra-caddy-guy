@@ -48,6 +48,7 @@ _infra_caddy_completions_build() {
     "self-update"
     "docker-disk"
     "clean-build-cache"
+    "buildx-multi-platform"
   )
   local cur="${COMP_WORDS[COMP_CWORD]}"
   mapfile -t COMPREPLY < <(compgen -W "${commands[*]}" -- "$cur")
