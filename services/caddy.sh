@@ -850,7 +850,7 @@ restricted_add_whitelist_ips() {
         }
         next;
     }
-    /@acmeChallenge path \\/.well-known\\/acme-challenge\\/*/ {
+    /@acmeChallenge path \/.well-known\/acme-challenge\// {
         print;
         if (updated == 0) {
             print "    @blocked_ips not remote_ip " ips;
