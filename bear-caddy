@@ -43,7 +43,7 @@ case "$1" in
   fi
   ;;
 "self-update")
-  if [ -d "$BASE_DIR" ]; then
+  if [ -d "${BASE_DIR}/.git" ]; then
     cd "$BASE_DIR" || {
       message ERROR "Failed go to the BASE_DIR of infra-caddy command"
       exit 1
@@ -53,7 +53,7 @@ case "$1" in
     git pull
     ls -l
   else
-    message ERROR "Failed to detected BASE_DIR of infra-caddy command"
+    message ERROR "You are not authorized to run automatic updates. Please contact ${DEVELOP_BY}"
     exit 1
   fi
   ;;
