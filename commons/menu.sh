@@ -86,6 +86,7 @@ bear_menu_interactive() {
     "Check Container Logs"
     "List all Sites" "Install new Site" "Stop Sites" "Start Sites" "Restart Sites" "Delete Sites"
     "Enable Basic Auth" "Disable Basic Auth"
+    "Add whitelist IPs" "Delete whitelist IPs" "Disable block IPs"
     "Add Static Site" "Delete Static Site"
     "Add Reverse Proxy" "Delete Reverse Proxy"
     "Add Load Balancer Cluster" "Delete Load Balancer Cluster" "Delete Load Balancer Backend"
@@ -115,19 +116,22 @@ bear_menu_interactive() {
     12) bash "${BASE_DIR}/bear-caddy" delete ;;
     13) bash "${BASE_DIR}/bear-caddy" basic-auth ;;
     14) bash "${BASE_DIR}/bear-caddy" delete-basic-auth ;;
-    15) bash "${BASE_DIR}/bear-caddy" add-static-site ;;
-    16) bash "${BASE_DIR}/bear-caddy" delete-static-site ;;
-    17) bash "${BASE_DIR}/bear-caddy" add-reverse-proxy ;;
-    18) bash "${BASE_DIR}/bear-caddy" delete-reverse-proxy ;;
-    19) bash "${BASE_DIR}/bear-caddy" add-load-balancer ;;
-    20) bash "${BASE_DIR}/bear-caddy" delete-load-balancer ;;
-    21) bash "${BASE_DIR}/bear-caddy" delete-load-balancer-backend ;;
-    22) bash "${BASE_DIR}/bear-caddy" laravel-up ;;
-    23) bash "${BASE_DIR}/bear-caddy" add-php-app ;;
-    24) bash "${BASE_DIR}/bear-caddy" delete-php-app ;;
-    25) bash "${BASE_DIR}/bear-caddy" node-up ;;
-    26) bash "${BASE_DIR}/bear-caddy" add-node-app ;;
-    27) bash "${BASE_DIR}/bear-caddy" delete-node-app ;;
+    15) bash "${BASE_DIR}/bear-caddy" add-whitelist-ips ;;
+    16) bash "${BASE_DIR}/bear-caddy" delete-whitelist-ips ;;
+    17) bash "${BASE_DIR}/bear-caddy" remove-block-ips ;;
+    18) bash "${BASE_DIR}/bear-caddy" add-static-site ;;
+    19) bash "${BASE_DIR}/bear-caddy" delete-static-site ;;
+    20) bash "${BASE_DIR}/bear-caddy" add-reverse-proxy ;;
+    21) bash "${BASE_DIR}/bear-caddy" delete-reverse-proxy ;;
+    22) bash "${BASE_DIR}/bear-caddy" add-load-balancer ;;
+    23) bash "${BASE_DIR}/bear-caddy" delete-load-balancer ;;
+    24) bash "${BASE_DIR}/bear-caddy" delete-load-balancer-backend ;;
+    25) bash "${BASE_DIR}/bear-caddy" laravel-up ;;
+    26) bash "${BASE_DIR}/bear-caddy" add-php-app ;;
+    27) bash "${BASE_DIR}/bear-caddy" delete-php-app ;;
+    28) bash "${BASE_DIR}/bear-caddy" node-up ;;
+    29) bash "${BASE_DIR}/bear-caddy" add-node-app ;;
+    30) bash "${BASE_DIR}/bear-caddy" delete-node-app ;;
 
     $((${#options[@]} + 1)) | 0 | exit)
       printf "\nGoodbye!\nSee you again at https://bash.nguyenanhung.com/\n\n"
