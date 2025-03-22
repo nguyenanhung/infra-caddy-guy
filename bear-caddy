@@ -250,7 +250,7 @@ case "$1" in
   ;;
 "join-caddy")
   shift                       # Shift to remove the first argument
-  docker_network_connect "$@" # Call delete_site with the remaining arguments
+  join_caddy_network "$@" # Call delete_site with the remaining arguments
   ;;
 "disconnect-caddy")
   shift                          # Shift to remove the first argument

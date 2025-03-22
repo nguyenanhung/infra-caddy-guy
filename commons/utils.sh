@@ -693,7 +693,7 @@ docker_network_disconnect() {
 join_caddy_network() {
   local container_name=$1
   if [ -z "$container_name" ]; then
-    container_name=$(prompt_with_default "Please enter container name you want to connect to ${container_name}")
+    container_name=$(prompt_with_default "Please enter container name you want to connect to ${NETWORK_NAME}")
   fi
   if [ -z "$container_name" ]; then
     message ERROR "Container name must be provided. Usage: $0 <container_name>"
