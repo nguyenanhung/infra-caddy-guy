@@ -280,8 +280,8 @@ EOF
     if wait_for_health "${CADDY_CONTAINER_NAME}" "Caddy Web Server"; then
       echo
       docker ps -a --filter "name=${CADDY_CONTAINER_NAME}"
-      docker exec -it "${CADDY_CONTAINER_NAME}" apk add --no-cache netcat-openbsd curl # Install netcat-openbsd, curl for testing purposes
-      docker exec -it "${CADDY_CONTAINER_NAME}" nc -zv host.docker.internal 80         # Test Caddy call to internal host
+      docker exec -it "${CADDY_CONTAINER_NAME}" apk add --no-cache bash netcat-openbsd curl # Install netcat-openbsd, curl for testing purposes
+      docker exec -it "${CADDY_CONTAINER_NAME}" nc -zv host.docker.internal 80              # Test Caddy call to internal host
       echo
       message NOTE "If your application is PHP and needs to run with FPM (eg: Laravel, WordPress ...), you need to deploy your source code to the ${CADDY_HOME_DIR}/<domain>/html directory for the application to work. Other applications like NodeJS, ReactJS can use reverse-proxy so you can deploy anywhere."
     else
