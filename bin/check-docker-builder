@@ -1,0 +1,41 @@
+#!/bin/bash
+# Function to check if a command exists
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+# Check if Docker and Buildx are installed
+if ! command_exists docker; then
+  echo -e "\033[31m[ERROR]\033[0m Docker is not installed."
+  exit 1
+fi
+
+if ! docker buildx version >/dev/null 2>&1; then
+  echo -e "\033[31m[ERROR]\033[0m Docker Buildx is not installed."
+  exit 1
+fi
+
+# Get available builders
+echo -e "\n\033[34m[INFO]\033[0m Checking available builders..."
+docker buildx ls
+
+# Find the first active builder using docker-container driver
+while IFS= read -r builder_name; do
+  platforms=$(docker buildx inspect "$builder_name" --bootstrap | awk -F': ' '/Platforms/ {print $2}')
+
+  # Debugging output
+  echo -e "\033[36m[DEBUG]\033[0m Checking builder: $builder_name"
+  echo -e "\033[36m[DEBUG]\033[0m Platforms: $platforms"
+
+  # Check if platforms contain both linux/amd64 and linux/386
+  if [[ "$platforms" =~ "linux/amd64" && "$platforms" =~ "linux/386" ]]; then
+    ACTIVE_BUILDER="$builder_name"
+    break
+  fi
+done < <(docker buildx ls | awk '$2 ~ /docker-container/ && ($4 ~ /running|active/) {print $1}')
+
+if [[ -z "$ACTIVE_BUILDER" ]]; then
+  echo -e "\033[33m[WARNING]\033[0m No active multi-platform builder found."
+else
+  echo -e "\033[32m[OK]\033[0m Active multi-platform builder: $ACTIVE_BUILDER"
+fi
