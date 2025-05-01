@@ -5,6 +5,11 @@ little simpler and easier.
 
 ![Screenshot](https://live.staticflickr.com/65535/54371975845_f827eeeb9c_b.jpg)
 
+## Note
+
+This script is suitable for one-server development, staging or production environments, not compatible with scale-out
+systems with multiple containers.
+
 ## Scope of Workflow
 
 The purpose of this script is to simplify the installation process, especially for projects running standalone servers
