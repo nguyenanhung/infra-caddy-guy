@@ -1,11 +1,15 @@
 # Infra Caddy Guy's Scripts
+![License](https://img.shields.io/github/license/nguyenanhung/infra-caddy-guy)
+![Last Commit](https://img.shields.io/github/last-commit/nguyenanhung/infra-caddy-guy)
+![Issues](https://img.shields.io/github/issues/nguyenanhung/infra-caddy-guy)
+![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)
 
 A lightweight Server management script set, backend is Docker, Caddy Web Server. Makes the life of the infra guy a
 little simpler and easier.
 
 ![Screenshot](https://live.staticflickr.com/65535/54371975845_f827eeeb9c_b.jpg)
 
-## Scope of Workflow
+## 📋 Scope of Workflow
 
 The purpose of this script is to simplify the installation process, especially for projects running standalone servers
 or staging, dev environments.
@@ -13,7 +17,7 @@ or staging, dev environments.
 It may not be suitable for cloud auto-scaling, because I don't really intend to deploy it that way. Implementing
 auto-scaling requires a higher level of IaC (Infrastructure as Code)
 
-### OS Support
+### 📋 OS Support
 
 - [x] RHEL Based: CentOS, Almalinux, Rocky Linux and Red Hat Enterprise Linux
 - [x] Fedora based
@@ -21,7 +25,7 @@ auto-scaling requires a higher level of IaC (Infrastructure as Code)
 - [x] Amazon Linux 2 and Amazon Linux 2023
 - [x] MacOS
 
-## Installation
+## 📋 Installation
 
 ```bash
 git clone git@github.com:nguyenanhung/infra-caddy-guy.git && cd infra-caddy-guy && ./bin/enable-shortcut
@@ -33,9 +37,9 @@ and use it
 infra-caddy introduce
 ```
 
-## Guidelines
+## 📋 Guidelines
 
-### Important note
+### 🆘 Important note
 
 #### If another container needs to connect to the Caddy Web Server network, it needs to connect to the Caddy Web Server network.
 
@@ -89,15 +93,15 @@ networks:
 
 - [ ] Amazon Web Services CLI integration (`awscli`)
 
-## LICENSE
+## 📄 Documentation
+- [Code of Conduct](./CODE_OF_CONDUCT.md)
+- [Security Policy](./SECURITY.md)
+- [Support](./SUPPORT.md)
 
-See [MIT License](https://github.com/nguyenanhung/infra-caddy-guy/blob/main/LICENSE)
+## 🤝 Contributing
+See the [CONTRIBUTING.md](./CONTRIBUTING.md) guide to get started.
 
-## CONTRIBUTING
-
-See [CONTRIBUTING](https://github.com/nguyenanhung/infra-caddy-guy/blob/main/CONTRIBUTING.md)
-
-## Contact
+## 👉 Contact
 
 | Name        | Email                | GitHub        | Facebook      |
 |-------------|----------------------|---------------|---------------|
