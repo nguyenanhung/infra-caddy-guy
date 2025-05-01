@@ -69,7 +69,7 @@ networks:
     # ...
 ```
 
-## Stack
+## ✅ Stack
 
 - [x] Docker, docker-compose, fzf
 - [x] Caddy Web Server: sites, reverse proxy, load balancer and basic authentication
@@ -85,11 +85,11 @@ networks:
   `percona`, `postgresql`, `influxdb`, `rabbitmq`, `beanstalkd`, `gearmand`, `elasticsearch`, `mailhog`, `mailpit`,
   `phpmyadmin`, `adminer`, `uptime-kuma`, `n8n`, `minio`
 
-## Deployment
+## 🚀 Deployment
 
 - [x] Blue/Green Rolling Deployment
 
-## Integration
+## ⛓️ Integration
 
 - [ ] Amazon Web Services CLI integration (`awscli`)
 
