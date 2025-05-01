@@ -91,7 +91,11 @@ networks:
 
 ## LICENSE
 
-MIT License
+See [MIT License](https://github.com/nguyenanhung/infra-caddy-guy/blob/main/LICENSE)
+
+## CONTRIBUTING
+
+See [CONTRIBUTING](https://github.com/nguyenanhung/infra-caddy-guy/blob/main/CONTRIBUTING.md)
 
 ## Contact
 
