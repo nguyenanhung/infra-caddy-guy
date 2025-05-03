@@ -28,13 +28,13 @@ auto-scaling requires a higher level of IaC (Infrastructure as Code)
 ## 📋 Installation
 
 ```bash
-git clone git@github.com:nguyenanhung/infra-caddy-guy.git && cd infra-caddy-guy && ./bin/enable-shortcut
+git clone https://github.com/nguyenanhung/infra-caddy-guy.git && cd infra-caddy-guy && ./bin/enable-shortcut
 ```
 
 and use it
 
 ```bash
-infra-caddy introduce
+infra-caddy intro
 ```
 
 ## 📋 Guidelines
@@ -103,7 +103,7 @@ See the [CONTRIBUTING.md](./CONTRIBUTING.md) guide to get started.
 
 ## 👉 Contact
 
-| Name        | Email                | GitHub        | Facebook      |
+| Name        | Email                | GitHub        | LinkedIn      |
 |-------------|----------------------|---------------|---------------|
 | Hung Nguyen | dev@nguyenanhung.com | @nguyenanhung | @nguyenanhung |
 
