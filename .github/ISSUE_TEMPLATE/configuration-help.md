@@ -1,6 +1,6 @@
 ---
 name: Configuration Help
-about: Describe this issue template's purpose here.
+about: Ask a question related to setup, deployment or usage
 title: ''
 labels: ''
 assignees: ''
