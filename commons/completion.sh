@@ -52,6 +52,8 @@ _infra_caddy_completions_build() {
     "docker-disk"
     "clean-build-cache"
     "buildx-multi-platform"
+    "setup-mtproto-proxy"
+    "setup-telegram-proxy"
   )
   local cur="${COMP_WORDS[COMP_CWORD]}"
   mapfile -t COMPREPLY < <(compgen -W "${commands[*]}" -- "$cur")
