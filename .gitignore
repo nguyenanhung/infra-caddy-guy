@@ -120,5 +120,9 @@ container/sites/*
 volumes/data/*
 !volumes/data/.gitkeep
 
+
+standalone/mtproto-proxy/*
+!standalone/mtproto-proxy/.gitkeep
+
 tests/*
 !tests/.gitkeep

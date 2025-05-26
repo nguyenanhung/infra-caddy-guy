@@ -96,6 +96,7 @@ bear_menu_interactive() {
     "Add new PHP App (Container exists)"
     "Build & Add new Laravel App (PHP-FPM)"
     "Delete PHP App"
+    "Setup Telegram Messenger MTProto proxy"
   )
   prompt="Enter your selected menu you want [0 = Exit]: "
   PS3=$'\n'"${prompt} "
@@ -132,6 +133,7 @@ bear_menu_interactive() {
     28) bash "${BASE_DIR}/bear-caddy" node-up ;;
     29) bash "${BASE_DIR}/bear-caddy" add-node-app ;;
     30) bash "${BASE_DIR}/bear-caddy" delete-node-app ;;
+    31) bash "${BASE_DIR}/bear-caddy" setup-mtproto-proxy ;;
 
     $((${#options[@]} + 1)) | 0 | exit)
       printf "\nGoodbye!\nSee you again at https://bash.nguyenanhung.com/\n\n"
