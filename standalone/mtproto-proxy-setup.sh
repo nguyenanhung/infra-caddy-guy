@@ -42,7 +42,15 @@ fi
 
 # 2. Generate SECRET and TAG (same value)
 SECRET=$(generate_secret)
-TAG=$SECRET
+TAG=""
+if confirm_action "Do you want to enable MTProxy Tag?"; then
+  echo "You can go to https://t.me/Mtproxybot to register MTProto bot with information"
+  echo "Registering a new proxy server. Please send me its address in the format host:port 👉 $(curl -s ifconfig.me):${PORT}"
+  echo "Now please specify its secret in hex format 👉 ${SECRET}"
+  echo
+  echo "If you see: Success! Your proxy has been successfully registered. You can now pass this proxy tag to the software you are using: <PROXY_TAG> Here is a link to your proxy server..."
+  TAG=$(prompt_with_default "Enter your MTProxy <PROXY_TAG> Here")
+fi
 
 # 3. Ask for location to save docker-compose.yml
 SAVE_PATH="${BASE_DIR}/standalone/mtproto-proxy"
@@ -64,8 +72,7 @@ services:
     ports:
       - "${PORT}:443"
     environment:
-      - SECRET=${SECRET}
-      - TAG=${TAG}
+      - SECRET=${SECRET}$([ -n "$TAG" ] && echo -e "\n      - TAG=${TAG}")
     restart: always
 EOF
 
@@ -91,9 +98,6 @@ else
     echo "or"
     echo "   tg://proxy?server=$(curl -s ifconfig.me)&port=${PORT}&secret=${SECRET}"
     echo "------------------------------------------------"
-    echo "You can go to https://t.me/Mtproxybot to register MTProto bot with information"
-    echo "Registering a new proxy server. Please send me its address in the format host:port 👉 $(curl -s ifconfig.me):${PORT}"
-    echo "Now please specify its secret in hex format 👉 ${SECRET}"
   else
     echo "❌ Failed to start MTProto proxy."
   fi
