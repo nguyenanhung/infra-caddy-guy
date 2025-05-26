@@ -80,7 +80,7 @@ networks:
 - [x] Node.js Application: Simple and lightweight connect Caddy Web Server with you Node.js Application
 - [x] PHP Application Routing
 - [x] Improve security (file, header) of common application: PHP, Node.js, SPA, Static site, Reverse Proxy
-
+- [x] Quick set up The `Telegram Messenger MTProto proxy` is a zero-configuration container that automatically sets up a proxy server that speaks Telegram's native MTProto.
 - [x] ... and others packages supporting, can be mentioned as `redis`, `memcached`, `mongodb`, `mariadb`, `mysql`,
   `percona`, `postgresql`, `influxdb`, `rabbitmq`, `beanstalkd`, `gearmand`, `elasticsearch`, `mailhog`, `mailpit`,
   `phpmyadmin`, `adminer`, `uptime-kuma`, `n8n`, `minio`
