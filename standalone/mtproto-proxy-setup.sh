@@ -32,7 +32,7 @@ generate_secret() {
 }
 
 # 1. Ask user for port to run
-read -rp "Enter the port you want MTProto proxy to listen on (e.g. 6688): " PORT
+PORT=$(prompt_with_default "Enter the port you want MTProto proxy to listen on (e.g. 6688)" "6688")
 
 # Validate port is a number between 1 and 65535
 if ! [[ "$PORT" =~ ^[0-9]+$ ]] || [ "$PORT" -lt 1 ] || [ "$PORT" -gt 65535 ]; then
