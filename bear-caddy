@@ -63,36 +63,6 @@ case "$1" in
 "reload-caddy")
   restart_caddy
   ;;
-"enable-"*)
-  service_name="${1#enable-}"
-  source "$BASE_DIR/services/common_services.sh"
-  enable_service "$service_name"
-  ;;
-"stop-"*)
-  service_name="${1#stop-}"
-  source "$BASE_DIR/services/common_services.sh"
-  stop_service "$service_name"
-  ;;
-"start-"*)
-  service_name="${1#start-}"
-  source "$BASE_DIR/services/common_services.sh"
-  start_service "$service_name"
-  ;;
-"restart-"*)
-  service_name="${1#restart-}"
-  source "$BASE_DIR/services/common_services.sh"
-  restart_service "$service_name"
-  ;;
-"remove-"*)
-  service_name="${1#remove-}"
-  source "$BASE_DIR/services/common_services.sh"
-  remove_service "$service_name"
-  ;;
-"log-"*)
-  service_name="${1#log-}"
-  source "$BASE_DIR/services/common_services.sh"
-  log_service "$service_name"
-  ;;
 "logs")
   shift # Shift to remove the first argument
   check_docker_container_logs "$@"
@@ -283,6 +253,36 @@ case "$1" in
 "setup-telegram-proxy" | "setup-mtproto-proxy")
   shift # Shift to remove the first argument
   bash "${BASE_DIR}/standalone/mtproto-proxy-setup.sh"
+  ;;
+"enable-"*)
+  service_name="${1#enable-}"
+  source "$BASE_DIR/services/common_services.sh"
+  enable_service "$service_name"
+  ;;
+"stop-"*)
+  service_name="${1#stop-}"
+  source "$BASE_DIR/services/common_services.sh"
+  stop_service "$service_name"
+  ;;
+"start-"*)
+  service_name="${1#start-}"
+  source "$BASE_DIR/services/common_services.sh"
+  start_service "$service_name"
+  ;;
+"restart-"*)
+  service_name="${1#restart-}"
+  source "$BASE_DIR/services/common_services.sh"
+  restart_service "$service_name"
+  ;;
+"remove-"*)
+  service_name="${1#remove-}"
+  source "$BASE_DIR/services/common_services.sh"
+  remove_service "$service_name"
+  ;;
+"log-"*)
+  service_name="${1#log-}"
+  source "$BASE_DIR/services/common_services.sh"
+  log_service "$service_name"
   ;;
 *)
   message ERROR "Unknown command: $1"
