@@ -54,8 +54,8 @@ fi
 
 # 3. Ask for location to save docker-compose.yml
 SAVE_PATH="${BASE_DIR}/standalone/mtproto-proxy"
-if [ ! -d "$SAVE_PATH" ]; then
-  mkdir -p "$SAVE_DIR"
+if [ ! -d "${SAVE_PATH}" ]; then
+  mkdir -p "${SAVE_PATH}"
 fi
 
 # Full file path
