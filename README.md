@@ -1,4 +1,5 @@
 # Infra Caddy Guy's Scripts
+
 ![License](https://img.shields.io/github/license/nguyenanhung/infra-caddy-guy)
 ![Last Commit](https://img.shields.io/github/last-commit/nguyenanhung/infra-caddy-guy)
 ![Issues](https://img.shields.io/github/issues/nguyenanhung/infra-caddy-guy)
@@ -19,7 +20,7 @@ auto-scaling requires a higher level of IaC (Infrastructure as Code)
 
 ### 📋 OS Support
 
-- [x] RHEL Based: CentOS, Almalinux, Rocky Linux and Red Hat Enterprise Linux
+- [x] RHEL Based: CentOS, AlmaLinux, Rocky Linux and Red Hat Enterprise Linux
 - [x] Fedora based
 - [x] Ubuntu/Debian
 - [x] Amazon Linux 2 and Amazon Linux 2023
@@ -94,11 +95,13 @@ networks:
 - [ ] Amazon Web Services CLI integration (`awscli`)
 
 ## 📄 Documentation
+
 - [Code of Conduct](./CODE_OF_CONDUCT.md)
 - [Security Policy](./SECURITY.md)
 - [Support](./SUPPORT.md)
 
 ## 🤝 Contributing
+
 See the [CONTRIBUTING.md](./CONTRIBUTING.md) guide to get started.
 
 ## 👉 Contact
