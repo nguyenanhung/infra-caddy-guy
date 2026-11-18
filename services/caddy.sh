@@ -53,30 +53,40 @@ setup_caddy() {
 # Security
 (file_forbidden_restricted) {
     @forbidden {
-        # Allowed
+        # Allowed exceptions
         not path /wp-includes/ms-files.php
 
-        # Global Restricted
+        # Global Restricted Files & Version Control
         path /.user.ini
         path /.htaccess
         path /web.config
         path /.env
         path /wp-config.php
+        path *.log
+        path *.sql
+        path *.sqlite
 
-        # Restricted file
+        # Restricted Version Control
+        path /.git*
+        path /.svn*
+        path /.hg*
+
+        # Restricted PHP execution inside uploads, storage, or include directories
         path /wp-admin/includes/*.php
         path /wp-includes/*.php
         path /wp-content/uploads/*.php
-        path /wp-content/debug.log
-        path /storage/logs/*.log
-
-        # Laravel
+        path /storage/*.php
+        path /storage/*/*.php
+        path /vendor/*.php
+        path /node_modules/*.php
         path /config/*.php
-        path /storage/*
+        path /backup/*.php
+        path /database/*.php
+
+        # Block direct directory listing/access for sensitive folders
         path /vendor/*
         path /node_modules/*
         path /backup/*
-        path /database/*
     }
     respond @forbidden "Access denied" 403
 }
@@ -886,7 +896,8 @@ restricted_remove_whitelist_ips() {
   local sites_path="$CONFIG_DIR/sites"
   local domain domain_file existing_ips remove_ips new_ips backup_file
 
-  local site_files=$(find "$sites_path" -maxdepth 1 -type f -name "*.caddy" | sed 's|.*/||;s/\.caddy$//')
+  local site_files
+  site_files=$(find "$sites_path" -maxdepth 1 -type f -name "*.caddy" | sed 's|.*/||;s/\.caddy$//')
   [ -z "$site_files" ] && {
     message ERROR "No domains available"
     return 1

@@ -511,7 +511,7 @@ get_containers_status() {
     ((count++))
   done < <(docker_compose_command -f "$compose_file" ps --status running --format '{{.Name}}')
 
-  if [ $count -eq 0 ]; then
+  if [ "${count}" -eq 0 ]; then
     message INFO "Status: No container is running"
   else
     echo -n "Status: $count containers are running: "
